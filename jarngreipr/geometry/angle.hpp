@@ -1,7 +1,6 @@
 #ifndef JARNGREIPR_GEOMETRY_ANGLE
 #define JARNGREIPR_GEOMETRY_ANGLE
-#include <mjolnir/math/rsqrt.hpp>
-#include <mjolnir/math/Vector.hpp>
+#include <mjolnir/math/math.hpp>
 #include <cmath>
 
 namespace jarngreipr
