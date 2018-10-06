@@ -63,8 +63,8 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
     partition["margin"] = 1.0;
     exv["spatial_partition"] = partition;
 
-    const toml::Table& sigmas = mjolnir::toml_value_at(
-            this->parameters_, "sigma", "jarngreipr::ExcludedVolume"
+    const toml::Table& radii = mjolnir::toml_value_at(
+            this->parameters_, "radii", "jarngreipr::ExcludedVolume"
             ).template cast<toml::value_t::Table>();
 
     toml::Array params;
@@ -74,8 +74,8 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
         {
             toml::Table para;
             para["index"] = bead->index();
-            para["sigma"] = toml::get<toml::Float>(mjolnir::toml_value_at(
-                sigmas, bead->name(), "jarngreipr::ExcludedVolume"));
+            para["radii"] = toml::get<toml::Float>(mjolnir::toml_value_at(
+                radii, bead->name(), "jarngreipr::ExcludedVolume"));
             params.push_back(para);
         }
     }
