@@ -14,22 +14,40 @@ template<typename T>
 T read_number_impl(const std::string& str);
 
 template<>
-double read_number_impl<double>(const std::string& s) {return std::stod(s);}
+double read_number_impl<double>(const std::string& s)
+{
+    return std::stod(s);
+}
 template<>
-float  read_number_impl<float >(const std::string& s) {return std::stof(s);}
+float read_number_impl<float>(const std::string& s)
+{
+    return std::stof(s);
+}
 template<>
-int    read_number_impl<int   >(const std::string& s) {return std::stoi(s);}
+int read_number_impl<int>(const std::string& s)
+{
+    return std::stoi(s);
+}
 template<>
-long   read_number_impl<long  >(const std::string& s) {return std::stol(s);}
+long read_number_impl<long  >(const std::string& s)
+{
+    return std::stol(s);
+}
 template<>
 long long read_number_impl<long long>(const std::string& s)
-{return std::stoll(s);}
+{
+    return std::stoll(s);
+}
 template<>
 unsigned long read_number_impl<unsigned long>(const std::string& s)
-{return std::stoul(s);}
+{
+    return std::stoul(s);
+}
 template<>
 unsigned long long read_number_impl<unsigned long long>(const std::string& s)
-{return std::stoull(s);}
+{
+    return std::stoull(s);
+}
 
 template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
