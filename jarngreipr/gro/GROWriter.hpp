@@ -38,10 +38,10 @@ class GROWriter
         {
             ofstrm_ << line << '\n';
         }
-        return;
         ofstrm_ << std::right << std::fixed << frame.box[0] << ' ';
         ofstrm_ << std::right << std::fixed << frame.box[1] << ' ';
         ofstrm_ << std::right << std::fixed << frame.box[2] << '\n';
+        return;
     }
 
   private:

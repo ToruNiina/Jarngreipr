@@ -17,8 +17,8 @@ struct GROLine
     using real_type = realT;
     using coordinate_type = mjolnir::Vector<real_type, 3>;
 
-    std::uint32_t atom_id;
-    std::uint32_t residue_id;
+    std::int32_t atom_id;
+    std::int32_t residue_id;
 
     std::string atom_name;
     std::string residue_name;
@@ -34,11 +34,9 @@ make_gro_line(const std::int32_t atm_id = 0,
         const std::string& atm_name = "AAAAA",
         const std::string& res_name = "RRRRR",
         const mjolnir::Vector<realT, 3>& pos = {0.0, 0.0, 0.0},
-        const mjolnir::Vector<realT, 3>& vel = {0.0, 0.0, 0.0},
-        const mjolnir::Vector<realT, 3>& box = {0.0, 0.0, 0.0})
+        const mjolnir::Vector<realT, 3>& vel = {0.0, 0.0, 0.0})
 {
-    return GROLine<realT>{atm_id, res_id, atm_name, 
-        res_name, pos, vel, box};
+    return GROLine<realT>{atm_id, res_id, atm_name, res_name, pos, vel};
 }
 
 template<typename charT, typename traits, typename realT>

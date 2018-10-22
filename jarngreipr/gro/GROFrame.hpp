@@ -2,7 +2,6 @@
 #define JARNGREIPR_GRO_FRAME_HPP
 #include <jarngreipr/gro/GROLine.hpp>
 #include <mjolnir/math/Vector.hpp>
-//#include <vector>
 
 namespace jarngreipr
 {
