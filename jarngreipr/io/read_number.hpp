@@ -55,12 +55,12 @@ unsigned long long read_number_impl<unsigned long long>(const std::string& s)
 template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
 get_substr(const std::basic_string<charT, traits, Alloc>& str,
-           std::size_t begin, std::size_t end,
+           std::size_t begin, std::size_t len,
            std::string error_message = std::string())
 {
     try
     {
-        return str.substr(begin, end);
+        return str.substr(begin, len);
     }
     catch(const std::out_of_range& err)
     {
@@ -68,7 +68,7 @@ get_substr(const std::basic_string<charT, traits, Alloc>& str,
         {
             std::cerr << "-- " << error_message << '\n';
         }
-        std::cerr << "-- range [" << begin << ", " << end
+        std::cerr << "-- range [" << begin << ", " << begin + len
                   << ") cannot be extracted from the following string\n";
         std::cerr << ">> " << str << '\n';
         std::exit(EXIT_FAILURE);
@@ -76,15 +76,14 @@ get_substr(const std::basic_string<charT, traits, Alloc>& str,
 }
 
 template<typename T>
-T read_number(const std::string& str, std::size_t begin, std::size_t end,
+T read_number(const std::string& str, std::size_t begin, std::size_t len,
               std::string error_message = std::string())
 {
     static_assert(std::is_arithmetic<T>::value, "");
-    assert(begin < end);
 
     try
     {
-        return detail::read_number_impl<T>(get_substr(str, begin, end));
+        return detail::read_number_impl<T>(get_substr(str, begin, len));
     }
     catch(const std::invalid_argument& err)
     {
@@ -95,7 +94,7 @@ T read_number(const std::string& str, std::size_t begin, std::size_t end,
         std::cerr << "-- expected number, but got\n";
         std::cerr << ">> " << str << '\n';
         std::cerr << "   " << std::string(begin, ' ')
-                  << std::string(end - begin, '^') << '\n';
+                  << std::string(len, '^') << '\n';
         std::exit(EXIT_FAILURE);
     }
     catch(const std::out_of_range& err)
@@ -107,7 +106,7 @@ T read_number(const std::string& str, std::size_t begin, std::size_t end,
         std::cerr << "-- invalid number appeared\n";
         std::cerr << ">> " << str << '\n';
         std::cerr << "   " << std::string(begin, ' ')
-                  << std::string(end - begin, '^') << '\n';
+                  << std::string(len, '^') << '\n';
         std::exit(EXIT_FAILURE);
     }
 }
