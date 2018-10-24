@@ -43,29 +43,24 @@ float read_number_impl<float>(const std::string& s)
     return std::stof(s);
 }
 template<>
-int read_number_impl<int>(const std::string& s)
+long double read_number_impl<long double>(const std::string& s)
 {
-    return std::stoi(s);
+    return std::stold(s);
 }
-template<>
-long read_number_impl<long  >(const std::string& s)
+
+template<typename T>
+typename std::enable_if<
+    std::is_signed<T>::value && std::is_integral<T>::value, T>::type
+read_number_impl(const std::string& s)
 {
-    return std::stol(s);
+    return static_cast<T>(std::stoll(s));
 }
-template<>
-long long read_number_impl<long long>(const std::string& s)
+template<typename T>
+typename std::enable_if<
+    std::is_unsigned<T>::value && std::is_integral<T>::value, T>::type
+read_number_impl(const std::string& s)
 {
-    return std::stoll(s);
-}
-template<>
-unsigned long read_number_impl<unsigned long>(const std::string& s)
-{
-    return std::stoul(s);
-}
-template<>
-unsigned long long read_number_impl<unsigned long long>(const std::string& s)
-{
-    return std::stoull(s);
+    return static_cast<T>(std::stoull(s));
 }
 } // detail
 
