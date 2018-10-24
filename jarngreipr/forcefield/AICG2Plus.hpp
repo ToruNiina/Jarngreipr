@@ -128,7 +128,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     toml::Float go_contact_threshold_;
     toml::Float atom_contact_cutoff_;
     toml::Float hydrogen_bond_cutoff_;
-    toml::Float solt_bridge_cutoff_;
+    toml::Float salt_bridge_cutoff_;
 
     toml::Float coef_13_;
     toml::Float coef_14_;
@@ -538,11 +538,11 @@ AICG2Plus<realT>::calc_contact_coef(
                 if((is_cation(atom1) && is_anion(atom2)) ||
                    (is_cation(atom2) && is_anion(atom1)))
                 {
-                    if(dist < solt_bridge_cutoff_)
+                    if(dist < salt_bridge_cutoff_)
                     {
                         num_ss_sb += 1;
                     }
-                    else // not a solt bridge, charge contact.
+                    else // not a salt bridge, charge contact.
                     {
                         num_ss_cc += 1;
                     }
@@ -682,9 +682,9 @@ AICG2Plus<realT>::AICG2Plus(
     this->atom_contact_cutoff_ = toml::get<toml::Float>(
         mjolnir::toml_value_at(this->parameters_,
             "atom_contact_cutoff", "[AICG2+]"));
-    this->solt_bridge_cutoff_ = toml::get<toml::Float>(
+    this->salt_bridge_cutoff_ = toml::get<toml::Float>(
         mjolnir::toml_value_at(this->parameters_,
-            "solt_bridge_cutoff", "[AICG2+]"));
+            "salt_bridge_cutoff", "[AICG2+]"));
     this->hydrogen_bond_cutoff_ = toml::get<toml::Float>(
         mjolnir::toml_value_at(this->parameters_,
             "hydrogen_bond_cutoff", "[AICG2+]"));

@@ -13,7 +13,7 @@ ecut_up_aicg2   =  -5.0
 
 go_contact_threshold = 6.5
 atom_contact_cutoff  = 5.0
-solt_bridge_cutoff   = 3.5
+salt_bridge_cutoff   = 3.5
 hydrogen_bond_cutoff = 3.2
 
 [contact_energy_coefficients]           # B: Backbone, S: Sidechain
