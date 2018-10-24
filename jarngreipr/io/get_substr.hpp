@@ -47,7 +47,7 @@ get_char_at(const std::basic_string<charT, traits, Alloc>& str,
     }
     catch(const std::out_of_range& err)
     {
-        write_error(std::cerr, error_message, "character at ", index,
+        write_error(std::cerr, error_message, " character at ", index,
                     " cannot be extracted from the following string");
         write_underline(std::cerr, str, index, 1, '^', line_number);
         std::exit(EXIT_FAILURE);
