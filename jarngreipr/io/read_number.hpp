@@ -75,6 +75,45 @@ unsigned long long read_number_impl<unsigned long long>(const std::string& s)
 } // detail
 
 template<typename charT, typename traits, typename Alloc>
+inline charT
+get_char_at(const std::basic_string<charT, traits, Alloc>& str,
+            const std::size_t index,
+            const at_line line_number = at_line{0})
+{
+    try
+    {
+        return str.at(index);
+    }
+    catch(const std::out_of_range& err)
+    {
+        write_error(std::cerr, "character at ", index,
+                    " cannot be extracted from the following string");
+        write_underline(std::cerr, str, index, 1, '^', line_number);
+        std::exit(EXIT_FAILURE);
+    }
+}
+
+template<typename charT, typename traits, typename Alloc>
+inline charT
+get_char_at(const std::basic_string<charT, traits, Alloc>& str,
+            const std::size_t index,
+            const std::string error_message,
+            const at_line line_number = at_line{0})
+{
+    try
+    {
+        return str.at(index);
+    }
+    catch(const std::out_of_range& err)
+    {
+        write_error(std::cerr, error_message, "character at ", index,
+                    " cannot be extracted from the following string");
+        write_underline(std::cerr, str, index, 1, '^', line_number);
+        std::exit(EXIT_FAILURE);
+    }
+}
+
+template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
 get_substr(const std::basic_string<charT, traits, Alloc>& str,
            const std::size_t begin, const std::size_t len,
@@ -92,6 +131,7 @@ get_substr(const std::basic_string<charT, traits, Alloc>& str,
         std::exit(EXIT_FAILURE);
     }
 }
+
 // with extra error message
 template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
