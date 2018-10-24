@@ -9,6 +9,8 @@
 
 namespace jarngreipr
 {
+namespace detail
+{
 
 template<typename T>
 T read_number_impl(const std::string& str);
@@ -48,6 +50,7 @@ unsigned long long read_number_impl<unsigned long long>(const std::string& s)
 {
     return std::stoull(s);
 }
+} // detail
 
 template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
@@ -81,7 +84,7 @@ T read_number(const std::string& str, std::size_t begin, std::size_t end,
 
     try
     {
-        return read_number_impl<T>(get_substr(str, begin, end));
+        return detail::read_number_impl<T>(get_substr(str, begin, end));
     }
     catch(const std::invalid_argument& err)
     {
