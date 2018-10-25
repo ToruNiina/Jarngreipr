@@ -30,24 +30,23 @@ namespace detail
 {
 
 template<typename T>
-T read_number_impl(const std::string& str);
-
-template<>
-double read_number_impl<double>(const std::string& s)
+typename std::enable_if<std::is_same<T, double>::value, double>::type
+read_number_impl(const std::string& s)
 {
     return std::stod(s);
 }
-template<>
-float read_number_impl<float>(const std::string& s)
+template<typename T>
+typename std::enable_if<std::is_same<T, float>::value, float>::type
+read_number_impl(const std::string& s)
 {
     return std::stof(s);
 }
-template<>
-long double read_number_impl<long double>(const std::string& s)
+template<typename T>
+typename std::enable_if<std::is_same<T, long double>::value, long double>::type
+read_number_impl(const std::string& s)
 {
     return std::stold(s);
 }
-
 template<typename T>
 typename std::enable_if<
     std::is_signed<T>::value && std::is_integral<T>::value, T>::type
