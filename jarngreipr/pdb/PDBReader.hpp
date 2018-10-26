@@ -26,7 +26,7 @@ class PDBReader
     {
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "PDBReader: file open error: ", fname);
+            write_error(std::cerr, "PDBReader: file open error: ", filename_);
             std::exit(EXIT_FAILURE);
         }
     }
@@ -65,7 +65,7 @@ class PDBReader
     atom_type read_atom(const std::string& line)
     {
         const auto ln  = at_line(this->line_num_);
-        const auto msg = std::string("while reading pdb ATOM in ") + this->fnmae;
+        const auto msg = std::string("while reading pdb ATOM in ") + this->filename_;
 
         if(get_substr(line, 0, 6, msg, ln) != "ATOM  ")
         {
