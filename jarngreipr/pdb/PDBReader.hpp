@@ -65,7 +65,7 @@ class PDBReader
     atom_type read_atom(const std::string& line)
     {
         const auto ln  = at_line(this->line_num_);
-        const auto msg = std::string("while reading pdb ATOM,");
+        const auto msg = std::string("while reading pdb ATOM in " + this->fnmae);
 
         if(get_substr(line, 0, 6, msg, ln) != "ATOM  ")
         {
