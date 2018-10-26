@@ -21,13 +21,6 @@ struct XYZLine
     coordinate_type position;
 };
 
-template<typename realT>
-inline XYZLine<realT>
-make_xyz_line(std::string name, const mjolnir::Vector<realT, 3>& pos)
-{
-    return XYZLine<realT, coordT>{std::move(name), pos};
-}
-
 template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
     std::basic_ostream<charT, traits>& os, const XYZLine<realT>& xyz)
