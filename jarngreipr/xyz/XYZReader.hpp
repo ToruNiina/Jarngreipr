@@ -16,8 +16,9 @@ template<typename realT>
 class XYZReader
 {
   public:
-    typedef XYZLine<realT>  line_type;
-    typedef XYZFrame<realT> frame_type;
+    using real_type  = realT;
+    using line_type  = XYZLine<realT>;
+    using frame_type = XYZFrame<realT>;
 
   public:
     explicit XYZReader(const std::string& fname)
@@ -64,20 +65,53 @@ class XYZReader
         std::getline(ifstrm_, line);
         this->line_num_++;
 
-        const auto msg = std::string("while reading XYZ file ") + this->fname;
-        const std::size_t n = get_number<std::size_t>(
+        const auto msg = std::string("while reading XYZ file ")+this->filename_;
+        const std::size_t n = read_number<std::size_t>(
                 line, 0, line.size(), msg, at_line(this->line_num_));
 
         frame_type frame;
+
         std::getline(ifstrm_, frame.comment);
+        this->line_num_++;
+
         for(std::size_t i=0; i<n; ++i)
         {
             std::getline(ifstrm_, line);
             this->line_num_++;
+            const auto ln  = at_line(this->line_num_);
+
+            //XXX: this code does redundant stuff to show a better error message
 
             std::istringstream iss(line);
+            std::string ident, crd_x, crd_y, crd_z;
+            iss >> ident;
+            iss >> crd_x;
+            iss >> crd_y;
+            iss >> crd_z;
+            if(crd_z.empty() || crd_y.empty() || crd_x.empty() || ident.empty())
+            {
+                write_error(std::cerr, "XYZReader: ", this->filename_,
+                            " line too short.");
+                write_underline(std::cerr, line, 0, line.size(), '^', ln);
+                std::exit(EXIT_FAILURE);
+            }
+
+
             line_type xyz;
-            iss >> xyz;
+            xyz.name        = ident;
+            xyz.position[0] = read_number<real_type>(
+                    line, line.find(crd_x), crd_x.size(), msg, ln);
+            xyz.position[1] = read_number<real_type>(
+                    line, line.find(crd_y), crd_y.size(), msg, ln);
+            xyz.position[2] = read_number<real_type>(
+                    line, line.find(crd_z), crd_z.size(), msg, ln);
+
+            // XXX: If crd_x and crd_y were the same, line.find(crd_y) returns
+            //      the position of crd_x. But practically it does not matter.
+            //      Since the string are the same, the value read from them are
+            //      also the same. In the case of error, crd_x first writes the
+            //      error before crd_y writes the same error.
+
             frame.lines.push_back(xyz);
         }
         return frame;
