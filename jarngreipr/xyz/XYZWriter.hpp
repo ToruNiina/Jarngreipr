@@ -23,8 +23,8 @@ class XYZWriter
     {
         if(!ofstrm_.good())
         {
-            throw std::runtime_error("jarngreipr::XYZWriter: file open error: "
-                    + filename_);
+            write_error(std::cerr, "XYZWriter: file open error: ", fname);
+            std::exit(EXIT_FAILURE);
         }
     }
     ~XYZWriter() = default;
@@ -35,7 +35,12 @@ class XYZWriter
         ofstrm_ << frame.comment      << '\n';
         for(const auto& line : frame.lines)
         {
-            ofstrm_ << line << '\n';
+            ofstrm_ << std::setw(6)  << std::left << line.name
+                    << std::fixed << std::showpoint
+                    << std::setprecision(5) << std::right
+                    << std::setw(10) << line.position[0] << ' '
+                    << std::setw(10) << line.position[1] << ' '
+                    << std::setw(10) << line.position[2] << '\n';
         }
         return;
     }
