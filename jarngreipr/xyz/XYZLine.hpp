@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_IO_XYZ_LINE_HPP
-#define JARNGREIPR_IO_XYZ_LINE_HPP
+#ifndef JARNGREIPR_IO_XYZ_PARTICLE_HPP
+#define JARNGREIPR_IO_XYZ_PARTICLE_HPP
 #include <mjolnir/math/Vector.hpp>
 #include <utility>
 #include <ostream>
@@ -12,7 +12,7 @@ namespace jarngreipr
 {
 
 template<typename realT>
-struct XYZLine
+struct XYZParticle
 {
     typedef realT  real_type;
     typedef mjolnir::Vector<real_type, 3> coordinate_type;

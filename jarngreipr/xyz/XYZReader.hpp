@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_XYZ_READER_HPP
 #define JARNGREIPR_XYZ_READER_HPP
-#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZParticle.hpp>
 #include <jarngreipr/xyz/XYZFrame.hpp>
 #include <jarngreipr/io/read_number.hpp>
 #include <mjolnir/util/throw_exception.hpp>
@@ -16,9 +16,9 @@ template<typename realT>
 class XYZReader
 {
   public:
-    using real_type  = realT;
-    using line_type  = XYZLine<realT>;
-    using frame_type = XYZFrame<realT>;
+    using real_type     = realT;
+    using particle_type = XYZParticle<realT>;
+    using frame_type    = XYZFrame<realT>;
 
   public:
     explicit XYZReader(const std::string& fname)
@@ -97,7 +97,7 @@ class XYZReader
             }
 
 
-            line_type xyz;
+            particle_type xyz;
             xyz.name        = ident;
             xyz.position[0] = read_number<real_type>(
                     line, line.find(crd_x), crd_x.size(), msg, ln);

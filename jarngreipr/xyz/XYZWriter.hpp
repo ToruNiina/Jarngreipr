@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_XYZ_WRITER_HPP
 #define JARNGREIPR_XYZ_WRITER_HPP
-#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZParticle.hpp>
 #include <jarngreipr/xyz/XYZFrame.hpp>
 #include <stdexcept>
 #include <ostream>
@@ -14,8 +14,8 @@ template<typename realT>
 class XYZWriter
 {
   public:
-    typedef XYZLine<realT>  line_type;
-    typedef XYZFrame<realT> frame_type;
+    typedef XYZParticle<realT> particle_type;
+    typedef XYZFrame<realT>    frame_type;
 
   public:
     explicit XYZWriter(const std::string& fname)
