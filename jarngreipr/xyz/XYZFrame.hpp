@@ -13,7 +13,7 @@ struct XYZFrame
     typedef XYZParticle<realT> particle_type;
 
     std::string                comment;
-    std::vector<particle_type> lines;
+    std::vector<particle_type> particles;
 };
 
 } // jarngreipr

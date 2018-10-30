@@ -31,16 +31,16 @@ class XYZWriter
 
     void write_frame(const frame_type& frame)
     {
-        ofstrm_ << frame.lines.size() << '\n';
+        ofstrm_ << frame.particles.size() << '\n';
         ofstrm_ << frame.comment      << '\n';
-        for(const auto& line : frame.lines)
+        for(const auto& particle : frame.particles)
         {
-            ofstrm_ << std::setw(6)  << std::left << line.name
+            ofstrm_ << std::setw(6)  << std::left << particle.name
                     << std::fixed << std::showpoint
                     << std::setprecision(5) << std::right
-                    << std::setw(10) << line.position[0] << ' '
-                    << std::setw(10) << line.position[1] << ' '
-                    << std::setw(10) << line.position[2] << '\n';
+                    << std::setw(10) << particle.position[0] << ' '
+                    << std::setw(10) << particle.position[1] << ' '
+                    << std::setw(10) << particle.position[2] << '\n';
         }
         return;
     }

@@ -112,7 +112,7 @@ class XYZReader
             //      also the same. In the case of error, crd_x first writes the
             //      error before crd_y writes the same error.
 
-            frame.lines.push_back(xyz);
+            frame.particles.push_back(xyz);
         }
         return frame;
     }
