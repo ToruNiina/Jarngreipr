@@ -35,15 +35,24 @@ class CarbonAlpha final : public Bead<realT>
                 this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
             if(num_ca == 0)
             {
-                mjolnir::throw_exception<std::runtime_error>("jarngreipr::"
-                    "model::CarbonAlpha: no c-alpha atom in this residue: \n",
-                    this->atoms_.front());
+                write_error(std::cerr, "jarngreipr::model::CarbonAlpha: "
+                            "no c-alpha atom in this residue.");
+                for(const auto atm : this->atoms_)
+                {
+                    write_underline(std::cerr, to_string(atm), 22, 4, '^');
+                }
             }
             if(num_ca > 1)
             {
-                mjolnir::throw_exception<std::runtime_error>("jarngreipr::"
-                    "model::CarbonAlpha: multiple c-alpha in this residue: \n",
-                    this->atoms_.front());
+                write_error(std::cerr, "jarngreipr::model::CarbonAlpha: "
+                            "multiple c-alpha in this residue.");
+                for(const auto atm : this->atoms_)
+                {
+                    if(atm.residue_id == " CA ")
+                    {
+                        write_underline(std::cerr, to_string(atm), 22, 4, '^');
+                    }
+                }
             }
             this->position_ = std::find_if(
                 this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;
