@@ -30,7 +30,6 @@ struct PDBAtom
     coordinate_type position;
 };
 
-
 template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
     std::basic_ostream<charT, traits>& os, const PDBAtom<realT>& atm)
@@ -60,6 +59,14 @@ std::basic_ostream<charT, traits>& operator<<(
     os << std::right << std::setw(2) << atm.element;
     os << std::right << std::setw(2) << atm.charge;
     return os;
+}
+
+template<typename realT>
+std::string to_string(const PDBAtom<realT>& atm)
+{
+    std::ostringstream oss;
+    oss << atm;
+    return oss.str();
 }
 
 }//jarngreipr
