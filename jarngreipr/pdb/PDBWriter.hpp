@@ -2,7 +2,6 @@
 #define JARNGREIPR_PDB_WRITER_HPP
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
-#include <mjolnir/util/throw_exception.hpp>
 #include <fstream>
 #include <sstream>
 

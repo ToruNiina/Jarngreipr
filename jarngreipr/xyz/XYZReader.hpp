@@ -3,7 +3,6 @@
 #include <jarngreipr/xyz/XYZParticle.hpp>
 #include <jarngreipr/xyz/XYZFrame.hpp>
 #include <jarngreipr/io/read_number.hpp>
-#include <mjolnir/util/throw_exception.hpp>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
