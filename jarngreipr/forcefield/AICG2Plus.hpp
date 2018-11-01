@@ -122,35 +122,35 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
   private:
 
     // cache
-    toml::Float e_min_;
-    toml::Float e_max_;
+    double e_min_;
+    double e_max_;
 
-    toml::Float go_contact_threshold_;
-    toml::Float atom_contact_cutoff_;
-    toml::Float hydrogen_bond_cutoff_;
-    toml::Float solt_bridge_cutoff_;
+    double go_contact_threshold_;
+    double atom_contact_cutoff_;
+    double hydrogen_bond_cutoff_;
+    double salt_bridge_cutoff_;
 
-    toml::Float coef_13_;
-    toml::Float coef_14_;
-    toml::Float coef_go_;
+    double coef_13_;
+    double coef_14_;
+    double coef_go_;
 
-    toml::Float bb_hydrogen_bond_;
-    toml::Float bb_donor_acceptor_;
-    toml::Float bb_carbon_contact_;
-    toml::Float bb_other_contact_;
-    toml::Float ss_hydrogen_bond_;
-    toml::Float ss_donor_acceptor_;
-    toml::Float ss_salty_bridge_;
-    toml::Float ss_carbon_contact_;
-    toml::Float ss_charge_contact_;
-    toml::Float ss_other_contact_;
-    toml::Float bs_hydrogen_bond_;
-    toml::Float bs_donor_acceptor_;
-    toml::Float bs_carbon_contact_;
-    toml::Float bs_charge_contact_;
-    toml::Float bs_other_contact_;
-    toml::Float long_range_contact_;
-    toml::Float offset_;
+    double bb_hydrogen_bond_;
+    double bb_donor_acceptor_;
+    double bb_carbon_contact_;
+    double bb_other_contact_;
+    double ss_hydrogen_bond_;
+    double ss_donor_acceptor_;
+    double ss_salty_bridge_;
+    double ss_carbon_contact_;
+    double ss_charge_contact_;
+    double ss_other_contact_;
+    double bs_hydrogen_bond_;
+    double bs_donor_acceptor_;
+    double bs_carbon_contact_;
+    double bs_charge_contact_;
+    double bs_other_contact_;
+    double long_range_contact_;
+    double offset_;
 
     toml::Table parameters_; // [AICG2Plus] section
     std::vector<std::size_t> flexible_beads_;
@@ -538,11 +538,11 @@ AICG2Plus<realT>::calc_contact_coef(
                 if((is_cation(atom1) && is_anion(atom2)) ||
                    (is_cation(atom2) && is_anion(atom1)))
                 {
-                    if(dist < solt_bridge_cutoff_)
+                    if(dist < salt_bridge_cutoff_)
                     {
                         num_ss_sb += 1;
                     }
-                    else // not a solt bridge, charge contact.
+                    else // not a salt bridge, charge contact.
                     {
                         num_ss_cc += 1;
                     }
@@ -671,88 +671,88 @@ AICG2Plus<realT>::AICG2Plus(
 
     // read and cache the parameters to be used...
 
-    this->e_min_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->e_min_ = toml::get<double>(mjolnir::toml_value_at(
             this->parameters_, "ecut_up_aicg2", "[AICG2+]"));
-    this->e_max_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->e_max_ = toml::get<double>(mjolnir::toml_value_at(
             this->parameters_, "ecut_low_aicg2",  "[AICG2+]"));
 
-    this->go_contact_threshold_ = toml::get<toml::Float>(
+    this->go_contact_threshold_ = toml::get<double>(
         mjolnir::toml_value_at(this->parameters_,
             "go_contact_threshold", "[AICG2+]"));
-    this->atom_contact_cutoff_ = toml::get<toml::Float>(
+    this->atom_contact_cutoff_ = toml::get<double>(
         mjolnir::toml_value_at(this->parameters_,
             "atom_contact_cutoff", "[AICG2+]"));
-    this->solt_bridge_cutoff_ = toml::get<toml::Float>(
+    this->salt_bridge_cutoff_ = toml::get<double>(
         mjolnir::toml_value_at(this->parameters_,
-            "solt_bridge_cutoff", "[AICG2+]"));
-    this->hydrogen_bond_cutoff_ = toml::get<toml::Float>(
+            "salt_bridge_cutoff", "[AICG2+]"));
+    this->hydrogen_bond_cutoff_ = toml::get<double>(
         mjolnir::toml_value_at(this->parameters_,
             "hydrogen_bond_cutoff", "[AICG2+]"));
 
-    this->coef_13_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->coef_13_ = toml::get<double>(mjolnir::toml_value_at(
                 this->parameters_, "caicg2plus_13", "[AICG2+]"));
-    this->coef_14_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->coef_14_ = toml::get<double>(mjolnir::toml_value_at(
                 this->parameters_, "caicg2plus_14", "[AICG2+]"));
-    this->coef_go_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->coef_go_ = toml::get<double>(mjolnir::toml_value_at(
                 this->parameters_, "caicg2plus_nloc", "[AICG2+]"));
 
     const auto& contact_energy_coef = mjolnir::toml_value_at(this->parameters_,
             "contact_energy_coefficients", "jarngreipr::AICG2Plus"
             ).template cast<toml::value_t::Table>();
 
-    this->bb_hydrogen_bond_  = toml::get<toml::Float>(
+    this->bb_hydrogen_bond_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "backbone_hydrogen_bond",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bb_donor_acceptor_ = toml::get<toml::Float>(
+    this->bb_donor_acceptor_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "backbone_donor_acceptor",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bb_carbon_contact_ = toml::get<toml::Float>(
+    this->bb_carbon_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "backbone_carbon_contact",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bb_other_contact_  = toml::get<toml::Float>(
+    this->bb_other_contact_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "backbone_contact",
             "[AICG2+.contact_energy_coefficients]"));
 
-    this->ss_hydrogen_bond_  = toml::get<toml::Float>(
+    this->ss_hydrogen_bond_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_hydrogen_bond",
             "[AICG2+.contact_energy_coefficients]"));
-    this->ss_donor_acceptor_ = toml::get<toml::Float>(
+    this->ss_donor_acceptor_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_donor_acceptor",
             "[AICG2+.contact_energy_coefficients]"));
-    this->ss_salty_bridge_   = toml::get<toml::Float>(
+    this->ss_salty_bridge_   = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_salty_bridge",
             "[AICG2+.contact_energy_coefficients]"));
-    this->ss_carbon_contact_ = toml::get<toml::Float>(
+    this->ss_carbon_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_carbon_contact",
             "[AICG2+.contact_energy_coefficients]"));
-    this->ss_charge_contact_ = toml::get<toml::Float>(
+    this->ss_charge_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_charge_contact",
             "[AICG2+.contact_energy_coefficients]"));
-    this->ss_other_contact_  = toml::get<toml::Float>(
+    this->ss_other_contact_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "sidechain_contact",
             "[AICG2+.contact_energy_coefficients]"));
 
-    this->bs_hydrogen_bond_  = toml::get<toml::Float>(
+    this->bs_hydrogen_bond_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "heterogeneous_hydrogen_bond",
             "[AICG2+.contacgy_coefficients]"));
-    this->bs_donor_acceptor_ = toml::get<toml::Float>(
+    this->bs_donor_acceptor_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "heterogeneous_donor_acceptor",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bs_carbon_contact_ = toml::get<toml::Float>(
+    this->bs_carbon_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "heterogeneous_carbon_contact",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bs_charge_contact_ = toml::get<toml::Float>(
+    this->bs_charge_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "heterogeneous_charge_contact",
             "[AICG2+.contact_energy_coefficients]"));
-    this->bs_other_contact_  = toml::get<toml::Float>(
+    this->bs_other_contact_  = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "heterogeneous_contact",
             "[AICG2+.contact_energy_coefficients]"));
 
-    this->long_range_contact_ = toml::get<toml::Float>(
+    this->long_range_contact_ = toml::get<double>(
         mjolnir::toml_value_at(contact_energy_coef, "long_range_contact",
             "[AICG2+.contact_energy_coefficients]"));
 
-    this->offset_ = toml::get<toml::Float>(mjolnir::toml_value_at(
+    this->offset_ = toml::get<double>(mjolnir::toml_value_at(
         contact_energy_coef, "offset", "[AICG2+.contact_energy_coefficients]"));
 }
 

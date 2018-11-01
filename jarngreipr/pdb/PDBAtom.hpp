@@ -3,6 +3,7 @@
 #include <mjolnir/math/Vector.hpp>
 #include <ostream>
 #include <istream>
+#include <sstream>
 #include <iomanip>
 #include <string>
 #include <cstdint>
@@ -29,16 +30,6 @@ struct PDBAtom
     std::string  charge;
     coordinate_type position;
 };
-
-template<typename realT>
-PDBAtom<realT> make_pdb_atom(const mjolnir::Vector<realT, 3>& pos,
-    const std::int32_t atm_id =   0, const std::string& atm_name = " X  ",
-    const std::int32_t res_id =   0, const std::string& res_name = "XXX",
-    const char         chn_id = 'A', const std::string& elm_name = "X")
-{
-    return PDBAtom<realT>{' ', ' ', chn_id, atm_id, res_id, 0.0, 0.0,
-                          atm_name, res_name, elm_name, "", pos};
-}
 
 template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
@@ -71,41 +62,12 @@ std::basic_ostream<charT, traits>& operator<<(
     return os;
 }
 
-template<typename charT, typename traits, typename realT>
-std::basic_istream<charT, traits>& operator>>(
-    std::basic_istream<charT, traits>& is, PDBAtom<realT>& atm)
+template<typename realT>
+std::string to_string(const PDBAtom<realT>& atm)
 {
-    std::string line;
-    std::getline(is, line);
-    if(line.substr(0, 6) != "ATOM  ")
-    {
-        throw std::runtime_error("not an ATOM line: " + line);
-    }
-    atm.atom_id      = std::stoi(line.substr( 6, 5));
-    atm.atom_name    = line.substr(12, 4);
-    atm.altloc       = line.at(16);
-    atm.residue_name = line.substr(17, 3);
-    atm.chain_id     = line.at(21);
-    atm.residue_id   = std::stoi(line.substr(22, 4));
-    atm.icode        = line.at(26);
-    atm.position[0]  = std::stod(line.substr(30, 8));
-    atm.position[1]  = std::stod(line.substr(38, 8));
-    atm.position[2]  = std::stod(line.substr(46, 8));
-
-    atm.occupancy          = 0.0;
-    atm.temperature_factor = 0.0;
-    atm.element            = "  ";
-    atm.charge             = "  ";
-
-    try{atm.occupancy = std::stod(line.substr(54, 6));}
-    catch(const std::out_of_range& o){return is;}
-    try{atm.temperature_factor = std::stod(line.substr(60, 6));}
-    catch(const std::out_of_range& o){return is;}
-    try{atm.element = line.substr(76, 2);}
-    catch(const std::out_of_range& o){return is;}
-    try{atm.charge = line.substr(78, 2);}
-    catch(const std::out_of_range& o){return is;}
-    return is;
+    std::ostringstream oss;
+    oss << atm;
+    return oss.str();
 }
 
 }//jarngreipr

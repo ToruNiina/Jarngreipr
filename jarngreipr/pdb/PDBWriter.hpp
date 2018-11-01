@@ -2,7 +2,6 @@
 #define JARNGREIPR_PDB_WRITER_HPP
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
-#include <mjolnir/util/throw_exception.hpp>
 #include <fstream>
 #include <sstream>
 
@@ -19,12 +18,13 @@ class PDBWriter
 
   public:
 
-    explicit PDBWriter(const std::string& fname): filename_(fname), ofstrm_(fname)
+    explicit PDBWriter(const std::string& fname)
+        : filename_(fname), ofstrm_(fname)
     {
         if(!ofstrm_.good())
         {
-            throw std::runtime_error(
-                "jarngreipr::PDBWriter: file open error: " + fname);
+            write_error(std::cerr, "PDBReader: file open error: ", fname);
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -32,20 +32,40 @@ class PDBWriter
     {
         for(const auto& atom : chain)
         {
-            ofstrm_ << atom << '\n';
+            this->write_atom(atom);
         }
         ofstrm_ << "TER\n";
+        return;
     }
 
-    void write_model(const std::vector<chain_type>& model,
-                     const std::size_t N_model)
+    void write_atom(const atom_type& chain)
     {
-        ofstrm_ << "MODEL " << N_model << '\n';
-        for(const auto& chain : model)
-        {
-            this->write_chain(chain);
-        }
-        ofstrm_ << "ENDMDL\n";
+        this->ofstrm_ << "ATOM  ";
+        this->ofstrm_ << std::right << std::setw(5) << atm.atom_id;
+        this->ofstrm_ << ' ';
+        this->ofstrm_ << std::setw(4) << atm.atom_name;
+        this->ofstrm_ << atm.altloc;
+        this->ofstrm_ << std::left  << std::setw(3) << atm.residue_name;
+        this->ofstrm_ << ' ';
+        this->ofstrm_ << atm.chain_id;
+        this->ofstrm_ << std::right << std::setw(4) << atm.residue_id;
+        this->ofstrm_ << atm.icode;
+        this->ofstrm_ << "   ";
+        this->ofstrm_ << std::right << std::setw(8) << std::fixed << std::setprecision(3)
+                      << atm.position[0];
+        this->ofstrm_ << std::right << std::setw(8) << std::fixed << std::setprecision(3)
+                      << atm.position[1];
+        this->ofstrm_ << std::right << std::setw(8) << std::fixed << std::setprecision(3)
+                      << atm.position[2];
+        this->ofstrm_ << std::right << std::setw(6) << std::fixed << std::setprecision(2)
+                      << atm.occupancy;
+        this->ofstrm_ << std::right << std::setw(6) << std::fixed << std::setprecision(2)
+                      << atm.temperature_factor;
+        this->ofstrm_ << "          ";
+        this->ofstrm_ << std::right << std::setw(2) << atm.element;
+        this->ofstrm_ << std::right << std::setw(2) << atm.charge;
+        this->ofstrm_ << '\n';
+        return;
     }
 
   private:

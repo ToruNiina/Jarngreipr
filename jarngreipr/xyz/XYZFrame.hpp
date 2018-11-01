@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_XYZ_FRAME_HPP
 #define JARNGREIPR_XYZ_FRAME_HPP
-#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZParticle.hpp>
 #include <vector>
 
 namespace jarngreipr
@@ -9,11 +9,11 @@ namespace jarngreipr
 template<typename realT>
 struct XYZFrame
 {
-    typedef realT  real_type;
-    typedef XYZLine<realT> line_type;
+    typedef realT              real_type;
+    typedef XYZParticle<realT> particle_type;
 
-    std::string            comment;
-    std::vector<line_type> lines;
+    std::string                comment;
+    std::vector<particle_type> particles;
 };
 
 } // jarngreipr

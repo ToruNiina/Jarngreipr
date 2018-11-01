@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_XYZ_WRITER_HPP
 #define JARNGREIPR_XYZ_WRITER_HPP
-#include <jarngreipr/xyz/XYZLine.hpp>
+#include <jarngreipr/xyz/XYZParticle.hpp>
 #include <jarngreipr/xyz/XYZFrame.hpp>
 #include <stdexcept>
 #include <ostream>
@@ -14,8 +14,8 @@ template<typename realT>
 class XYZWriter
 {
   public:
-    typedef XYZLine<realT>  line_type;
-    typedef XYZFrame<realT> frame_type;
+    typedef XYZParticle<realT> particle_type;
+    typedef XYZFrame<realT>    frame_type;
 
   public:
     explicit XYZWriter(const std::string& fname)
@@ -23,19 +23,24 @@ class XYZWriter
     {
         if(!ofstrm_.good())
         {
-            throw std::runtime_error("jarngreipr::XYZWriter: file open error: "
-                    + filename_);
+            write_error(std::cerr, "XYZWriter: file open error: ", fname);
+            std::exit(EXIT_FAILURE);
         }
     }
     ~XYZWriter() = default;
 
     void write_frame(const frame_type& frame)
     {
-        ofstrm_ << frame.lines.size() << '\n';
+        ofstrm_ << frame.particles.size() << '\n';
         ofstrm_ << frame.comment      << '\n';
-        for(const auto& line : frame.lines)
+        for(const auto& particle : frame.particles)
         {
-            ofstrm_ << line << '\n';
+            ofstrm_ << std::setw(6)  << std::left << particle.name
+                    << std::fixed << std::showpoint
+                    << std::setprecision(5) << std::right
+                    << std::setw(10) << particle.position[0] << ' '
+                    << std::setw(10) << particle.position[1] << ' '
+                    << std::setw(10) << particle.position[2] << '\n';
         }
         return;
     }
