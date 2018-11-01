@@ -2,7 +2,7 @@
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/Bead.hpp>
 #include <jarngreipr/model/CGModelGenerator.hpp>
-#include <mjolnir/util/throw_exception.hpp>
+#include <jarngreipr/io/write_error.hpp>
 #include <algorithm>
 #include <stdexcept>
 #include <memory>

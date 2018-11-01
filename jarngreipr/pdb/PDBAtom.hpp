@@ -3,6 +3,7 @@
 #include <mjolnir/math/Vector.hpp>
 #include <ostream>
 #include <istream>
+#include <sstream>
 #include <iomanip>
 #include <string>
 #include <cstdint>
