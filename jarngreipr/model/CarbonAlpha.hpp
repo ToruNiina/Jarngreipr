@@ -48,7 +48,7 @@ class CarbonAlpha final : public Bead<realT>
                             "multiple c-alpha in this residue.");
                 for(const auto atm : this->atoms_)
                 {
-                    if(atm.residue_id == " CA ")
+                    if(atm.residue_name == std::string(" CA "))
                     {
                         write_underline(std::cerr, to_string(atm), 22, 4, '^');
                     }
