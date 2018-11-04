@@ -39,7 +39,7 @@ void write_toml_value(
             for(auto iter = ary.begin(); iter != ary.end(); ++iter)
             {
                 if(iter != ary.begin()){os << ',';}
-                write_toml_value(os, item);
+                write_toml_value(os, *iter);
             }
             os << ']';
             return;
