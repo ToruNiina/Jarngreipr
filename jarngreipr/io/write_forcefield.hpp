@@ -74,20 +74,23 @@ void write_local_forcefield(
                     "jarngreipr: generated local forcefield"));
 
             os << "indices = [";
-            for(const auto& idx : idxs)
+            for(auto iter = idxs.begin(); iter != idxs.end(); ++iter)
             {
-                os << std::setw(idx_width) << idx << ',';
+                if(iter != idxs.begin()) {os << ',';}
+                const auto& idx = *iter;
+                os << std::setw(idx_width) << idx;
             }
             os << "], ";
         }
 
-        for(const auto& key : keys)
+        for(auto iter = keys.begin(); iter != keys.end(); ++iter)
         {
+            if(iter != keys.begin()) {os << ", ";}
+            const auto& key = *iter;
             const auto& val = mjolnir::toml_value_at(ptable, key,
                     "jarngreipr: generated local forcefield");
             os << key << " = ";
             write_toml_value(os, val);
-            os << ", ";
         }
         os << "},\n";
     }
@@ -166,13 +169,14 @@ void write_global_forcefield(
                 os << "index = "<< std::setw(idx_width) << idx << ", ";
             }
 
-            for(const auto& key : keys)
+            for(auto iter = keys.begin(); iter != keys.end(); ++iter)
             {
+                if(iter != keys.begin()) {os << ", ";}
+                const auto& key = *iter;
                 const auto& val = mjolnir::toml_value_at(ptable, key,
                         "jarngreipr: generated local forcefield");
                 os << key << " = ";
                 write_toml_value(os, val);
-                os << ", ";
             }
             os << "},\n";
         }
