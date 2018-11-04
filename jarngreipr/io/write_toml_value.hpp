@@ -35,10 +35,11 @@ void write_toml_value(
         case toml::value_t::Array:
         {
             os << '[';
-            for(const auto& item : v.cast<toml::value_t::Array>())
+            const auto ary = v.cast<toml::value_t::Array>();
+            for(auto iter = ary.begin(); iter != ary.end(); ++iter)
             {
+                if(iter != ary.begin()){os << ',';}
                 write_toml_value(os, item);
-                os << ',';
             }
             os << ']';
             return;
@@ -46,11 +47,12 @@ void write_toml_value(
         case toml::value_t::Table:
         {
             os << '{';
-            for(const auto& kv : v.cast<toml::value_t::Table>())
+            const auto& tab = v.cast<toml::value_t::Table>();
+            for(auto iter = tab.begin(); iter != tab.end(); ++iter)
             {
-                os << kv.first << '=';
-                write_toml_value(os, kv.second);
-                os << ',';
+                if(iter != tab.begin()) {os << ',';}
+                os << iter->first << '=';
+                write_toml_value(os, iter->second);
             }
             os << '}';
             return;
