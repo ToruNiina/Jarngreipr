@@ -41,6 +41,7 @@ class CarbonAlpha final : public Bead<realT>
                 {
                     write_underline(std::cerr, to_string(atm), 22, 4, '^');
                 }
+                std::exit(EXIT_FAILURE);
             }
             if(num_ca > 1)
             {
@@ -53,6 +54,7 @@ class CarbonAlpha final : public Bead<realT>
                         write_underline(std::cerr, to_string(atm), 22, 4, '^');
                     }
                 }
+                std::exit(EXIT_FAILURE);
             }
             this->position_ = std::find_if(
                 this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;
