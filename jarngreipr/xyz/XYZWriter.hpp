@@ -50,5 +50,5 @@ class XYZWriter
     std::ofstream ofstrm_;
 };
 
-} // mjolnir
+} // jarngreipr
 #endif// JARNGREIPR_IO_XYZ_WRITER
