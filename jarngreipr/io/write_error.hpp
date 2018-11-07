@@ -58,7 +58,8 @@ inline void write_underline(std::ostream& os, const std::string& line,
 {
     if(line_number.value == 0)
     {
-        os << line << '\n';
+        os << " | " << line << '\n';
+        os << " | ";
         for(std::size_t i=0; i<begin;  ++i){os << ' ';}
         for(std::size_t i=0; i<length; ++i){os << c;}
         os << '\n';

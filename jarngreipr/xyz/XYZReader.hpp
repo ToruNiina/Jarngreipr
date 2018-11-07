@@ -123,5 +123,5 @@ class XYZReader
     std::vector<frame_type> frames_;
 };
 
-} // mjolnir
+} // jarngreipr
 #endif //JARNGREIPR_IO_XYZ_READER

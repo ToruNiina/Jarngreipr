@@ -52,15 +52,20 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
     }
 
     toml::Table exv;
-    exv["interaction"]      = toml::String("Distance");
-    exv["potential"]        = toml::String("ExcludedVolume");
-    exv["ignored_chain"]    = toml::String("Nothing");
-    exv["ignored_bonds"]    = 3;
-    exv["ignored_contacts"] = 1;
+    exv["interaction"] = toml::String("Pair");
+    exv["potential"]   = toml::String("ExcludedVolume");
+
+    toml::Table particles_within;
+    particles_within["bond"]    = 3;
+    particles_within["contact"] = 1;
+    toml::Table ignore;
+    ignore["molecule"] = toml::String("Nothing");
+    ignore["particles_within"] = particles_within;
+    exv["ignore"] = ignore;
 
     toml::Table partition;
     partition["type"]   = toml::String("CellList");
-    partition["margin"] = 1.0;
+    partition["margin"] = 0.5;
     exv["spatial_partition"] = partition;
 
     const toml::Table& radii = mjolnir::toml_value_at(
@@ -74,7 +79,7 @@ void ExcludedVolume<realT>::generate(toml::Table& ff,
         {
             toml::Table para;
             para["index"] = bead->index();
-            para["radii"] = toml::get<toml::Float>(mjolnir::toml_value_at(
+            para["radius"] = toml::get<toml::Float>(mjolnir::toml_value_at(
                 radii, bead->name(), "jarngreipr::ExcludedVolume"));
             params.push_back(para);
         }

@@ -228,7 +228,7 @@ void AICG2Plus<realT>::generate(toml::Table& ff,
 
                         toml::Table para;
                         para["indices"] = toml::value{i1, i2};
-                        para["eq"     ] = distance(bead1->position(), bead2->position());
+                        para["v0"     ] = distance(bead1->position(), bead2->position());
                         para["k"      ] = -coef_go_ * calc_contact_coef(bead1, bead2);
                         params.push_back(std::move(para));
                     }
@@ -276,7 +276,7 @@ void AICG2Plus<realT>::generate_local(
             const std::size_t i2 = bead2->index();
             toml::Table para;
             para["indices"] = toml::value{i1, i2};
-            para["eq"     ] = distance(bead1->position(), bead2->position());
+            para["v0"     ] = distance(bead1->position(), bead2->position());
             para["k"      ] = kbd;
             params.push_back(std::move(para));
         }
@@ -286,7 +286,7 @@ void AICG2Plus<realT>::generate_local(
     /* bond-angle */{
         toml::Table bond_angle;
         bond_angle["interaction"] = toml::String("BondLength");
-        bond_angle["potential"]   = toml::String("AICG2PlusAngle");
+        bond_angle["potential"]   = toml::String("Gaussian");
         bond_angle["topology"]    = toml::String("none");
 
         const auto& width = mjolnir::toml_value_at(
@@ -308,9 +308,9 @@ void AICG2Plus<realT>::generate_local(
 
             toml::Table para;
             para["indices"] = toml::value{i1, i3};
-            para["eq"     ] = distance(bead1->position(), bead3->position());
-            para["w"      ] = width;
-            para["epsilon"] = this->coef_13_ * calc_contact_coef(bead1, bead3);
+            para["v0"     ] = distance(bead1->position(), bead3->position());
+            para["sigma"  ] = width;
+            para["k"      ] = this->coef_13_ * calc_contact_coef(bead1, bead3);
             params.push_back(std::move(para));
         }
         bond_angle["parameters"] = std::move(params);
@@ -359,7 +359,7 @@ void AICG2Plus<realT>::generate_local(
     /* dihedral-angle */{
         toml::Table dihd_angle;
         dihd_angle["interaction"] = toml::String("DihedralAngle");
-        dihd_angle["potential"  ] = toml::String("AICG2PlusDihedral");
+        dihd_angle["potential"  ] = toml::String("Gaussian");
         dihd_angle["topology"   ] = toml::String("none");
 
         const auto& width = mjolnir::toml_value_at(
@@ -383,10 +383,10 @@ void AICG2Plus<realT>::generate_local(
 
             toml::Table para;
             para["indices"] = toml::value{i1, i2, i3, i4};
-            para["eq"     ] = dihedral_angle(bead1->position(),
+            para["v0"     ] = dihedral_angle(bead1->position(),
                     bead2->position(), bead3->position(), bead4->position());
-            para["w"      ] = width;
-            para["epsilon"] = this->coef_14_ * calc_contact_coef(bead1, bead4);
+            para["sigma"  ] = width;
+            para["k"      ] = this->coef_14_ * calc_contact_coef(bead1, bead4);
             params.push_back(std::move(para));
         }
         dihd_angle["parameters"] = std::move(params);
@@ -459,7 +459,7 @@ void AICG2Plus<realT>::generate_local(
 
                     toml::Table para;
                     para["indices"] = toml::value{i1, i2};
-                    para["eq"     ] = distance(bead1->position(), bead2->position());
+                    para["v0"     ] = distance(bead1->position(), bead2->position());
                     para["k"      ] = -this->coef_go_ * calc_contact_coef(bead1, bead2);
                     params.push_back(std::move(para));
                 }
