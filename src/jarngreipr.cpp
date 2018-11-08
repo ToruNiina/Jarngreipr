@@ -5,6 +5,7 @@
 #include <jarngreipr/io/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
 #include <jarngreipr/pdb/PDBReader.hpp>
+#include <jarngreipr/gro/GROWriter.hpp>
 #include <algorithm>
 #include <random>
 #include <map>
@@ -99,5 +100,12 @@ int main(int argc, char **argv)
     exv.generate(ff, ca);
 
     write_forcefield(std::cout, ff);
+
+    // ========================================================================
+
+    // Change file extension from pdb to gro
+    const std::string gro_fname = fname.substr(0, fname.find(".pdb")) + ".gro";
+    std::cout << "Str: " << gro_fname;
+
     return 0;
 }
