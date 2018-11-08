@@ -1,5 +1,8 @@
 # parameter set for AICG2+ [1,2] and flexible local potential [3].
 
+unit.length = "angstrom"
+unit.energy = "kcal/mol"
+
 cbd_aicg2       = 110.40
 wid_aicg13      =   0.15
 wid_dih         =   0.15
