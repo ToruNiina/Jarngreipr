@@ -1,4 +1,4 @@
 option(DEBUG "dump debug information" OFF)
 if(DEBUG)
-    add_definitions(-DMJOLNIR_DEBUG)
+    add_definitions(-DJARNGREIPR_DEBUG)
 endif()
