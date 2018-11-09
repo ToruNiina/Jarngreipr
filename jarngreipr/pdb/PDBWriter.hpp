@@ -38,7 +38,7 @@ class PDBWriter
         return;
     }
 
-    void write_atom(const atom_type& chain)
+    void write_atom(const atom_type& atm)
     {
         this->ofstrm_ << "ATOM  ";
         this->ofstrm_ << std::right << std::setw(5) << atm.atom_id;

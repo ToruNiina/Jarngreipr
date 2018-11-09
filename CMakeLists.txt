@@ -27,6 +27,7 @@ set(CMAKE "${PROJECT_SOURCE_DIR}/cmake")
 
 # Add paths
 include_directories("${EXT}")
+include_directories("${EXT}/Boost.toml")
 include_directories("${PROJECT_SOURCE_DIR}")
 #include_directories("${MJOLNIR}/core")
 #include_directories("${MJOLNIR}/input")

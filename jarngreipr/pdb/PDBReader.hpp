@@ -3,6 +3,7 @@
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
 #include <jarngreipr/io/read_number.hpp>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
