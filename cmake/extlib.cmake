@@ -45,7 +45,7 @@ else()
 endif()
 
 # TOML
-if(NOT EXISTS "${EXT}/toml/toml.hpp")
+if(NOT EXISTS "${EXT}/Boost.toml/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()

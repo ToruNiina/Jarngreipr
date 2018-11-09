@@ -1,0 +1,3 @@
+[submodule "extlib/Boost.toml"]
+	path = extlib/Boost.toml
+	url = https://github.com/ToruNiina/Boost.toml.git
