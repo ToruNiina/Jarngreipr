@@ -23,8 +23,8 @@ class GROWriter
     {
         if(!ofstrm_.good())
         {
-            throw std::runtime_error("jarngreipr::GROWriter: file open error: "
-                    + filename_);
+            write_error(std::cerr, "GROReader: file open error: ", filename_);
+            std::exit(EXIT_FAILURE);
         }
     }
     ~GROWriter() = default;
@@ -49,5 +49,5 @@ class GROWriter
     std::ofstream ofstrm_;
 };
 
-} // mjolnir
+} // jarngreipr
 #endif// JARNGREIPR_GRO_WRITER_HPP
