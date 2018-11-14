@@ -27,18 +27,6 @@ struct GROLine
     coordinate_type velocity;
 };
 
-template<typename realT>
-inline GROLine<realT>
-make_gro_line(const std::int32_t atm_id = 0,
-        const std::int32_t res_id = 0,
-        const std::string& atm_name = "AAAAA",
-        const std::string& res_name = "RRRRR",
-        const mjolnir::Vector<realT, 3>& pos = {0.0, 0.0, 0.0},
-        const mjolnir::Vector<realT, 3>& vel = {0.0, 0.0, 0.0})
-{
-    return GROLine<realT>{atm_id, res_id, atm_name, res_name, pos, vel};
-}
-
 template<typename charT, typename traits, typename realT>
 std::basic_ostream<charT, traits>& operator<<(
     std::basic_ostream<charT, traits>& os, const GROLine<realT>& gro_line)
