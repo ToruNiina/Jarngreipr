@@ -47,7 +47,8 @@ using ninfo_pdpwm_prefix     = char_sequence<'p','d','p','w','m'>;
 
 } // detail
 
-template<typename realT, std::size_t N_particles, std::size_t N_coefs, typename prefixT>
+template<typename realT, std::size_t N_units, std::size_t N_particles,
+         std::size_t N_coefs, typename prefixT>
 struct NinfoElement
 {
     using real_type   = realT;
@@ -55,37 +56,38 @@ struct NinfoElement
     static char const* prefix;
 
     std::size_t                          id;
-    std::array<std::size_t, 2>           units;
+    std::array<std::size_t, N_units>     units;
     std::array<std::size_t, N_particles> imps;
     std::array<std::size_t, N_particles> impuns;
     std::array<real_type, N_coefs>       coefs;
     std::string suffix; // like "p-p"
 };
 
-template<typename realT, std::size_t N_p, std::size_t N_c, typename prefixT>
-char const* NinfoElement<realT, N_p, N_c, prefixT>::prefix =
+template<typename realT, std::size_t N_u, std::size_t N_p, std::size_t N_c,
+         typename prefixT>
+char const* NinfoElement<realT, N_u, N_p, N_c, prefixT>::prefix =
     detail::char_sequence_string_generator<prefixT>::generate();
 
 template<typename realT>
-using NinfoBond      = NinfoElement<realT, 2,  4, detail::ninfo_bond_prefix>;
+using NinfoBond      = NinfoElement<realT, 2, 2,  4, detail::ninfo_bond_prefix>;
 template<typename realT>
-using NinfoAngl      = NinfoElement<realT, 3,  4, detail::ninfo_angl_prefix>;
+using NinfoAngl      = NinfoElement<realT, 2, 3,  4, detail::ninfo_angl_prefix>;
 template<typename realT>
-using NinfoDihd      = NinfoElement<realT, 4,  5, detail::ninfo_dihd_prefix>;
+using NinfoDihd      = NinfoElement<realT, 2, 4,  5, detail::ninfo_dihd_prefix>;
 template<typename realT>
-using NinfoAicg13    = NinfoElement<realT, 3,  5, detail::ninfo_aicg13_prefix>;
+using NinfoAicg13    = NinfoElement<realT, 2, 3,  5, detail::ninfo_aicg13_prefix>;
 template<typename realT>
-using NinfoAicg14    = NinfoElement<realT, 4,  5, detail::ninfo_aicg14_prefix>;
+using NinfoAicg14    = NinfoElement<realT, 2, 4,  5, detail::ninfo_aicg14_prefix>;
 template<typename realT>
-using NinfoAicgdih   = NinfoElement<realT, 4,  5, detail::ninfo_aicgdih_prefix>;
+using NinfoAicgdih   = NinfoElement<realT, 2, 4,  5, detail::ninfo_aicgdih_prefix>;
 template<typename realT>
-using NinfoContact   = NinfoElement<realT, 2,  4, detail::ninfo_contact_prefix>;
+using NinfoContact   = NinfoElement<realT, 2, 2,  4, detail::ninfo_contact_prefix>;
 template<typename realT>
-using NinfoBasePair  = NinfoElement<realT, 2,  4, detail::ninfo_basepair_prefix>;
+using NinfoBasePair  = NinfoElement<realT, 2, 2,  4, detail::ninfo_basepair_prefix>;
 template<typename realT>
-using NinfoBaseStack = NinfoElement<realT, 2,  4, detail::ninfo_basestack_prefix>;
+using NinfoBaseStack = NinfoElement<realT, 2, 2,  4, detail::ninfo_basestack_prefix>;
 template<typename realT>
-using NinfoPDPWM     = NinfoElement<realT, 1, 10, detail::ninfo_pdpwm_prefix>;
+using NinfoPDPWM     = NinfoElement<realT, 1, 1, 10, detail::ninfo_pdpwm_prefix>;
 
 // XXX: BE CAREFUL. In the format of PDPWM, the second column group (normally imp)
 //      has nil value, filled with 999 and the third column group (normally impun)
