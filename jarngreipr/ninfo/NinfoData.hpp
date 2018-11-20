@@ -9,6 +9,7 @@ namespace jarngreipr
 template<typename realT>
 struct NinfoData
 {
+    using real_type = realT;
     // std::variant or inheritance, later...
     std::vector<NinfoBond     <real_type>> bonds;
     std::vector<NinfoAngl     <real_type>> angls;
@@ -32,7 +33,8 @@ struct block_getter_impl;
     template<typename realT>\
     struct block_getter_impl<NinfoKind::kind, realT>\
     {\
-        using ninfo_type = typename ninfo_type_of<kind, realT>::type;\
+        using real_type = realT;\
+        using ninfo_type = typename ninfo_type_of<NinfoKind::kind, realT>::type;\
         static std::vector<ninfo_type> const&\
         invoke(NinfoData<realT> const& nd) noexcept {return nd.valname;}\
         static std::vector<ninfo_type>&\
@@ -54,16 +56,16 @@ JARNGREIPR_NINFO_BLOCK_GETTER_IMPL_GENERATOR(pdpwm    , pdpwms    )
 } // detail
 
 template<NinfoKind kind, typename realT>
-inline std::vector<typename ninfo_type_of<kind, real_type>::type> const&
+inline std::vector<typename ninfo_type_of<kind, realT>::type> const&
 get_block(NinfoData<realT> const& nd) noexcept
 {
-    return detail::block_getter_impl<kind, real_type>::invoke(nd);
+    return detail::block_getter_impl<kind, realT>::invoke(nd);
 }
 template<NinfoKind kind, typename realT>
-inline std::vector<typename ninfo_type_of<kind, real_type>::type>&
+inline std::vector<typename ninfo_type_of<kind, realT>::type>&
 get_block(NinfoData<realT>& nd) noexcept
 {
-    return detail::block_getter_impl<kind, real_type>::invoke(nd);
+    return detail::block_getter_impl<kind, realT>::invoke(nd);
 }
 
 // TODO operators for concat/split this?
