@@ -74,7 +74,6 @@ class NinfoReader
         for(auto& imp   : ninfo.imps)   {iss >> imp;}
         for(auto& impun : ninfo.impuns) {iss >> impun;}
         for(auto& coef  : ninfo.coefs)  {iss >> coef;}
-
         if(iss.fail())
         {
             write_error(std::cerr, "while reading ninfo ", ninfoT::prefix,
@@ -84,6 +83,10 @@ class NinfoReader
                             at_line(this->line_num_));
             std::exit(EXIT_FAILURE);
         }
+
+        // if there are no suffix, it does not matter.
+        iss >> ninfo.suffix;
+
         return ninfo;
     }
 
