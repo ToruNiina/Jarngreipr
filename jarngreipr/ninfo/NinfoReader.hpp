@@ -32,6 +32,22 @@ class NinfoReader
     bool is_eof() {this->ifstrm_.peek(); return this->ifstrm_.eof();}
     void rewind() {this->ifstrm_.seekg(0, std::ios::beg);}
 
+    data_type const& read()
+    {
+        // read_block function stores the data into the internal stroage.
+        this->read_block<NinfoKind::bond     >();
+        this->read_block<NinfoKind::angl     >();
+        this->read_block<NinfoKind::dihd     >();
+        this->read_block<NinfoKind::aicg13   >();
+        this->read_block<NinfoKind::aicg14   >();
+        this->read_block<NinfoKind::aicgdih  >();
+        this->read_block<NinfoKind::contact  >();
+        this->read_block<NinfoKind::basepair >();
+        this->read_block<NinfoKind::basestack>();
+        this->read_block<NinfoKind::pdpwm    >();
+        return this->data_;
+    }
+
     template<NinfoKind kind>
     std::vector<ninfo_t<kind>> const& read_block()
     {

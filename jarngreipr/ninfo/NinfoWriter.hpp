@@ -27,6 +27,21 @@ class NinfoWriter
         }
     }
 
+    void write(const data_type& data)
+    {
+        this->write_block(data.bonds);
+        this->write_block(data.angls);
+        this->write_block(data.dihds);
+        this->write_block(data.aicg13s);
+        this->write_block(data.aicg14s);
+        this->write_block(data.aicgdihs);
+        this->write_block(data.contacts);
+        this->write_block(data.basepairs);
+        this->write_block(data.basestacks);
+        this->write_block(data.pdpwms);
+        return;
+    }
+
     template<std::size_t Nu, std::size_t Np, std::size_t Nc, NinfoKind kind>
     void write_block(
         const std::vector<NinfoElement<real_type, Nu, Np, Nc, kind>>& block)
