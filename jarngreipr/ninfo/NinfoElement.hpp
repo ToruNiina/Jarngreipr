@@ -77,6 +77,25 @@ template<typename realT, std::size_t N_u, std::size_t N_p, std::size_t N_c,
          NinfoKind kind>
 constexpr const char* NinfoElement<realT, N_u, N_p, N_c, kind>::prefix;
 
+template<typename T, std::size_t Nu, std::size_t Np, std::size_t Nc, NinfoKind kind>
+bool operator==(const NinfoElement<T, Nu, Np, Nc, kind>& lhs,
+                const NinfoElement<T, Nu, Np, Nc, kind>& rhs) noexcept
+{
+    return lhs.id     == rhs.id     &&
+           lhs.units  == rhs.units  &&
+           lhs.imps   == rhs.imps   &&
+           lhs.impuns == rhs.impuns &&
+           lhs.coefs  == rhs.coefs  &&
+           lhs.suffix == rhs.suffix;
+}
+
+template<typename T, std::size_t Nu, std::size_t Np, std::size_t Nc, NinfoKind kind>
+bool operator!=(const NinfoElement<T, Nu, Np, Nc, kind>& lhs,
+                const NinfoElement<T, Nu, Np, Nc, kind>& rhs) noexcept
+{
+    return !(lhs == rhs);
+}
+
 template<typename realT>
 using NinfoBond      = NinfoElement<realT, 2, 2,  4, NinfoKind::bond>;
 template<typename realT>

@@ -23,6 +23,26 @@ struct NinfoData
     std::vector<NinfoPDPWM    <real_type>> pdpwms;
 };
 
+template<typename realT>
+bool operator==(const NinfoData<realT>& lhs, const NinfoData<realT>& rhs)
+{
+    return lhs.bonds      == rhs.bonds      &&
+           lhs.angls      == rhs.angls      &&
+           lhs.dihds      == rhs.dihds      &&
+           lhs.aicg13s    == rhs.aicg13s    &&
+           lhs.aicg14s    == rhs.aicg14s    &&
+           lhs.aicgdihs   == rhs.aicgdihs   &&
+           lhs.contacts   == rhs.contacts   &&
+           lhs.basepairs  == rhs.basepairs  &&
+           lhs.basestacks == rhs.basestacks &&
+           lhs.pdpwms     == rhs.pdpwms;
+}
+template<typename realT>
+bool operator!=(const NinfoData<realT>& lhs, const NinfoData<realT>& rhs)
+{
+    return !(lhs == rhs);
+}
+
 namespace detail
 {
 
