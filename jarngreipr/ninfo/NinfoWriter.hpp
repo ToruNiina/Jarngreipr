@@ -25,6 +25,7 @@ class NinfoWriter
             write_error(std::cerr, "NinfoReader: file open error: ", filename_);
             std::exit(EXIT_FAILURE);
         }
+        ofstrm_.close();
     }
 
     void write(const data_type& data)
@@ -47,11 +48,14 @@ class NinfoWriter
         const std::vector<NinfoElement<real_type, Nu, Np, Nc, kind>>& block)
     {
         using ninfo_type = NinfoElement<real_type, Nu, Np, Nc, kind>;
+        if(block.empty()){return ;}
 
+        this->ofstrm_.open(this->filename_, std::ios_base::app);
         this->ofstrm_ << "<<<< " << ninfo_type::prefix << '\n';
         for(const auto& ninfo : block)
         {
             this->ofstrm_ << ninfo_type::prefix << ' ';
+            this->ofstrm_ << std::setw(6) << std::right << ninfo.id << ' ';
             for(auto& unit  : ninfo.units)
             {
                 this->ofstrm_ << std::setw(6) << std::right << unit << ' ';
@@ -73,6 +77,7 @@ class NinfoWriter
             this->ofstrm_ << ninfo.suffix << '\n';
         }
         this->ofstrm_ << ">>>>\n";
+        ofstrm_.close();
         return;
     }
 

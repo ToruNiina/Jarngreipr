@@ -27,6 +27,7 @@ class NinfoReader
             write_error(std::cerr, "NinfoReader: file open error: ", filename_);
             std::exit(EXIT_FAILURE);
         }
+        ifstrm_.close();
     }
 
     bool is_eof() {this->ifstrm_.peek(); return this->ifstrm_.eof();}
@@ -62,6 +63,13 @@ class NinfoReader
 
         // the data is not found.
         // it might not exist in the file, or has not read yet.
+        this->ifstrm_.open(this->filename_);
+        if(!ifstrm_.good())
+        {
+            write_error(std::cerr, "NinfoReader: file open error: ", filename_);
+            std::exit(EXIT_FAILURE);
+        }
+
         this->rewind();
 
         while(!this->is_eof())
@@ -76,6 +84,7 @@ class NinfoReader
                 corresponding_block.push_back(this->read_ninfo<ninfo_type>(iss));
             }
         }
+        this->ifstrm_.close();
         return corresponding_block;
     }
 
