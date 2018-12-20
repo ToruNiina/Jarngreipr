@@ -101,11 +101,5 @@ int main(int argc, char **argv)
 
     write_forcefield(std::cout, ff);
 
-    // ========================================================================
-
-    // Change file extension from pdb to gro
-    const std::string gro_fname = fname.substr(0, fname.find(".pdb")) + ".gro";
-    std::cout << "Str: " << gro_fname;
-
     return 0;
 }
