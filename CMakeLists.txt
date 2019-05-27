@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD          11) # use c++11
 set(CMAKE_CXX_EXTENSIONS       OFF) # not gnu11, c++11
 
 include("${PROJECT_SOURCE_DIR}/cmake/extlib.cmake")
-include("${PROJECT_SOURCE_DIR}/cmake/options.cmake")
 
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/extlib/Mjolnir")
