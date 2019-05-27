@@ -1,3 +1,6 @@
 [submodule "extlib/toml"]
 	path = extlib/toml
 	url = https://github.com/ToruNiina/toml11.git
+[submodule "extlib/Mjolnir"]
+	path = extlib/Mjolnir
+	url = https://github.com/Mjolnir-MD/Mjolnir.git
