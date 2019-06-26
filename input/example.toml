@@ -5,12 +5,8 @@
 toml_prefix   = "example1"
 output_prefix = "lala"
 output_path   = "./"
-format        = "gromacs"
-format_prefix = "genesis"
 parameters    = "./parameter/parameters.toml"
 precision     = "double"
-thread        = false
-gpu           = false
 
 [[structures]]
 protein = {file = "./data/pdb/example.pdb", model = "CarbonAlpha", chain="A-D"}
@@ -24,15 +20,15 @@ scheme     = "Underdamped Langevin"
 delta_t    = 0.4    # the unit [tau] depends on the forcefield and parameters
 total_step = 50_000 # the total simulation time will be 0.4 * 50000 = 20000.
 save_step  = 100    # each 40 [tau], the configurations are saved.
+seed       = 2374
 boundary.type  = "Unlimited"
 boundary.shape = {}
 #boundary.type  = "PeriodicCuboid"
 #boundary.shape = {lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
 
 [[systems]]
-temperature    = 300.0 # [K]
-seed           = 2374
-ionic_strength = 0.1   # [mol/L]
+attribute.temperature    = 300.0 # [K]
+attribute.ionic_strength = 0.1   # [mol/L]
 
 [[forcefields]]
 # the energy become the sum of these.
