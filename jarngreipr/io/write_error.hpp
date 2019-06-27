@@ -1,5 +1,6 @@
 #ifndef JARNGREIPR_WRITE_ERROR_HPP
 #define JARNGREIPR_WRITE_ERROR_HPP
+#include <mjolnir/util/color.hpp>
 #include <utility>
 #include <string>
 #include <ostream>
@@ -17,7 +18,7 @@ void write_error_impl(std::basic_ostream<charT, traits>&)
     return;
 }
 
-// to output arbitral number of arguments
+// to output arbitral number of arguments...
 template<typename charT, typename traits, typename T, typename ... Ts>
 void write_error_impl(std::basic_ostream<charT, traits>& os, T&& v, Ts&& ... args)
 {
@@ -32,12 +33,13 @@ void write_error(std::ostream& os, Ts&& ... args)
 {
     static_assert(sizeof...(Ts) > 0, "write_error requires at least one value");
 
-    os << "error: ";
+    os << mjolnir::io::red << "error: " << mjolnir::io::nocolor;
     detail::write_error_impl(os, std::forward<Ts>(args)...);
     os << '\n';
     return;
 }
 
+// a wrapper struct that prevents (implicit) conversion from ints to line_number
 struct at_line
 {
     explicit at_line(std::size_t v): value(v){}
@@ -53,28 +55,33 @@ struct at_line
 };
 
 inline void write_underline(std::ostream& os, const std::string& line,
-        const std::size_t begin, const std::size_t length, const char c = '^',
-        const at_line line_number = at_line{0})
+        const std::size_t begin, const std::size_t length,
+        const at_line line_number = at_line{0},
+        const char c = '^')
 {
     if(line_number.value == 0)
     {
         os << " | " << line << '\n';
         os << " | ";
         for(std::size_t i=0; i<begin;  ++i){os << ' ';}
+        os << mjolnir::io::red;
         for(std::size_t i=0; i<length; ++i){os << c;}
+        os << mjolnir::io::nocolor;
         os << '\n';
+        return ;
     }
-    else
-    {
-        const std::size_t wid = std::to_string(line_number.value).size();
 
-        os << line_number.value << " | " << line << '\n';
-        for(std::size_t i=0; i<wid;    ++i){os << ' ';}
-        os << " | ";
-        for(std::size_t i=0; i<begin;  ++i){os << ' ';}
-        for(std::size_t i=0; i<length; ++i){os << c;}
-        os << '\n';
-    }
+    const auto line_num_str   = std::to_string(line_number.value);
+    const auto line_num_width = line_num_str.size();
+
+    os << line_num_str << " | " << line << '\n';
+    for(std::size_t i=0; i<wid;    ++i){os << ' ';}
+    os << " | ";
+    for(std::size_t i=0; i<begin;  ++i){os << ' ';}
+    os << mjolnir::io::red;
+    for(std::size_t i=0; i<length; ++i){os << c;}
+    os << mjolnir::io::nocolor;
+    os << '\n';
     return;
 }
 
