@@ -11,7 +11,7 @@ struct GROFrame
 {
     using real_type = realT;
     using line_type = GROLine<realT>;
-    using coordinate_type = mjolnir::Vector<real_type, 3>;
+    using coordinate_type = typename line_type::coordinate_type;
 
     std::string            comment;
     std::vector<line_type> lines;

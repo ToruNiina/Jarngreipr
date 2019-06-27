@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_IO_GRO_LINE_HPP
 #define JARNGREIPR_IO_GRO_LINE_HPP
-#include <mjolnir/math/Vector.hpp>
+#include <mjolnir/math/math.hpp>
 #include <utility>
 #include <ostream>
 #include <istream>
@@ -15,7 +15,7 @@ template<typename realT>
 struct GROLine
 {
     using real_type = realT;
-    using coordinate_type = mjolnir::Vector<real_type, 3>;
+    using coordinate_type = mjolnir::math::Vector<real_type, 3>;
 
     std::int32_t atom_id;
     std::int32_t residue_id;

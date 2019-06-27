@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_PDB_ATOM_HPP
 #define JARNGREIPR_PDB_ATOM_HPP
-#include <mjolnir/math/Vector.hpp>
+#include <mjolnir/math/math.hpp>
 #include <ostream>
 #include <istream>
 #include <sstream>
@@ -15,7 +15,7 @@ template<typename realT>
 struct PDBAtom
 {
     using real_type   = realT;
-    using coordinate_type = mjolnir::Vector<realT, 3>;
+    using coordinate_type = mjolnir::math::Vector<realT, 3>;
 
     char         altloc;
     char         icode;
