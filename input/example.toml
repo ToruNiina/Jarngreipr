@@ -1,42 +1,51 @@
-# this file is for jarngreipr.
+# TOML v0.5.0
+
 # "A-D" means [A, B, C, D]. "A&C&E" means [A, C, E]. "A&C-E" means [A, C, D, E].
 
-[general]
-toml_prefix   = "example1"
-output_prefix = "lala"
-output_path   = "./"
-parameters    = "./parameter/parameters.toml"
-precision     = "double"
-
-[[structures]]
-protein = {file = "./data/pdb/example.pdb", model = "CarbonAlpha", chain="A-D"}
-DNA     = {file = "./data/pdb/DNA.pdb",     model = "3SPN2",       chain="A"}
-# To specify the initial conformation that is differrent from reference
-# structure, define `initial`.
+[files]
+output.prefix = "example"
+output.path   = "./"
+output.format = "xyz"
 
 [simulator]
-type       = "Molecular Dynamics"
-scheme     = "Underdamped Langevin"
-delta_t    = 0.4    # the unit [tau] depends on the forcefield and parameters
-total_step = 50_000 # the total simulation time will be 0.4 * 50000 = 20000.
-save_step  = 100    # each 40 [tau], the configurations are saved.
-seed       = 2374
-boundary.type  = "Unlimited"
-boundary.shape = {}
-#boundary.type  = "PeriodicCuboid"
-#boundary.shape = {lower = [0.0, 0.0, 0.0], upper = [10.0, 10.0, 10.0]}
+# The same as Mjolnir.
+precision       = "double"
+boundary_type   = "Unlimited"
+type            = "MolecularDynamics"
+delta_t         = 0.4
+total_step      = 50_000
+save_step       = 100
+integrator.type = "BAOABLangevin"
+integrator.seed = 2374
 
 [[systems]]
 attribute.temperature    = 300.0 # [K]
 attribute.ionic_strength = 0.1   # [mol/L]
+boundary_shape           = {}    # unlimited boundary
+
+# path/to/directory/that/contains/pdb/files
+path.pdb      = "./data/pdb/"
+# <group-name> = <tableof: pdb file and model name>
+# The same group-name would be used in `[[forcefields]]` table.
+# you can use `[A-Za-z0-9_]+`. Note that `-` is considered as a name-separator.
+protein       = {reference = "example.pdb", model = "AICG2+", chain="A-D"}
+
+DNA.reference = "DNA.pdb"
+DNA.initial   = "bend_DNA.pdb"
+DNA.model     = "3SPN2"
+DNA.chain     = "A-B"
 
 [[forcefields]]
-# the energy become the sum of these.
+# parameter file for this forcefield
+parameters    = "./parameter/parameters.toml"
+
 [forcefields.local]
-protein = [{name = "ClementiGo"}]
+protein = ["ClementiGo"]
+
 [forcefields.global]
-protein = [{name = "GoContact"}, {name = "ExcludedVolume"}]
+protein     = ["GoContact", "ExcludedVolume"]
+DNA         = ["3SPN2",     "Electrostatic"]
 protein-DNA = [
-    {name = "GoContact"},
-    {name = "Electrostatic"}
+    {name = "GoContact", k = 0.1},
+    "Electrostatic"
 ]
