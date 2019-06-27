@@ -1,23 +1,23 @@
 #ifndef JARNGREIPR_GEOMETRY_DISTANCE
 #define JARNGREIPR_GEOMETRY_DISTANCE
 #include <jarngreipr/model/Bead.hpp>
-#include <mjolnir/math/Vector.hpp>
+#include <mjolnir/math/math.hpp>
 
 namespace jarngreipr
 {
 
 template<typename realT>
-inline realT distance_sq(const mjolnir::Vector<realT, 3>& lhs,
-                         const mjolnir::Vector<realT, 3>& rhs) noexcept
+inline realT distance_sq(const mjolnir::math::Vector<realT, 3>& lhs,
+                         const mjolnir::math::Vector<realT, 3>& rhs) noexcept
 {
-    return mjolnir::length_sq(lhs - rhs);
+    return mjolnir::math::length_sq(lhs - rhs);
 }
 
 template<typename realT>
-inline realT distance(const mjolnir::Vector<realT, 3>& lhs,
-                      const mjolnir::Vector<realT, 3>& rhs) noexcept
+inline realT distance(const mjolnir::math::Vector<realT, 3>& lhs,
+                      const mjolnir::math::Vector<realT, 3>& rhs) noexcept
 {
-    return mjolnir::length(lhs - rhs);
+    return mjolnir::math::length(lhs - rhs);
 }
 
 } // jarngreipr

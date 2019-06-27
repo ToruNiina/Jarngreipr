@@ -7,20 +7,20 @@ namespace jarngreipr
 {
 
 template<typename realT>
-inline realT cos_theta(const mjolnir::Vector<realT, 3>& lhs,
-                       const mjolnir::Vector<realT, 3>& rhs)
+inline realT cos_theta(const mjolnir::math::Vector<realT, 3>& lhs,
+                       const mjolnir::math::Vector<realT, 3>& rhs)
 {
     const auto dist2 = length_sq(lhs) * length_sq(rhs);
-    const auto dot   = mjolnir::dot_product(lhs, rhs);
-    const auto cos_t = dot * mjolnir::rsqrt(dist2);
+    const auto dot   = mjolnir::math::dot_product(lhs, rhs);
+    const auto cos_t = dot * mjolnir::math::rsqrt(dist2);
     if(cos_t < -1.0) {return -1.0;} else if(cos_t >  1.0) {return 1.0;}
     return cos_t;
 }
 
 template<typename realT>
-inline realT cos_theta(const mjolnir::Vector<realT, 3>& p1,
-                       const mjolnir::Vector<realT, 3>& p2,
-                       const mjolnir::Vector<realT, 3>& p3)
+inline realT cos_theta(const mjolnir::math::Vector<realT, 3>& p1,
+                       const mjolnir::math::Vector<realT, 3>& p2,
+                       const mjolnir::math::Vector<realT, 3>& p3)
 {
     /*      p1     *
      *     /       *
@@ -30,16 +30,16 @@ inline realT cos_theta(const mjolnir::Vector<realT, 3>& p1,
 }
 
 template<typename realT>
-inline realT angle(const mjolnir::Vector<realT, 3>& lhs,
-                   const mjolnir::Vector<realT, 3>& rhs)
+inline realT angle(const mjolnir::math::Vector<realT, 3>& lhs,
+                   const mjolnir::math::Vector<realT, 3>& rhs)
 {
     return std::acos(cos_theta(lhs, rhs));
 }
 
 template<typename realT>
-inline realT angle(const mjolnir::Vector<realT, 3>& p1,
-                   const mjolnir::Vector<realT, 3>& p2,
-                   const mjolnir::Vector<realT, 3>& p3)
+inline realT angle(const mjolnir::math::Vector<realT, 3>& p1,
+                   const mjolnir::math::Vector<realT, 3>& p2,
+                   const mjolnir::math::Vector<realT, 3>& p3)
 {
     return std::acos(cos_theta(p1, p2, p3));
 }

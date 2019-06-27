@@ -16,28 +16,28 @@ namespace jarngreipr
  *             |
  * */
 template<typename realT>
-realT dihedral_angle(const mjolnir::Vector<realT, 3>& p1,
-                     const mjolnir::Vector<realT, 3>& p2,
-                     const mjolnir::Vector<realT, 3>& p3,
-                     const mjolnir::Vector<realT, 3>& p4)
+realT dihedral_angle(const mjolnir::math::Vector<realT, 3>& p1,
+                     const mjolnir::math::Vector<realT, 3>& p2,
+                     const mjolnir::math::Vector<realT, 3>& p3,
+                     const mjolnir::math::Vector<realT, 3>& p4)
 {
     const auto r_ij = p1 - p2;
     const auto r_kj = p3 - p2;
     const auto r_lk = p4 - p3;
-    const auto r_kj_lensq_inv = 1. / mjolnir::length_sq(r_kj);
+    const auto r_kj_lensq_inv = 1. / mjolnir::math::length_sq(r_kj);
 
-    const auto n = mjolnir::cross_product(r_kj, -1e0 * r_lk);
+    const auto n = mjolnir::math::cross_product(r_kj, -1e0 * r_lk);
 
-    const auto R = r_ij - (mjolnir::dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
-    const auto S = r_lk - (mjolnir::dot_product(r_lk, r_kj) * r_kj_lensq_inv) * r_kj;
+    const auto R = r_ij - (mjolnir::math::dot_product(r_ij, r_kj) * r_kj_lensq_inv) * r_kj;
+    const auto S = r_lk - (mjolnir::math::dot_product(r_lk, r_kj) * r_kj_lensq_inv) * r_kj;
 
-    const auto cos_RS = mjolnir::dot_product(R, S) * mjolnir::rsqrt(
-            mjolnir::length_sq(R) * mjolnir::length_sq(S));
+    const auto cos_RS = mjolnir::math::dot_product(R, S) * mjolnir::math::rsqrt(
+            mjolnir::math::length_sq(R) * mjolnir::math::length_sq(S));
 
     const auto cos_phi = (-1e0 <= cos_RS && cos_RS <= 1e0)
                          ? cos_RS : std::copysign(1.0, cos_RS);
 
-    return std::copysign(std::acos(cos_phi), dot_product(r_ij, n));
+    return std::copysign(std::acos(cos_phi), mjolnir::math::dot_product(r_ij, n));
 }
 
 } // jarngreipr
