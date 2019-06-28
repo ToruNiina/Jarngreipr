@@ -79,7 +79,7 @@ class PDBReader
         atm.atom_id      = read_number<std::int32_t>(line, 6, 5, msg, ln);
         atm.atom_name    = get_substr (line, 12, 4, msg, ln);
         atm.altloc       = get_char_at(line, 16,    msg, ln);
-        atm.residue_name = get_substr (line, 17, 3);
+        atm.residue_name = get_substr (line, 17, 3, msg, ln);
         atm.chain_id     = get_char_at(line, 21,    msg, ln);
         atm.residue_id   = read_number<std::int32_t>(line, 22, 4, msg, ln);
         atm.icode        = get_char_at(line, 26,    msg, ln);
