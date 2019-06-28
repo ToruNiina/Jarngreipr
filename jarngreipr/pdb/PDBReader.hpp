@@ -69,7 +69,7 @@ class PDBReader
         if(get_substr(line, 0, 6, msg, ln) != "ATOM  ")
         {
             write_error(std::cerr, "[internal erorr] PDBReader: non ATOM line");
-            write_underline(std::cerr, line, 0, 6, '^', ln);
+            write_underline(std::cerr, line, 0, 6, ln);
             std::exit(EXIT_FAILURE);
         }
 
