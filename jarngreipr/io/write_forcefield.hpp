@@ -19,11 +19,11 @@ std::basic_ostream<charT, traits>&
 write_local_forcefield(std::basic_ostream<charT, traits>& os,
                        const toml::basic_value<Comment, Map, Array>& ff)
 {
-    if(!ff.comment().empty())
+    if(!ff.comments().empty())
     {
         // TODO later (toml11-v3.0.0), this can be refactored into
-        //      `os << local.comment();`
-        for(const auto& c : ff.comment())
+        //      `os << local.comments();`
+        for(const auto& c : ff.comments())
         {
             os << '#' << c << '\n';
         }
@@ -33,16 +33,16 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     // ========================================================================
     // output miscellaneous stuff in the predefined order
 
-    assert(toml::find(ff, "interaction").comment().empty());
+    assert(toml::find(ff, "interaction").comments().empty());
     os << "interaction = " << toml::find(ff, "interaction") << '\n';
     if(ff.as_table().count("potential") == 1)
     {
-        assert(toml::find(ff, "potential").comment().empty());
+        assert(toml::find(ff, "potential").comments().empty());
         os << "potential   = " << toml::find(ff, "potential") << '\n';
     }
     if(ff.as_table().count("topology") == 1)
     {
-        assert(toml::find(ff, "topology").comment().empty());
+        assert(toml::find(ff, "topology").comments().empty());
         os << "topology    = " << toml::find(ff, "topology") << '\n';
     }
 
@@ -50,9 +50,10 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     {
         for(const auto& kv : toml::find(ff, "env").as_table())
         {
-            assert(kv.second.comment().empty());
+            assert(kv.second.comments().empty());
             // TODO later (toml11 v3.0.0), use toml::format_key(kv.first) here
-            os << "env." << kv.first << " = " << kv.second << '\n';
+            os << "env." << kv.first << " = " << std::setw(160)
+               << kv.second << '\n';
         }
     }
 
@@ -66,8 +67,8 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
             // these keys has special meaning, so output in a different way
             continue;
         }
-        assert(kv.second.comment().empty());
-        os << key << " = " << kv.second;
+        assert(kv.second.comments().empty());
+        os << key << " = " << kv.second << '\n';
     }
 
     // ========================================================================
@@ -92,7 +93,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     // collect and sort keys in a table it to output them in a fixed order
 
     std::vector<std::string> keys;
-    for(const auto& kv : toml::find(ff, "parameters").as_array().front())
+    for(const auto& kv : toml::find(ff, "parameters").as_array().front().as_table())
     {
         if(kv.first != "indices") {keys.push_back(kv.first);}
     }
@@ -102,11 +103,11 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     for(const auto& p : toml::find(ff, "parameters").as_array())
     {
         // write comment if exists
-        if(!p.comment().empty())
+        if(!p.comments().empty())
         {
             // TODO later (toml11-v3.0.0), this can be refactored into
-            //      `os << local.comment();`
-            for(const auto& c : p.comment())
+            //      `os << local.comments();`
+            for(const auto& c : p.comments())
             {
                 os << '#' << c << '\n';
             }
@@ -127,7 +128,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         // write other keys in the fixed order
         for(const auto& key : keys)
         {
-            assert(toml::find(p, key).comment().empty());
+            assert(toml::find(p, key).comments().empty());
             os << ", " << key << " = " << toml::find(p, key);
         }
         os << "},\n";
@@ -142,9 +143,9 @@ std::basic_ostream<charT, traits>&
 write_global_forcefield(std::basic_ostream<charT, traits>& os,
                         const toml::basic_value<Comment, Map, Array>& ff)
 {
-    if(!ff.comment().empty())
+    if(!ff.comments().empty())
     {
-        for(const auto& c : ff.comment())
+        for(const auto& c : ff.comments())
         {
             os << '#' << c << '\n';
         }
@@ -154,22 +155,24 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     // ========================================================================
     // output interaction, potential, ignore, spatial_partition, and env first
 
-    assert(toml::find(ff, "interaction").comment().empty());
+    assert(toml::find(ff, "interaction").comments().empty());
     os << "interaction = " << toml::find(ff, "interaction") << '\n';
 
-    assert(toml::find(ff, "potential").comment().empty());
+    assert(toml::find(ff, "potential").comments().empty());
     os << "potential   = " << toml::find(ff, "potential") << '\n';
 
-    for(const auto& kv : toml::find(ff, "ignore").as_table())
+    os << "ignore.molecule = " << toml::find(ff, "ignore", "molecule") << '\n';
+
+    for(const auto& kv : toml::find(ff, "ignore", "particles_within").as_table())
     {
-        assert(kv.second.comment().empty());
+        assert(kv.second.comments().empty());
         // TODO toml::format_key(kv.first)
-        os << "ignore." << kv.first << " = " << kv.second << '\n';
+        os << "ignore.particles_within." << kv.first << " = " << kv.second << '\n';
     }
 
     for(const auto& kv : toml::find(ff, "spatial_partition").as_table())
     {
-        assert(kv.second.comment().empty());
+        assert(kv.second.comments().empty());
         // TODO toml::format_key(kv.first)
         os << "spatial_partition." << kv.first << " = " << kv.second << '\n';
     }
@@ -178,9 +181,10 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     {
         for(const auto& kv : toml::find(ff, "env").as_table())
         {
-            assert(kv.second.comment().empty());
+            assert(kv.second.comments().empty());
             // TODO toml::format_key(kv.first)
-            os << "env." << kv.first << " = " << kv.second << '\n';
+            os << "env." << kv.first << " = " << std::setw(160)
+               << kv.second << '\n';
         }
     }
 
@@ -195,9 +199,9 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
             // these keys has special meaning, so output in a different way
             continue;
         }
-        assert(kv.second.comment().empty());
+        assert(kv.second.comments().empty());
         // TODO toml::format_key(kv.first)
-        os << key << " = " << kv.second;
+        os << key << " = " << kv.second << '\n';
     }
 
     // ========================================================================
@@ -221,9 +225,9 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     // collect and sort keys in a table it to output them in a fixed order
 
     std::vector<std::string> keys;
-    for(const auto& kv : toml::find(ff, "parameters").as_array().front())
+    for(const auto& kv : toml::find(ff, "parameters").as_array().front().as_table())
     {
-        if(kv.first != "indices") {keys.push_back(kv.first);}
+        if(kv.first != "index") {keys.push_back(kv.first);}
     }
     std::sort(keys.begin(), keys.end());
 
