@@ -1,4 +1,4 @@
-#include <jarngreipr/forcefield/ClementiGo.hpp>
+// #include <jarngreipr/forcefield/ClementiGo.hpp>
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
 #include <jarngreipr/io/write_forcefield.hpp>
@@ -32,66 +32,73 @@ int main(int argc, char **argv)
     std::vector<CGChain<double>> ca;
     ca.push_back(model_generator.generate(chain, 0));
 
-    // ========================================================================
-
-    const toml::Table params = toml::parse("parameter/parameters.toml");
-
-    toml::Table sys;
-    const double kB = 1.986231313e-3;
-    const double T  = 300.0;
-    sys["attributes"] = toml::value({{"temperature", T}});
-    sys["boundary"]   = toml::Table();
-    toml::Array ps;
-
-    std::mt19937 mt(123456789);
-    const auto& mass = params.at("mass").cast<toml::value_t::Table>();
-    for(const auto& chain : ca)
-    {
-        for(const auto& bead : chain)
-        {
-            const double m = toml::get<double>(mass.at(bead->name()));
-            const mjolnir::Vector<double, 3> p = bead->position();
-            std::normal_distribution<double> distro(0., std::sqrt(kB * T / m));
-            const mjolnir::Vector<double, 3> v(distro(mt), distro(mt), distro(mt));
-            toml::Table tab;
-            tab["mass"] = m;
-            tab["position"] = toml::Array{p[0], p[1], p[2]};
-            tab["velocity"] = toml::Array{v[0], v[1], v[2]};
-            ps.push_back(tab);
-        }
-    }
-    sys["particles"] = std::move(ps);
-    write_system(std::cout, sys);
+    const auto params = toml::parse("parameter/parameters.toml");
 
     // ========================================================================
 
     std::random_device rng;
     std::cout << "[simulator]\n";
-    std::cout << "type       = \"Molecular Dynamics\"\n";
-    std::cout << "scheme     = \"Underdamped Langevin\"\n";
-    std::cout << "seed       = " << rng() << '\n';
-    std::cout << "delta_t    = " << 0.1 << '\n';
-    std::cout << "total_step = " << 100000 << '\n';
-    std::cout << "save_step  = " << 100 << '\n';
-    std::cout << "parameters = [\n";
+    std::cout << "type          = \"MolecularDynamics\"\n";
+    std::cout << "boundary_type = \"Unlimited\"\n";
+    std::cout << "precision     = \"double\"\n";
+    std::cout << "delta_t       = 0.1\n";
+    std::cout << "total_step    = 1000_000\n";
+    std::cout << "save_step     =    1_000\n";
+    std::cout << "integrator.type       = \"BAOABLangevin\"\n";
+    std::cout << "integrator.seed       = " << rng() << '\n';
+    std::cout << "integrator.parameters = [\n";
     for(const auto& chain : ca)
     {
         for(std::size_t i=0; i<chain.size(); ++i)
         {
-            std::cout << "{index = " << std::setw(std::to_string(chain.size()).length())
+            std::cout << "{index = "
+                      << std::setw(std::to_string(chain.size()).length())
                       << i << ", gamma = " << 168.7 * 0.005 << "},\n";
         }
     }
     std::cout << "]\n";
 
     // ========================================================================
+    {
+        const double kBT = 300.0 * 1.986231313e-3;
+        toml::table sys{
+            {"attributes", toml::table{{"temperature", 300.0}}},
+            {"boundary_shape", toml::table{}}
+        };
+        std::mt19937 mt(123456789);
+        const auto& mass = toml::find(params, "mass");
 
-    const toml::Table aicg2p_params = toml::parse("parameter/AICG2+.toml");
-    const toml::Table exv_params    = toml::parse("parameter/ExcludedVolume.toml");
+        toml::array ps;
+        for(const auto& chain : ca)
+        {
+            for(const auto& bead : chain)
+            {
+                const auto m = toml::find<double>(mass, bead->name());
+                std::normal_distribution<double>
+                    maxwell_boltzmann(0.0, std::sqrt(kBT / m));
 
-    toml::Table ff;
+                const auto& p = bead->position();
+                const std::array<double, 3> v{
+                    {maxwell_boltzmann(mt), maxwell_boltzmann(mt), maxwell_boltzmann(mt)}
+                };
+                toml::table tab {
+                    {"mass", m},
+                    {"position", toml::value{p[0], p[1], p[2]}},
+                    {"velocity", toml::value{v[0], v[1], v[2]}},
+                };
+                ps.push_back(std::move(tab));
+            }
+        }
+        sys["particles"] = std::move(ps);
+        write_system(std::cout, toml::value(sys));
+    }
+    // ========================================================================
 
-    std::vector<std::size_t> flex{/* flexible region*/};
+    const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
+    const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
+
+    const std::vector<std::size_t> flex{/* flexible region*/};
+    toml::basic_value<toml::preserve_comments> ff;
 
     AICG2Plus<double> aicg(aicg2p_params, flex);
     aicg.generate(ff, ca);
