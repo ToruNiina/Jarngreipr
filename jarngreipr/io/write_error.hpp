@@ -75,7 +75,7 @@ inline void write_underline(std::ostream& os, const std::string& line,
     const auto line_num_width = line_num_str.size();
 
     os << line_num_str << " | " << line << '\n';
-    for(std::size_t i=0; i<wid;    ++i){os << ' ';}
+    for(std::size_t i=0; i<line_num_width; ++i){os << ' ';}
     os << " | ";
     for(std::size_t i=0; i<begin;  ++i){os << ' ';}
     os << mjolnir::io::red;

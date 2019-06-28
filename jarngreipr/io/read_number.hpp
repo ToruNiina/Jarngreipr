@@ -54,31 +54,31 @@ read_number_impl(const std::string& s)
 // ----------------------------------------------------------------------------
 // integers supported by standard library
 template<typename T>
-typename std::enable_if<std::is_same<T, int>, T>::type
+typename std::enable_if<std::is_same<T, int>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return std::stoi(s);
 }
 template<typename T>
-typename std::enable_if<std::is_same<T, long>, T>::type
+typename std::enable_if<std::is_same<T, long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return std::stol(s);
 }
 template<typename T>
-typename std::enable_if<std::is_same<T, long long>, T>::type
+typename std::enable_if<std::is_same<T, long long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return std::stoll(s);
 }
 template<typename T>
-typename std::enable_if<std::is_same<T, unsigned long>, T>::type
+typename std::enable_if<std::is_same<T, unsigned long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return std::stoul(s);
 }
 template<typename T>
-typename std::enable_if<std::is_same<T, unsigned long long>, T>::type
+typename std::enable_if<std::is_same<T, unsigned long long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return std::stoull(s);
@@ -111,7 +111,7 @@ T read_number(const std::string& str,
     try
     {
         return detail::read_number_impl<T>(
-                get_substr(str, begin, len, error_message, line_number));
+                get_substr(str, begin, len, error_prefix, line_number));
     }
     catch(const std::invalid_argument& err)
     {
