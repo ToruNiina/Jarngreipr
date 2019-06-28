@@ -39,7 +39,7 @@ class CarbonAlpha final : public Bead<realT>
                             "no c-alpha atom in this residue.");
                 for(const auto atm : this->atoms_)
                 {
-                    write_underline(std::cerr, to_string(atm), 22, 4, '^');
+                    write_underline(std::cerr, to_string(atm), 22, 4);
                 }
                 std::exit(EXIT_FAILURE);
             }
@@ -51,7 +51,7 @@ class CarbonAlpha final : public Bead<realT>
                 {
                     if(atm.residue_name == std::string(" CA "))
                     {
-                        write_underline(std::cerr, to_string(atm), 22, 4, '^');
+                        write_underline(std::cerr, to_string(atm), 22, 4);
                     }
                 }
                 std::exit(EXIT_FAILURE);
@@ -67,7 +67,7 @@ class CarbonAlpha final : public Bead<realT>
     CarbonAlpha& operator=(const CarbonAlpha&) = default;
     CarbonAlpha& operator=(CarbonAlpha&&)      = default;
 
-    std::string attribute(const std::string& n) const override {return "";}
+    std::string attribute(const std::string&) const override {return "";}
     std::string kind() const override {return "CarbonAlpha";}
 
     coordinate_type position() const override {return this->position_;}
