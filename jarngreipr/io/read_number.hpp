@@ -87,14 +87,18 @@ read_number_impl(const std::string& s)
 // other integers (require conversion) ...
 template<typename T>
 typename std::enable_if<
-    std::is_signed<T>::value && std::is_integral<T>::value, T>::type
+    std::is_signed<T>::value     && std::is_integral<T>::value    &&
+    !std::is_same<T, int>::value && !std::is_same<T, long>::value &&
+    !std::is_same<T, long long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return static_cast<T>(std::stoll(s));
 }
 template<typename T>
 typename std::enable_if<
-    std::is_unsigned<T>::value && std::is_integral<T>::value, T>::type
+    std::is_unsigned<T>::value             && std::is_integral<T>::value &&
+    !std::is_same<T, unsigned long>::value &&
+    !std::is_same<T, unsigned long long>::value, T>::type
 read_number_impl(const std::string& s)
 {
     return static_cast<T>(std::stoull(s));
