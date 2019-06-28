@@ -18,7 +18,7 @@ class Bead
   public:
 
     Bead(std::size_t index, container_type atoms, std::string name)
-        : index_(index), atoms_(std::move(atoms)), name_(std::move(name))
+        : index_(index), name_(std::move(name)), atoms_(std::move(atoms))
     {}
     virtual ~Bead() = default;
 
