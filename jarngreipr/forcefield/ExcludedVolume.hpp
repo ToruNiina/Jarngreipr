@@ -1,7 +1,6 @@
 #ifndef JARNGREIPR_FORCEFIELD_EXCLUDED_VOLUME
 #define JARNGREIPR_FORCEFIELD_EXCLUDED_VOLUME
 #include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
-#include <mjolnir/util/get_toml_value.hpp>
 #include <extlib/toml/toml.hpp>
 
 namespace jarngreipr
@@ -11,85 +10,108 @@ template<typename realT>
 class ExcludedVolume final : public ForceFieldGenerator<realT>
 {
   public:
-    typedef ForceFieldGenerator<realT> base_type;
-    typedef typename base_type::real_type  real_type;
-    typedef typename base_type::bead_type  bead_type;
-    typedef typename base_type::chain_type chain_type;
+    using base_type = ForceFieldGenerator<realT>;
+    using real_type  = typename base_type::real_type;
+    using bead_type  = typename base_type::bead_type;
+    using chain_type = typename base_type::chain_type;
 
   public:
 
-    ExcludedVolume(const toml::Table& para) : parameters_(para){}
+    template<typename Comment, template<typename...> class Map,
+             template<typename...> class Array>
+    explicit ExcludedVolume(const toml::basic_value<Comment, Map, Array>& para)
+        : epsilon_(toml::find<decltype(epsilon_)>(para, "epsilon")),
+          radii_  (toml::find<decltype(radii_)  >(para, "radii"))
+    {}
     ~ExcludedVolume() override = default;
 
-    void generate(toml::Table& out,
-        const std::vector<chain_type>& chains
-        ) const override;
+    toml::basic_value<toml::preserve_comments>&
+    generate(toml::basic_value<toml::preserve_comments>& out,
+             const std::vector<chain_type>& chains) const override;
 
-    void generate(toml::Table& out,
-        const std::vector<chain_type>& lhs, const std::vector<chain_type>& rhs
-        ) const override
-    {
-        std::cerr << "WARNING: inter-chain(does not include intra-chain) "
-                  << "ExcludedVolume is not suppored yet." << std::endl;
-        return;
-    }
+    toml::basic_value<toml::preserve_comments>&
+    generate(toml::basic_value<toml::preserve_comments>& out,
+             const std::vector<chain_type>& lhs,
+             const std::vector<chain_type>& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override
-    {return true;}
+    {
+        return true;
+    }
 
   private:
 
-    toml::Table parameters_;
+    real_type epsilon_;
+    std::map<std::string, real_type> radii_;
 };
 
 template<typename realT>
-void ExcludedVolume<realT>::generate(toml::Table& ff,
-        const std::vector<chain_type>& chains) const
+toml::basic_value<toml::preserve_comments>&
+ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+                                const std::vector<chain_type>& chains) const
 {
-    if(ff.count("global") == 0)
+    using value_type = toml::basic_value<toml::preserve_comments>;
+    using array_type = value_type::array_type;
+    using table_type = value_type::table_type;
+
+    if(ff_.is_uninitialized())
     {
-        ff["global"] = toml::Array();
+        ff_ = table_type{};
     }
 
-    toml::Table exv;
-    exv["interaction"] = toml::String("Pair");
-    exv["potential"]   = toml::String("ExcludedVolume");
+    table_type& ff = ff_.as_table();
+    if(ff.count("global") == 0)
+    {
+        ff["global"] = array_type{};
+    }
 
-    toml::Table particles_within;
-    particles_within["bond"]    = 3;
-    particles_within["contact"] = 1;
-    toml::Table ignore;
-    ignore["molecule"] = toml::String("Nothing");
-    ignore["particles_within"] = particles_within;
-    exv["ignore"] = ignore;
+    // TODO to support inter- and intra-group interaction, the argument
+    //      std::vector<chain_type> should be changed to a group class later.
 
-    toml::Table partition;
-    partition["type"]   = toml::String("CellList");
-    partition["margin"] = 0.5;
-    exv["spatial_partition"] = partition;
+    table_type exv{
+        {"interaction", "Pair"          },
+        {"potential"  , "ExcludedVolume"},
+        {"ignore", table_type{
+                {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
+                {"molecule", "Nothing"} // TODO ignore inter-group interaction
+            }
+        },
+        {"spatial_partition", table_type{
+                {"type", "CellList"}, {"margin", 0.5}
+            }
+        },
+        {"epsilon", this->epsilon_}
+    };
 
-    const toml::Table& radii = mjolnir::toml_value_at(
-            this->parameters_, "radii", "jarngreipr::ExcludedVolume"
-            ).template cast<toml::value_t::Table>();
-
-    toml::Array params;
+    array_type params;
     for(const auto& chain : chains)
     {
         for(const auto& bead : chain)
         {
-            toml::Table para;
-            para["index"] = bead->index();
-            para["radius"] = toml::get<toml::Float>(mjolnir::toml_value_at(
-                radii, bead->name(), "jarngreipr::ExcludedVolume"));
-            params.push_back(para);
+            table_type para;
+            para["index"]  = bead->index();
+            para["radius"] = this->radii_.at(bead->name());
+            params.push_back(std::move(para));
         }
     }
-    exv["parameters"] = toml::value(std::move(params));
-    exv["epsilon"]    = toml::get<toml::Float>(mjolnir::toml_value_at(
-                this->parameters_, "epsilon", "jarngreipr::ExcludedVolume"));
+    exv["parameters"] = std::move(params);
 
-    ff["global"].template cast<toml::value_t::Array>().push_back(exv);
-    return;
+    ff.at("global").as_array().push_back(std::move(exv));
+    return ff_;
+}
+
+template<typename realT>
+toml::basic_value<toml::preserve_comments>&
+ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+                                const std::vector<chain_type>& lhs,
+                                const std::vector<chain_type>& rhs) const
+{
+    std::cerr
+        << '[' << mjolnir::io::red << "error" << mjolnir::io::nocolor
+        << "] only inter-group excluded volume is currently not supported. "
+           "see https://github.com/Mjolnir-MD/Mjolnir/issues/128"
+        << std::endl;
+    return ff_;
 }
 
 } // jarngreipr
