@@ -29,14 +29,14 @@ void write_error_impl(std::basic_ostream<charT, traits>& os, T&& v, Ts&& ... arg
 
 // to make the error message format uniform.
 template<typename ... Ts>
-void write_error(std::ostream& os, Ts&& ... args)
+std::ostream& write_error(std::ostream& os, Ts&& ... args)
 {
     static_assert(sizeof...(Ts) > 0, "write_error requires at least one value");
 
     os << mjolnir::io::red << "error: " << mjolnir::io::nocolor;
     detail::write_error_impl(os, std::forward<Ts>(args)...);
     os << '\n';
-    return;
+    return os;
 }
 
 // a wrapper struct that prevents (implicit) conversion from ints to line_number
@@ -69,7 +69,7 @@ write_underline(std::ostream& os, const std::string& line,
         for(std::size_t i=0; i<length; ++i){os << c;}
         os << mjolnir::io::nocolor;
         os << '\n';
-        return ;
+        return os;
     }
 
     const auto line_num_str   = std::to_string(line_number.value);
@@ -83,7 +83,7 @@ write_underline(std::ostream& os, const std::string& line,
     for(std::size_t i=0; i<length; ++i){os << c;}
     os << mjolnir::io::nocolor;
     os << '\n';
-    return;
+    return os;
 }
 
 } // jarngreipr
