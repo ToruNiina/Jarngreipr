@@ -85,6 +85,8 @@ int main(int argc, char **argv)
                     {"mass", m},
                     {"position", toml::value{p[0], p[1], p[2]}},
                     {"velocity", toml::value{v[0], v[1], v[2]}},
+                    {"name",     "CA"},
+                    {"group",    "none"}
                 };
                 ps.push_back(std::move(tab));
             }
