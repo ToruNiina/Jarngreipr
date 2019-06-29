@@ -25,6 +25,7 @@ boundary_shape           = {}    # unlimited boundary
 
 # path/to/directory/that/contains/pdb/files
 path.pdb      = "./data/pdb/"
+
 # <group-name> = <tableof: pdb file and model name>
 # The same group-name would be used in `[[forcefields]]` table.
 # you can use `[A-Za-z0-9_]+`. Note that `-` is considered as a name-separator.
@@ -40,12 +41,13 @@ DNA.chain     = "A-B"
 parameters    = "./parameter/parameters.toml"
 
 [forcefields.local]
-protein = ["ClementiGo"]
+protein = ["AICG2+"]
 
 [forcefields.global]
-protein     = ["GoContact", "ExcludedVolume"]
-DNA         = ["3SPN2",     "Electrostatic"]
+protein     = ["GoContact", "Electrostatic", "ExcludedVolume"]
+DNA         = ["3SPN2"]
 protein-DNA = [
     {name = "GoContact", k = 0.1},
-    "Electrostatic"
+    "Electrostatic",
+    "ExcludedVolume"
 ]
