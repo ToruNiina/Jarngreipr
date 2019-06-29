@@ -104,7 +104,7 @@ class NinfoReader
             write_error(std::cerr, "while reading ninfo ", ninfoT::prefix,
                         " block in ", this->filename_,
                         " some of the column has invalid format");
-            write_underline(std::cerr, iss.str(), 0, iss.str().size(), '^',
+            write_underline(std::cerr, iss.str(), 0, iss.str().size(),
                             at_line(this->line_num_));
             std::exit(EXIT_FAILURE);
         }
