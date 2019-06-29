@@ -1,6 +1,7 @@
 #ifndef JARNGREIPR_WRITE_SYSTEM_HPP
 #define JARNGREIPR_WRITE_SYSTEM_HPP
 #include <extlib/toml/toml.hpp>
+#include <jarngreipr/io/write_number.hpp>
 #include <iomanip>
 
 namespace jarngreipr
@@ -55,19 +56,13 @@ write_system(std::basic_ostream<charT, traits>& os,
         const auto m = toml::find<double>(particle, "mass");
         const auto p = toml::find<std::array<double, 3>>(particle, "position");
         const auto v = toml::find<std::array<double, 3>>(particle, "velocity");
-        const auto n = toml::find_or<std::string>(particle, "name",  "CA");
-        const auto g = toml::find_or<std::string>(particle, "group", "none");
+        const auto n = toml::find(particle, "name");
+        const auto g = toml::find(particle, "group");
 
-        os << "{m=" << std::setw(7) << std::fixed << std::right << m;
-        os << ",pos=["
-           << std::setw(9) << std::fixed << std::right << p[0] << ','
-           << std::setw(9) << std::fixed << std::right << p[1] << ','
-           << std::setw(9) << std::fixed << std::right << p[2];
-        os << "],vel=["
-           << std::setw(9) << std::fixed << std::right << v[0] << ','
-           << std::setw(9) << std::fixed << std::right << v[1] << ','
-           << std::setw(9) << std::fixed << std::right << v[2];
-        os << "], name = \"" << n << "\", group = \"" << g << "\"},\n";
+        os << "{m = "   << format_number("%8.3f", m);
+        os << ", pos = " << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
+        os << ", vel = " << format_number("[%9.4f,%9.4f,%9.4f]", v[0], v[1], v[2]);
+        os << ", name = " << n << ", group = " << g << "},\n";
     }
     os << "]\n";
     return os;

@@ -1,7 +1,8 @@
 #ifndef JARNGREIPR_WRITE_FORCEFIELD_HPP
 #define JARNGREIPR_WRITE_FORCEFIELD_HPP
-#include <extlib/toml/toml.hpp>
+#include <jarngreipr/io/toml_serializer.hpp>
 #include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/write_number.hpp>
 #include <algorithm>
 #include <ostream>
 
@@ -19,6 +20,7 @@ std::basic_ostream<charT, traits>&
 write_local_forcefield(std::basic_ostream<charT, traits>& os,
                        const toml::basic_value<Comment, Map, Array>& ff)
 {
+    using value_type = toml::basic_value<Comment, Map, Array>;
     if(!ff.comments().empty())
     {
         // TODO later (toml11-v3.0.0), this can be refactored into
@@ -51,9 +53,11 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         for(const auto& kv : toml::find(ff, "env").as_table())
         {
             assert(kv.second.comments().empty());
+            inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
+
             // TODO later (toml11 v3.0.0), use toml::format_key(kv.first) here
-            os << "env." << kv.first << " = " << std::setw(160)
-               << kv.second << '\n';
+            os << "env." << kv.first << " = "
+               << toml::visit(serializer, kv.second) << '\n';
         }
     }
 
@@ -68,7 +72,8 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
             continue;
         }
         assert(kv.second.comments().empty());
-        os << key << " = " << kv.second << '\n';
+        inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
+        os << key << " = " << toml::visit(serializer, kv.second) << '\n';
     }
 
     // ========================================================================
@@ -129,7 +134,8 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         for(const auto& key : keys)
         {
             assert(toml::find(p, key).comments().empty());
-            os << ", " << key << " = " << toml::find(p, key);
+            inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
+            os << ", " << key << " = " << toml::visit(serializer, toml::find(p, key));
         }
         os << "},\n";
     }
@@ -143,6 +149,7 @@ std::basic_ostream<charT, traits>&
 write_global_forcefield(std::basic_ostream<charT, traits>& os,
                         const toml::basic_value<Comment, Map, Array>& ff)
 {
+    using value_type = toml::basic_value<Comment, Map, Array>;
     if(!ff.comments().empty())
     {
         for(const auto& c : ff.comments())
@@ -182,9 +189,10 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
         for(const auto& kv : toml::find(ff, "env").as_table())
         {
             assert(kv.second.comments().empty());
+            inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
             // TODO toml::format_key(kv.first)
             os << "env." << kv.first << " = " << std::setw(160)
-               << kv.second << '\n';
+               << toml::visit(serializer, kv.second) << '\n';
         }
     }
 
@@ -201,7 +209,8 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
         }
         assert(kv.second.comments().empty());
         // TODO toml::format_key(kv.first)
-        os << key << " = " << kv.second << '\n';
+        inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
+        os << key << " = " << toml::visit(serializer, kv.second) << '\n';
     }
 
     // ========================================================================
@@ -243,7 +252,8 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
         for(const auto& key : keys)
         {
             assert(toml::find(p, key).comments().empty());
-            os << ", " << key << " = " << toml::find(p, key);
+            inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
+            os << ", " << key << " = " << toml::visit(serializer, toml::find(p, key));
         }
         os << "},\n";
     }
