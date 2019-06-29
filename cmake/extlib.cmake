@@ -41,3 +41,8 @@ if(NOT EXISTS "${JARNGREIPR_EXTLIB_DIR}/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
+
+if(NOT EXISTS "${JARNGREIPR_EXTLIB_DIR}/Mjolnir/README.md")
+    execute_process(COMMAND git submodule update --init --recursive
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif()
