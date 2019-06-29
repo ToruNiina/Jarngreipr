@@ -50,7 +50,8 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
 
     if(ff.as_table().count("env") == 1)
     {
-        for(const auto& kv : toml::find(ff, "env").as_table())
+        // to sort the values, convert it into std::map.
+        for(auto&& kv : toml::find<std::map<std::string, value_type>>(ff, "env"))
         {
             assert(kv.second.comments().empty());
             inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
@@ -186,7 +187,8 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
 
     if(ff.as_table().count("env") == 1)
     {
-        for(const auto& kv : toml::find(ff, "env").as_table())
+        // to sort the values, convert it into std::map.
+        for(const auto& kv : toml::find<std::map<std::string, value_type>>(ff, "env"))
         {
             assert(kv.second.comments().empty());
             inline_formatted_serializer<value_type> serializer("%d", "%9.4f");
