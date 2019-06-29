@@ -54,7 +54,8 @@ struct at_line
     std::size_t value;
 };
 
-inline void write_underline(std::ostream& os, const std::string& line,
+inline std::ostream&
+write_underline(std::ostream& os, const std::string& line,
         const std::size_t begin, const std::size_t length,
         const at_line line_number = at_line{0},
         const char c = '^')
