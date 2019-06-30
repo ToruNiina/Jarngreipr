@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_FORCEFIELD_GENERATOR
 #define JARNGREIPR_FORCEFIELD_GENERATOR
-#include <jarngreipr/model/Bead.hpp>
+#include <jarngreipr/model/CGBead.hpp>
 #include <jarngreipr/model/CGChain.hpp>
 #include <extlib/toml/toml.hpp>
 #include <memory>
@@ -13,7 +13,7 @@ class ForceFieldGenerator
 {
   public:
     using real_type  = realT;
-    using bead_type  = Bead<real_type>;
+    using bead_type  = CGBead<real_type>;
     using chain_type = CGChain<real_type>;
     using atom_type  = typename bead_type::atom_type;
 

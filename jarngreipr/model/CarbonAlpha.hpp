@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
-#include <jarngreipr/model/Bead.hpp>
+#include <jarngreipr/model/CGBead.hpp>
 #include <jarngreipr/model/CGModelGenerator.hpp>
 #include <jarngreipr/io/write_error.hpp>
 #include <algorithm>
@@ -13,10 +13,10 @@ namespace jarngreipr
 
 /*! @brief carbon alpha 1 beads per amino acid model */
 template<typename realT>
-class CarbonAlpha final : public Bead<realT>
+class CarbonAlpha final : public CGBead<realT>
 {
   public:
-    typedef Bead<realT> base_type;
+    typedef CGBead<realT> base_type;
     typedef typename base_type::real_type       real_type;
     typedef typename base_type::coordinate_type coordinate_type;
     typedef typename base_type::atom_type       atom_type;

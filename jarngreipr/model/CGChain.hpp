@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_MODEL_CG_CHAIN_H
 #define JARNGREIPR_MODEL_CG_CHAIN_H
-#include <jarngreipr/model/Bead.hpp>
+#include <jarngreipr/model/CGBead.hpp>
 #include <vector>
 #include <memory>
 
@@ -12,7 +12,7 @@ class CGChain
 {
   public:
     typedef realT real_type;
-    typedef Bead<real_type> bead_type;
+    typedef CGBead<real_type> bead_type;
     typedef std::shared_ptr<bead_type> bead_ptr;
     typedef std::vector<bead_ptr> container_type;
     typedef typename container_type::iterator iterator;
