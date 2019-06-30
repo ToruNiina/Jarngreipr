@@ -254,6 +254,50 @@ AICG2Plus<realT>::generate(
     {
         ff["local"] = array_type{};
     }
+    array_type& ff_tables = ff.at("local").as_array();
+
+    // It is inefficient to define multiple LocalForceFiled having the same
+    // Interaction-Potential pair. So here, first search a table that defines
+    // the same forcefield and push to it.
+    // If it does not exist, create new one.
+    const auto forcefield_table_comparator =
+        [](const value_type& lhs, const value_type& rhs) noexcept -> bool
+        {
+            // check "interaction", "potential", "topology".
+            try
+            {
+                const auto& lt = lhs.as_table();
+                const auto& rt = rhs.as_table();
+                if(lt.count("interaction"))
+                {
+                    // check string only. it is okay to have a different comment.
+                    if(lt.at("interaction").as_string().str !=
+                       rt.at("interaction").as_string().str)
+                    {
+                        return false;
+                    }
+                }
+                if(lt.count("potential"))
+                {
+                    if(lt.at("potential").as_string().str !=
+                       rt.at("potential").as_string().str)
+                    {
+                        return false;
+                    }
+                }
+                if(lt.count("topology"))
+                {
+                    if(lt.at("topology").as_string().str !=
+                       rt.at("topology").as_string().str)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            catch(...) {return false;}
+        };
+
 
     for(const auto& chain : chains)
     {
@@ -266,18 +310,34 @@ AICG2Plus<realT>::generate(
             return ff_;
         }
 
-        /* bond-length */ {
-            table_type bond_length{
+        // --------------------------------------------------------------------
+        // generate bond length interaction
+        {
+            // make sure that the tablel does have bondlength+harmonic forcefield
+            value_type bond_length(toml::table{
                 {"interaction", "BondLength"},
                 {"potential",   "Harmonic"},
-                {"topology",    "bond"}
-            };
+                {"topology",    "bond"},
+                {"parameters",  array_type{}}
+            });
+            assert(forcefield_table_comparator(bond_length, bond_length));
 
-            array_type params;
-            if(chain.size() > 1)
+            if(ff_tables.end() == std::find_if(ff_tables.begin(), ff_tables.end(),
+                [&](const value_type& tab) -> bool {
+                    return forcefield_table_comparator(bond_length, tab);
+                }))
             {
-                params.reserve(chain.size() - 1);
+                ff_tables.push_back(bond_length);
             }
+
+            // append new parameters to bondlength+harmonic forcefield
+
+            auto& params = std::find_if(ff_tables.begin(), ff_tables.end(),
+                [&](const value_type& tab) -> bool {
+                    return forcefield_table_comparator(bond_length, tab);
+                })->as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
+
             for(std::size_t i=1, sz = chain.size(); i<sz; ++i)
             {
                 const auto& bead1 = chain.at(i-1);
@@ -286,16 +346,18 @@ AICG2Plus<realT>::generate(
                 const auto  i2    = bead2->index();
                 const auto  dist  = distance(bead1->position(), bead2->position());
 
-                table_type para;
-                para["indices"] = array_type{i1, i2};
-                para["v0"     ] = dist;
-                para["k"      ] = this->cbd_aicg2_;
+                value_type para = toml::table{};
+                para.as_table()["indices"] = array_type{i1, i2};
+                para.as_table()["v0"     ] = dist;
+                para.as_table()["k"      ] = this->cbd_aicg2_;
 
+                if(i == 1)
+                {
+                    para.comments().push_back(std::string(
+                            " AICG2+ BondLength for chain ") + chain.name());
+                }
                 params.push_back(std::move(para));
             }
-            bond_length["parameters"] = std::move(params);
-
-            ff.at("local").as_array().push_back(std::move(bond_length));
         }
         /* bond-angle */{
             table_type bond_angle{
