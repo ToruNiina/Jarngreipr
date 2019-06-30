@@ -256,49 +256,6 @@ AICG2Plus<realT>::generate(
     }
     array_type& ff_tables = ff.at("local").as_array();
 
-    // It is inefficient to define multiple LocalForceFiled having the same
-    // Interaction-Potential pair. So here, first search a table that defines
-    // the same forcefield and push to it.
-    // If it does not exist, create new one.
-    const auto forcefield_table_comparator =
-        [](const value_type& lhs, const value_type& rhs) noexcept -> bool
-        {
-            // check "interaction", "potential", "topology".
-            try
-            {
-                const auto& lt = lhs.as_table();
-                const auto& rt = rhs.as_table();
-                if(lt.count("interaction"))
-                {
-                    // check string only. it is okay to have a different comment.
-                    if(lt.at("interaction").as_string().str !=
-                       rt.at("interaction").as_string().str)
-                    {
-                        return false;
-                    }
-                }
-                if(lt.count("potential"))
-                {
-                    if(lt.at("potential").as_string().str !=
-                       rt.at("potential").as_string().str)
-                    {
-                        return false;
-                    }
-                }
-                if(lt.count("topology"))
-                {
-                    if(lt.at("topology").as_string().str !=
-                       rt.at("topology").as_string().str)
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            catch(...) {return false;}
-        };
-
-
     for(const auto& chain : chains)
     {
         if(!this->check_beads_kind(chain))
@@ -313,6 +270,12 @@ AICG2Plus<realT>::generate(
         // --------------------------------------------------------------------
         // generate bond length interaction
         {
+            // It is inefficient to define multiple LocalForceFiled having the
+            // same combination of interaction and potential.
+            // So here, first search a table that defines the same forcefield.
+            // If it exists, push new parameters to the found one. Otherwise,
+            // add a new table and push to it.
+
             // make sure that the tablel does have bondlength+harmonic forcefield
             value_type bond_length(toml::table{
                 {"interaction", "BondLength"},
@@ -320,22 +283,20 @@ AICG2Plus<realT>::generate(
                 {"topology",    "bond"},
                 {"parameters",  array_type{}}
             });
-            assert(forcefield_table_comparator(bond_length, bond_length));
+            const auto table_finder =
+                local_forcefield_table_comparator<value_type>(bond_length);
 
-            if(ff_tables.end() == std::find_if(ff_tables.begin(), ff_tables.end(),
-                [&](const value_type& tab) -> bool {
-                    return forcefield_table_comparator(bond_length, tab);
-                }))
+            if(ff_tables.end() == std::find_if(
+                        ff_tables.begin(), ff_tables.end(), table_finder))
             {
-                ff_tables.push_back(bond_length);
+                ff_tables.push_back(std::move(bond_length));
             }
 
             // append new parameters to bondlength+harmonic forcefield
 
-            auto& params = std::find_if(ff_tables.begin(), ff_tables.end(),
-                [&](const value_type& tab) -> bool {
-                    return forcefield_table_comparator(bond_length, tab);
-                })->as_table().at("parameters").as_array();
+            auto& params = std::find_if(
+                    ff_tables.begin(), ff_tables.end(), table_finder
+                )->as_table().at("parameters").as_array();
             params.reserve(params.size() + chain.size());
 
             for(std::size_t i=1, sz = chain.size(); i<sz; ++i)
