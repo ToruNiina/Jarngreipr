@@ -5,7 +5,6 @@
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
-#include <jarngreipr/model/CGChain.hpp>
 #include <iterator>
 #include <iostream>
 #include <vector>
@@ -21,6 +20,7 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     using real_type  = typename base_type::real_type;
     using bead_type  = typename base_type::bead_type;
     using chain_type = typename base_type::chain_type;
+    using group_type = typename base_type::group_type;
     using bead_ptr   = typename chain_type::bead_ptr;
 
   public:
@@ -40,13 +40,12 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     // generate local parameters, not inter-chain contacts
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& chains) const override;
+             const group_type& chains) const override;
 
     // generate inter-chain contacts.
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& lhs,
-             const std::vector<chain_type>& rhs) const override;
+             const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override;
 
@@ -80,8 +79,9 @@ class ClementiGo final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-                            const std::vector<chain_type>& chains) const
+ClementiGo<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& out,
+        const group_type& chains) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using table_type = typename value_type::table_type;
@@ -227,9 +227,9 @@ ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-                            const std::vector<chain_type>& lhs,
-                            const std::vector<chain_type>& rhs) const
+ClementiGo<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& out,
+        const group_type& lhs, const group_type& rhs) const
 {
     const real_type th2 = contact_threshold_ * contact_threshold_;
 

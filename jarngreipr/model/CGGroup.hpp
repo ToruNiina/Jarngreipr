@@ -21,7 +21,7 @@ class CGGroup
     using chain_type     = CGChain<real_type>;
     using bead_type      = typename chain_type::bead_type;
     using bead_ptr       = typename chain_type::bead_ptr;
-    using container_type = std::vector<bead_ptr>;
+    using container_type = std::vector<chain_type>;
     using iterator       = typename container_type::iterator;
     using const_iterator = typename container_type::const_iterator;
 

@@ -24,8 +24,9 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     using real_type  = typename base_type::real_type;
     using bead_type  = typename base_type::bead_type;
     using chain_type = typename base_type::chain_type;
-    using bead_ptr   = typename chain_type::bead_ptr;
+    using group_type = typename base_type::group_type;
     using atom_type  = typename base_type::atom_type;
+    using bead_ptr   = typename chain_type::bead_ptr;
 
   public:
 
@@ -91,13 +92,12 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     // generate local parameters, not inter-chain contacts
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& chains) const override;
+             const group_type& chains) const override;
 
     // generate inter-chain contacts.
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& lhs,
-             const std::vector<chain_type>& rhs) const override;
+             const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override;
 
@@ -109,19 +109,19 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
                                   this->flexible_beads_.end(), bead_idx);
     }
 
-    bool is_backbone(const PDBAtom<realT>& atom) const
+    bool is_backbone(const atom_type& atom) const
     {
         return (atom.atom_name == " N  " || atom.atom_name == " C  " ||
                 atom.atom_name == " O  " || atom.atom_name == " OXT" ||
                 atom.atom_name == " CA ");
     }
-    bool is_sidechain(const PDBAtom<realT>& atom) const
+    bool is_sidechain(const atom_type& atom) const
     {
         return !is_backbone(atom) &&
             atom.atom_name.at(0) != 'H' && atom.atom_name.at(1) != 'H';
     }
 
-    bool is_donor(const PDBAtom<realT>& atom) const
+    bool is_donor(const atom_type& atom) const
     {
         return (atom.atom_name.at(1) == 'N' ||
                 (atom.residue_name == "SER" && atom.atom_name == " OG ") ||
@@ -129,24 +129,24 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
                 (atom.residue_name == "TYR" && atom.atom_name == " OH ") ||
                 (atom.residue_name == "CYS" && atom.atom_name.at(1) == 'S'));
     }
-    bool is_acceptor(const PDBAtom<realT>& atom) const
+    bool is_acceptor(const atom_type& atom) const
     {
         return (atom.atom_name.at(1) == 'O' || atom.atom_name.at(1) == 'S');
     }
-    bool is_cation(const PDBAtom<realT>& atom) const
+    bool is_cation(const atom_type& atom) const
     {
 	    return ((atom.residue_name == "ARG" && atom.atom_name == " NH1") ||
                 (atom.residue_name == "ARG" && atom.atom_name == " NH2") ||
                 (atom.residue_name == "LYS" && atom.atom_name == " NZ "));
     }
-    bool is_anion(const PDBAtom<realT>& atom) const
+    bool is_anion(const atom_type& atom) const
     {
 		return ((atom.residue_name == "GLU" && atom.atom_name == " OE1") ||
                 (atom.residue_name == "GLU" && atom.atom_name == " OE2") ||
                 (atom.residue_name == "ASP" && atom.atom_name == " OD1") ||
                 (atom.residue_name == "ASP" && atom.atom_name == " OD2"));
     }
-    bool is_carbon(const PDBAtom<realT>& atom) const
+    bool is_carbon(const atom_type& atom) const
     {
         return (atom.atom_name.at(1) == 'C');
     }
@@ -236,8 +236,9 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                           const std::vector<chain_type>& chains) const
+AICG2Plus<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        const group_type& chains) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
@@ -498,9 +499,9 @@ AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>&
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                           const std::vector<chain_type>& lhs,
-                           const std::vector<chain_type>& rhs) const
+AICG2Plus<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        const group_type& lhs, const group_type& rhs) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;

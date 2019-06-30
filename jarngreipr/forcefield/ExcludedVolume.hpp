@@ -14,6 +14,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     using real_type  = typename base_type::real_type;
     using bead_type  = typename base_type::bead_type;
     using chain_type = typename base_type::chain_type;
+    using group_type = typename base_type::group_type;
 
   public:
 
@@ -27,12 +28,11 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& chains) const override;
+             const group_type& chains) const override;
 
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const std::vector<chain_type>& lhs,
-             const std::vector<chain_type>& rhs) const override;
+             const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override
     {
@@ -48,7 +48,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                                const std::vector<chain_type>& chains) const
+                                const group_type& chains) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
@@ -103,8 +103,8 @@ ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                                const std::vector<chain_type>& lhs,
-                                const std::vector<chain_type>& rhs) const
+                                const group_type& lhs,
+                                const group_type& rhs) const
 {
     std::cerr
         << '[' << mjolnir::io::red << "error" << mjolnir::io::nocolor

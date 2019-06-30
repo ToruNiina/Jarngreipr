@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     PDBReader<double> reader(fname);
     const auto chain = reader.read_chain('A');
     CarbonAlphaGenerator<double> model_generator;
-    std::vector<CGChain<double>> ca;
+    CGGroup<double> ca("Chain A");
     ca.push_back(model_generator.generate(chain, 0));
 
     const auto params = toml::parse("parameter/parameters.toml");
