@@ -38,13 +38,13 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     ~ClementiGo() override = default;
 
     // generate local parameters, not inter-chain contacts
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& chains) const override;
 
     // generate inter-chain contacts.
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& lhs,
              const std::vector<chain_type>& rhs) const override;
 
@@ -79,11 +79,11 @@ class ClementiGo final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments>& out,
+toml::basic_value<toml::preserve_comments, std::map>&
+ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& out,
                             const std::vector<chain_type>& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using table_type = typename value_type::table_type;
     using array_type = typename value_type::array_type;
 
@@ -226,8 +226,8 @@ ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments>& out,
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments>& out,
+toml::basic_value<toml::preserve_comments, std::map>&
+ClementiGo<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& out,
                             const std::vector<chain_type>& lhs,
                             const std::vector<chain_type>& rhs) const
 {

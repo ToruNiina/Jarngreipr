@@ -89,13 +89,13 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     ~AICG2Plus() override = default;
 
     // generate local parameters, not inter-chain contacts
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& chains) const override;
 
     // generate inter-chain contacts.
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& lhs,
              const std::vector<chain_type>& rhs) const override;
 
@@ -235,11 +235,11 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+toml::basic_value<toml::preserve_comments, std::map>&
+AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
                            const std::vector<chain_type>& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
@@ -497,12 +497,12 @@ AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+toml::basic_value<toml::preserve_comments, std::map>&
+AICG2Plus<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
                            const std::vector<chain_type>& lhs,
                            const std::vector<chain_type>& rhs) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 

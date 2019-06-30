@@ -4,6 +4,7 @@
 #include <jarngreipr/model/CGChain.hpp>
 #include <extlib/toml/toml.hpp>
 #include <memory>
+#include <map>
 
 namespace jarngreipr
 {
@@ -21,13 +22,13 @@ class ForceFieldGenerator
     virtual ~ForceFieldGenerator() = default;
 
     //!@brief generate forcefield parameter values
-    virtual toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    virtual toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& chains) const = 0;
 
     //!@brief generate inter-chain parameters if it's defined.
-    virtual toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    virtual toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& lhs,
              const std::vector<chain_type>& rhs) const = 0;
 

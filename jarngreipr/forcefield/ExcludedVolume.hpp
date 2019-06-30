@@ -25,12 +25,12 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     {}
     ~ExcludedVolume() override = default;
 
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& chains) const override;
 
-    toml::basic_value<toml::preserve_comments>&
-    generate(toml::basic_value<toml::preserve_comments>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const std::vector<chain_type>& lhs,
              const std::vector<chain_type>& rhs) const override;
 
@@ -46,11 +46,11 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+toml::basic_value<toml::preserve_comments, std::map>&
+ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
                                 const std::vector<chain_type>& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
@@ -101,8 +101,8 @@ ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments>&
-ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments>& ff_,
+toml::basic_value<toml::preserve_comments, std::map>&
+ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
                                 const std::vector<chain_type>& lhs,
                                 const std::vector<chain_type>& rhs) const
 {
