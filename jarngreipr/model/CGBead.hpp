@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_MODEL_BEAD
-#define JARNGREIPR_MODEL_BEAD
+#ifndef JARNGREIPR_MODEL_CGBEAD_HPP
+#define JARNGREIPR_MODEL_CGBEAD_HPP
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <vector>
 
@@ -7,20 +7,20 @@ namespace jarngreipr
 {
 
 template<typename realT>
-class Bead
+class CGBead
 {
   public:
-    typedef realT  real_type;
-    typedef PDBAtom<real_type> atom_type;
-    typedef typename atom_type::coordinate_type coordinate_type;
-    typedef std::vector<atom_type> container_type;
+    using real_type = realT;
+    using atom_type = PDBAtom<real_type>;
+    using coordinate_type = typename atom_type::coordinate_type;
+    using container_type  = std::vector<atom_type>;
 
   public:
 
-    Bead(std::size_t index, container_type atoms, std::string name)
+    CGBead(std::size_t index, container_type atoms, std::string name)
         : index_(index), name_(std::move(name)), atoms_(std::move(atoms))
     {}
-    virtual ~Bead() = default;
+    virtual ~CGBead() = default;
 
     virtual coordinate_type position() const = 0;
     virtual std::string attribute(const std::string& attr_name) const = 0;
@@ -38,4 +38,4 @@ class Bead
 };
 
 }//jarngreipr
-#endif /* JARNGREIPR_BEAD */
+#endif /* JARNGREIPR_MODEL_CGBEAD_HPP */
