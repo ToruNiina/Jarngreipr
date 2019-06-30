@@ -1,6 +1,5 @@
 #ifndef JARNGREIPR_GEOMETRY_DISTANCE
 #define JARNGREIPR_GEOMETRY_DISTANCE
-#include <jarngreipr/model/Bead.hpp>
 #include <mjolnir/math/math.hpp>
 
 namespace jarngreipr
