@@ -11,12 +11,12 @@ template<typename realT>
 class CGChain
 {
   public:
-    typedef realT real_type;
-    typedef CGBead<real_type> bead_type;
-    typedef std::shared_ptr<bead_type> bead_ptr;
-    typedef std::vector<bead_ptr> container_type;
-    typedef typename container_type::iterator iterator;
-    typedef typename container_type::const_iterator const_iterator;
+    using real_type = realT;
+    using bead_type = CGBead<real_type>;
+    using bead_ptr  = std::shared_ptr<bead_type>;
+    using container_type = std::vector<bead_ptr>;
+    using iterator       = typename container_type::iterator;
+    using const_iterator = typename container_type::const_iterator;
 
   public:
 
@@ -28,6 +28,7 @@ class CGChain
     CGChain& operator=(CGChain&&)      = default;
     ~CGChain() = default;
 
+    bool       empty() const noexcept {return beads_.empty();}
     std::size_t size() const noexcept {return beads_.size();}
 
     void push_back(const std::shared_ptr<bead_type>& b)
