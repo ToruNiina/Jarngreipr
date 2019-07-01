@@ -374,6 +374,7 @@ AICG2Plus<realT>::generate(
                         env[y2_prefix + y2.first] = y2.second;
                     }
                 }
+                env["default_x"] = this->angle_x_;
                 flp_angle.as_table()["env"] = std::move(env);
             }
             auto& params = find_or_push_table(ff.at("local"), flp_angle,
@@ -394,6 +395,7 @@ AICG2Plus<realT>::generate(
                 value_type para = table_type{
                     {"indices", value_type{i1, i2, i3}   },
                     {"k"      , this->k_angle_           },
+                    {"x"      , "default_x"              },
                     {"y"      , y1_prefix + bead2->name()},
                     {"d2y"    , y2_prefix + bead2->name()}
                 };
@@ -535,7 +537,7 @@ AICG2Plus<realT>::generate(
                             continue;
                         }
 
-                        const auto nat_dist = 
+                        const auto nat_dist =
                             distance(bead1->position(), bead2->position());
                         const auto contact_coef =
                             calc_contact_coef(bead1, bead2);
