@@ -559,6 +559,81 @@ AICG2Plus<realT>::generate(
             }
         }
     }
+
+    // inter-chain interaction
+    if(2 <= chains.size())
+    {
+        const auto th2 = this->go_contact_threshold_ * this->go_contact_threshold_;
+        auto& params = find_or_push_table(ff.at("local"), value_type{
+            {"interaction", "BondLength"},
+            {"potential",   "GoContact"},
+            {"topology",    "contact"},
+            {"parameters",  array_type{}}
+        }, /* the keys that should be equivalent = */ {
+            "interaction", "potential", "topology"
+        }).as_table().at("parameters").as_array();
+
+        std::vector<std::pair<std::string, std::string>> combinations;
+        combinations.reserve(1 + chains.size() * chains.size() / 2);
+
+        for(const auto& chain1 : chains)
+        {
+            for(const auto& chain2 : chains)
+            {
+                // intra chain. skip
+                if(chain1.name() == chain2.name())
+                {
+                    continue;
+                }
+                // combination already found
+                if(std::find_if(combinations.begin(), combinations.end(),
+                    [&](const std::pair<std::string, std::string>& c){
+                        return (c.first == chain2.name() && c.second == chain1.name()) ||
+                               (c.first == chain1.name() && c.second == chain2.name());
+                    }) != combinations.end())
+                {
+                    continue;
+                }
+                combinations.push_back(std::make_pair(chain1.name(), chain2.name()));
+
+                bool is_first = true;
+                for(const auto& bead1 : chain1)
+                {
+                    for(const auto& bead2 : chain2)
+                    {
+                        if(this->min_distance_sq(bead1, bead2) < th2)
+                        {
+                            const auto i1 = bead1->index();
+                            const auto i2 = bead2->index();
+
+                            // if one of the bead is flexible region, continue.
+                            if(is_in_flexible_region(i1) || is_in_flexible_region(i2))
+                            {
+                                continue;
+                            }
+
+                            value_type para = table_type{
+                                {"indices", value_type{i1, i2}},
+                                {"v0"     , distance(bead1->position(), bead2->position())},
+                                {"k"      , -coef_go_ * this->calc_contact_coef(bead1, bead2)}
+                            };
+                            if(is_first)
+                            {
+                                para.comments().push_back(" AICG2+ Contact "
+                                    "Potential between chain " + chain1.name() +
+                                    " and chain " + chain2.name());
+                                is_first = false;
+                            }
+                            params.push_back(std::move(para));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
     return ff_;
 }
 
