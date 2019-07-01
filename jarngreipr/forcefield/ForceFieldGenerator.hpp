@@ -46,8 +46,8 @@ struct toml_table_comparator
 {
     using value_type = Value; // toml::basic_value<...>
 
-    std::vector<std::string> keys; // keys to compare
     value_type reference;
+    std::vector<std::string> keys; // keys to compare
 
     toml_table_comparator(value_type r, std::vector<std::string> ks)
         : reference(std::move(r)), keys(std::move(ks))

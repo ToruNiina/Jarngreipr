@@ -34,7 +34,7 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const group_type& lhs, const group_type& rhs) const override;
 
-    bool check_beads_kind(const chain_type& chain) const override
+    bool check_beads_kind(const chain_type&) const override
     {
         return true;
     }
@@ -102,9 +102,9 @@ ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                                const group_type& lhs,
-                                const group_type& rhs) const
+ExcludedVolume<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        const group_type&, const group_type&) const
 {
     std::cerr
         << '[' << mjolnir::io::red << "error" << mjolnir::io::nocolor
