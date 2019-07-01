@@ -27,7 +27,6 @@ write_system(std::basic_ostream<charT, traits>& os,
     if(toml::find(sys, "boundary_shape").as_table().empty())
     {
         os << "boundary_shape = {} # unlimited\n";
-        std::cerr << "boundary is unlimited" << std::endl;
     }
     else
     {
@@ -37,7 +36,6 @@ write_system(std::basic_ostream<charT, traits>& os,
             // TODO later (toml11 v3.0.0), use toml::format_key(kv.first) here
             os << "boundary_shape." << kv.first << " = " << kv.second << '\n';
         }
-        std::cerr << "boundary is periodic" << std::endl;
     }
 
     if(sys.as_table().count("attributes") == 1)
