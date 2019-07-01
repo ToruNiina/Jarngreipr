@@ -254,7 +254,6 @@ AICG2Plus<realT>::generate(
     {
         ff["local"] = array_type{};
     }
-    array_type& ff_tables = ff.at("local").as_array();
 
     for(const auto& chain : chains)
     {
@@ -275,28 +274,14 @@ AICG2Plus<realT>::generate(
             // So here, first search a table that defines the same forcefield.
             // If it exists, push new parameters to the found one. Otherwise,
             // add a new table and push to it.
-
-            // make sure that the tablel does have bondlength+harmonic forcefield
-            value_type bond_length(toml::table{
-                {"interaction", "BondLength"},
-                {"potential",   "Harmonic"},
-                {"topology",    "bond"},
-                {"parameters",  array_type{}}
-            });
-            const auto table_finder =
-                local_forcefield_table_comparator<value_type>(bond_length);
-
-            if(ff_tables.end() == std::find_if(
-                        ff_tables.begin(), ff_tables.end(), table_finder))
-            {
-                ff_tables.push_back(std::move(bond_length));
-            }
-
-            // append new parameters to bondlength+harmonic forcefield
-
-            auto& params = std::find_if(
-                    ff_tables.begin(), ff_tables.end(), table_finder
-                )->as_table().at("parameters").as_array();
+            auto& params = find_or_push_table(ff.at("local"), value_type{
+                    {"interaction", "BondLength"},
+                    {"potential",   "Harmonic"},
+                    {"topology",    "bond"},
+                    {"parameters",  array_type{}}
+                }, /* the keys that should be equivalent = */ {
+                    "interaction", "potential", "topology"
+                }).as_table().at("parameters").as_array();
             params.reserve(params.size() + chain.size());
 
             for(std::size_t i=1, sz = chain.size(); i<sz; ++i)
@@ -307,27 +292,32 @@ AICG2Plus<realT>::generate(
                 const auto  i2    = bead2->index();
                 const auto  dist  = distance(bead1->position(), bead2->position());
 
-                value_type para = toml::table{};
-                para.as_table()["indices"] = array_type{i1, i2};
-                para.as_table()["v0"     ] = dist;
-                para.as_table()["k"      ] = this->cbd_aicg2_;
-
+                value_type para = table_type{
+                    {"indices", array_type{i1, i2}},
+                    {"v0"     , dist              },
+                    {"k"      , this->cbd_aicg2_  }
+                };
                 if(i == 1)
                 {
-                    para.comments().push_back(std::string(
-                            " AICG2+ BondLength for chain ") + chain.name());
+                    para.comments().push_back(std::string(" AICG2+ Bond Length "
+                        "Potential for chain ") + chain.name());
                 }
                 params.push_back(std::move(para));
             }
         }
-        /* bond-angle */{
-            table_type bond_angle{
+        // --------------------------------------------------------------------
+        // generate 1-3 contact
+        {
+            auto& params = find_or_push_table(ff.at("local"), value_type{
                 {"interaction", "BondLength"},
                 {"potential",   "Gaussian"},
-                {"topology",    "none"}
-            };
+                {"topology",    "none"},
+                {"parameters",  array_type{}}
+            }, /* the keys that should be equivalent = */ {
+                "interaction", "potential", "topology"
+            }).as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
 
-            array_type params;
             for(std::size_t i=2, sz = chain.size(); i<sz; ++i)
             {
                 const auto& bead1 = chain.at(i-2);
@@ -344,42 +334,54 @@ AICG2Plus<realT>::generate(
                     continue;
                 }
 
-                table_type para;
-                para["indices"] = value_type{i1, i3};
-                para["v0"     ] = distance(bead1->position(), bead3->position());
-                para["sigma"  ] = this->wid_aicg13_;
-                para["k"      ] = this->coef_13_ * this->calc_contact_coef(bead1, bead3);
+                const auto nat_dist = distance(bead1->position(), bead3->position());
+                const auto contact_coef = this->calc_contact_coef(bead1, bead3);
+
+                value_type para = table_type{
+                    {"indices", value_type{i1, i3}           },
+                    {"v0"     , nat_dist                     },
+                    {"sigma"  , this->wid_aicg13_            },
+                    {"k"      , this->coef_13_ * contact_coef}
+                };
+                if(i == 2)
+                {
+                    para.comments().push_back(std::string(" AICG2+ 1-3 Contact "
+                        "Potential for chain ") + chain.name());
+                }
                 params.push_back(std::move(para));
             }
-            bond_angle["parameters"] = std::move(params);
-            ff.at("local").as_array().push_back(std::move(bond_angle));
         }
         /* flexible-local-angle */{
-            table_type flp_angle{
+            value_type flp_angle{
                 {"interaction", "BondAngle"},
                 {"potential",   "FlexibleLocalAngle"},
-                {"topology",    "none"}
+                {"topology",    "none"},
+                {"parameters",  array_type{}}
             };
-
-            table_type env;
             const std::string y1_prefix("y1_");
             const std::string y2_prefix("y2_");
             {
-                for(const auto& y1 : this->angle_y_1_)
+                table_type env;
                 {
-                    env[y1_prefix + y1.first] = y1.second;
+                    for(const auto& y1 : this->angle_y_1_)
+                    {
+                        env[y1_prefix + y1.first] = y1.second;
+                    }
                 }
-            }
-            {
-                for(const auto& y2 : this->angle_y_2_)
                 {
-                    env[y2_prefix + y2.first] = y2.second;
+                    for(const auto& y2 : this->angle_y_2_)
+                    {
+                        env[y2_prefix + y2.first] = y2.second;
+                    }
                 }
+                flp_angle.as_table()["env"] = std::move(env);
             }
+            auto& params = find_or_push_table(ff.at("local"), flp_angle,
+                /* the keys that should be equivalent = */ {
+                    "interaction", "potential", "topology", "env"
+                }).as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
 
-            flp_angle["env"] = std::move(env);
-
-            array_type params;
             for(std::size_t i=2, sz = chain.size(); i<sz; ++i)
             {
                 const auto& bead1 = chain.at(i-2);
@@ -389,24 +391,31 @@ AICG2Plus<realT>::generate(
                 const auto  i2    = bead2->index();
                 const auto  i3    = bead3->index();
 
-                table_type para;
-                para["indices"] = value_type{i1, i2, i3};
-                para["k"      ] = this->k_angle_;
-                para["y"      ] = y1_prefix + bead2->name();
-                para["d2y"    ] = y2_prefix + bead2->name();
+                value_type para = table_type{
+                    {"indices", value_type{i1, i2, i3}   },
+                    {"k"      , this->k_angle_           },
+                    {"y"      , y1_prefix + bead2->name()},
+                    {"d2y"    , y2_prefix + bead2->name()}
+                };
+                if(i == 2)
+                {
+                    para.comments().push_back(std::string(" AICG2+ Flexible "
+                        "Local Angle Potential for chain ") + chain.name());
+                }
                 params.push_back(std::move(para));
             }
-            flp_angle["parameters"] = std::move(params);
-            ff["local"].as_array().push_back(std::move(flp_angle));
         }
         /* dihedral-angle */{
-            table_type dihd_angle{
+            auto& params = find_or_push_table(ff.at("local"), value_type{
                 {"interaction", "DihedralAngle"},
                 {"potential",   "Gaussian"},
-                {"topology",    "none"}
-            };
+                {"topology",    "none"},
+                {"parameters",  array_type{}}
+            }, /* the keys that should be equivalent = */ {
+                "interaction", "potential", "topology"
+            }).as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
 
-            array_type params;
             for(std::size_t i=3, sz = chain.size(); i<sz; ++i)
             {
                 const auto& bead1 = chain.at(i-3);
@@ -425,55 +434,72 @@ AICG2Plus<realT>::generate(
                     continue;
                 }
 
-                table_type para;
-                para["indices"] = value_type{i1, i2, i3, i4};
-                para["v0"     ] = dihedral_angle(
-                                    bead1->position(), bead2->position(),
-                                    bead3->position(), bead4->position());
-                para["sigma"  ] = this->wid_dih_;
-                para["k"      ] = this->coef_14_ * this->calc_contact_coef(bead1, bead4);
+                const auto nat_dihd = dihedral_angle(
+                                        bead1->position(), bead2->position(),
+                                        bead3->position(), bead4->position());
+                const auto contact_coef = this->calc_contact_coef(bead1, bead4);
+
+                value_type para = table_type{
+                    {"indices", value_type{i1, i2, i3, i4}   },
+                    {"v0"     , nat_dihd                     },
+                    {"sigma"  , this->wid_dih_               },
+                    {"k"      , this->coef_14_ * contact_coef}
+                };
+                if(i == 3)
+                {
+                    para.comments().push_back(std::string(" AICG2+ Dihedral "
+                        "Potential for chain ") + chain.name());
+                }
                 params.push_back(std::move(para));
             }
-            dihd_angle["parameters"] = std::move(params);
-            ff["local"].as_array().push_back(std::move(dihd_angle));
         }
         /* flexible-dihedral-angle */{
-            table_type dihd_angle{
+            value_type flp_dihd{
                 {"interaction", "DihedralAngle"},
                 {"potential"  , "FlexibleLocalDihedral"},
-                {"topology"   , "none"}
+                {"topology"   , "none"},
+                {"parameters",  array_type{}}
             };
-
-            table_type env;
-            for(const auto& dih : this->dihedral_term_)
             {
-                env[dih.first] = dih.second;
+                table_type env;
+                for(const auto& dih : this->dihedral_term_)
+                {
+                    env[dih.first] = dih.second;
+                }
+                flp_dihd.as_table()["env"] = std::move(env);
             }
-            dihd_angle["env"] = std::move(env);
+            auto& params = find_or_push_table(ff.at("local"), flp_dihd,
+                /* the keys that should be equivalent = */ {
+                    "interaction", "potential", "topology", "env"
+                }).as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
 
-            array_type params;
-            for(std::size_t i=0, sz = chain.size() - 3; i<sz; ++i)
+            for(std::size_t i=3, sz = chain.size(); i<sz; ++i)
             {
-                const auto& bead1 = chain.at(i);
-                const auto& bead2 = chain.at(i+1);
-                const auto& bead3 = chain.at(i+2);
-                const auto& bead4 = chain.at(i+3);
-                const std::size_t i1 = bead1->index();
-                const std::size_t i2 = bead2->index();
-                const std::size_t i3 = bead3->index();
-                const std::size_t i4 = bead4->index();
+                const auto& bead1 = chain.at(i-3);
+                const auto& bead2 = chain.at(i-2);
+                const auto& bead3 = chain.at(i-1);
+                const auto& bead4 = chain.at(i);
+                const auto  i1    = bead1->index();
+                const auto  i2    = bead2->index();
+                const auto  i3    = bead3->index();
+                const auto  i4    = bead4->index();
 
                 // like "ALA-PHE" or something like that
                 const std::string separator("-");
 
-                table_type para;
-                para["indices"] = value_type{i1, i2, i3, i4};
-                para["k"      ] = this->k_dihedral_;
-                para["coef"   ] = bead2->name() + separator + bead3->name();
+                value_type para = table_type{
+                    {"indices", value_type{i1, i2, i3, i4}               },
+                    {"k"      , this->k_dihedral_                        },
+                    {"coef"   , bead2->name() + separator + bead3->name()}
+                };
+                if(i == 2)
+                {
+                    para.comments().push_back(std::string(" AICG2+ Flexible "
+                        "Local Dihedral Potential for chain ") + chain.name());
+                }
                 params.push_back(std::move(para));
             }
-            dihd_angle["parameters"] = std::move(params);
-            ff["local"].as_array().push_back(std::move(dihd_angle));
         }
 
         const real_type th2 = this->go_contact_threshold_ *
@@ -481,13 +507,17 @@ AICG2Plus<realT>::generate(
         /* intra-chain-go-contacts */
         if(4 < chain.size()) // if chain has <4 atoms, no contact would be formed
         {
-            table_type go_contact{
+            auto& params = find_or_push_table(ff.at("local"), value_type{
                 {"interaction", "BondLength"},
                 {"potential",   "GoContact"},
-                {"topology",    "contact"}
-            };
+                {"topology",    "contact"},
+                {"parameters",  array_type{}}
+            }, /* the keys that should be equivalent = */ {
+                "interaction", "potential", "topology"
+            }).as_table().at("parameters").as_array();
+            params.reserve(params.size() + chain.size());
 
-            array_type params;
+            bool first = true;
             for(std::size_t i=0, sz_i = chain.size()-4; i<sz_i; ++i)
             {
                 for(std::size_t j=i+4, sz_j = chain.size(); j<sz_j; ++j)
@@ -505,16 +535,26 @@ AICG2Plus<realT>::generate(
                             continue;
                         }
 
-                        table_type para;
-                        para["indices"] = value_type{i1, i2};
-                        para["v0"     ] = distance(bead1->position(), bead2->position());
-                        para["k"      ] = -this->coef_go_ * calc_contact_coef(bead1, bead2);
+                        const auto nat_dist = 
+                            distance(bead1->position(), bead2->position());
+                        const auto contact_coef =
+                            calc_contact_coef(bead1, bead2);
+
+                        value_type para = table_type{
+                            {"indices", value_type{i1, i2}            },
+                            {"v0"     , nat_dist                      },
+                            {"k"      , -this->coef_go_ * contact_coef}
+                        };
+                        if(first)
+                        {
+                            para.comments().push_back(std::string(" AICG2+ "
+                                "Contact Potential for chain ") + chain.name());
+                            first = false;
+                        }
                         params.push_back(std::move(para));
                     }
                 }
             }
-            go_contact["parameters"]  = std::move(params);
-            ff["local"].as_array().push_back(std::move(go_contact));
         }
     }
     return ff_;
@@ -530,6 +570,11 @@ AICG2Plus<realT>::generate(
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
+    if(ff_.is_uninitialized())
+    {
+        ff_ = table_type{};
+    }
+
     table_type& ff = ff_.as_table();
     if(ff.count("local") == 0)
     {
@@ -538,16 +583,18 @@ AICG2Plus<realT>::generate(
 
     const auto th2 = this->go_contact_threshold_ * this->go_contact_threshold_;
 
-    table_type go_contact{
+    auto& params = find_or_push_table(ff.at("local"), value_type{
         {"interaction", "BondLength"},
         {"potential",   "GoContact"},
-        {"topology",    "contact"}
-    };
+        {"topology",    "contact"},
+        {"parameters",  array_type{}}
+    }, /* the keys that should be equivalent = */ {
+        "interaction", "potential", "topology"
+    }).as_table().at("parameters").as_array();
 
     std::vector<std::pair<std::string, std::string>> combinations;
     combinations.reserve(1 + lhs.size() * rhs.size() / 2);
 
-    array_type params;
     for(const auto& chain1 : lhs)
     {
         for(const auto& chain2 : rhs)
@@ -568,6 +615,7 @@ AICG2Plus<realT>::generate(
             }
             combinations.push_back(std::make_pair(chain1.name(), chain2.name()));
 
+            bool is_first = true;
             for(const auto& bead1 : chain1)
             {
                 for(const auto& bead2 : chain2)
@@ -583,18 +631,24 @@ AICG2Plus<realT>::generate(
                             continue;
                         }
 
-                        table_type para;
-                        para["indices"] = value_type{i1, i2};
-                        para["v0"     ] = distance(bead1->position(), bead2->position());
-                        para["k"      ] = -coef_go_ * this->calc_contact_coef(bead1, bead2);
+                        value_type para = table_type{
+                            {"indices", value_type{i1, i2}},
+                            {"v0"     , distance(bead1->position(), bead2->position())},
+                            {"k"      , -coef_go_ * this->calc_contact_coef(bead1, bead2)}
+                        };
+                        if(is_first)
+                        {
+                            para.comments().push_back(" AICG2+ Contact "
+                                "Potential between chain " + chain1.name() +
+                                " and chain " + chain2.name());
+                            is_first = false;
+                        }
                         params.push_back(std::move(para));
                     }
                 }
             }
         }
     }
-    go_contact["parameters"] = std::move(params);
-    ff["local"].as_array().push_back(std::move(go_contact));
 
     return ff_;
 }

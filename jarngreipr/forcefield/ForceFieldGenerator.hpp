@@ -35,7 +35,6 @@ class ForceFieldGenerator
     virtual bool check_beads_kind(const chain_type& chain) const = 0;
 };
 
-
 // It is inefficient to define multiple LocalForceFiled having the same
 // combination of interaction and potential.
 //
@@ -43,14 +42,15 @@ class ForceFieldGenerator
 // table value. It is helpful to merge two (semantically the same) tables.
 //
 template<typename Value>
-struct local_forcefield_table_comparator
+struct toml_table_comparator
 {
-    using value_type = Value;
+    using value_type = Value; // toml::basic_value<...>
 
-    value_type ref;
+    std::vector<std::string> keys; // keys to compare
+    value_type reference;
 
-    local_forcefield_table_comparator(value_type r)
-        : ref(std::move(r))
+    toml_table_comparator(value_type r, std::vector<std::string> ks)
+        : reference(std::move(r)), keys(std::move(ks))
     {
         if(!r.is_table())
         {
@@ -58,37 +58,16 @@ struct local_forcefield_table_comparator
         }
     }
 
-    bool operator()(const value_type& tgt) noexcept
+    bool operator()(const value_type& other) noexcept
     {
         // check "interaction", "potential" and "topology".
-
-        // check only the content of a string. toml::values are the same
-        // only if both comment and the value is the same. But here we can
-        // ignore the comments.
         try
         {
-            const auto& lt = ref.as_table();
-            const auto& rt = tgt.as_table();
-            if(lt.count("interaction"))
+            const auto& t1 = reference.as_table();
+            const auto& t2 = other.as_table();
+            for(const auto& key : keys)
             {
-                if(lt.at("interaction").as_string().str !=
-                   rt.at("interaction").as_string().str)
-                {
-                    return false;
-                }
-            }
-            if(lt.count("potential"))
-            {
-                if(lt.at("potential").as_string().str !=
-                   rt.at("potential").as_string().str)
-                {
-                    return false;
-                }
-            }
-            if(lt.count("topology"))
-            {
-                if(lt.at("topology").as_string().str !=
-                   rt.at("topology").as_string().str)
+                if(t1.at(key) != t2.at(key))
                 {
                     return false;
                 }
@@ -98,6 +77,36 @@ struct local_forcefield_table_comparator
         catch(...) {return false;}
     };
 };
+
+template<typename Comment, template<typename...> class Map,
+         template<typename...> class Array>
+toml_table_comparator<toml::basic_value<Comment, Map, Array>>
+make_table_comparator(const toml::basic_value<Comment, Map, Array>& tab,
+                      std::vector<std::string> keys)
+{
+    return toml_table_comparator<toml::basic_value<Comment, Map, Array>>(
+            tab, std::move(keys));
+}
+
+// search a table.
+// If a table that is equivalent to`src` exists in a table `dst`,
+// return a reference to it.
+// Otherwise, push `src` and return a reference to the newly created one.
+template<typename Comment, template<typename...> class Map,
+         template<typename...> class Array>
+toml::basic_value<Comment, Map, Array>&
+find_or_push_table(toml::basic_value<Comment, Map, Array>& dst,
+                   const toml::basic_value<Comment, Map, Array>& src,
+                   std::vector<std::string> keys)
+{
+    const auto cmp = make_table_comparator(src, std::move(keys));
+    auto& dst_array = dst.as_array();
+    if(dst_array.end() == std::find_if(dst_array.begin(), dst_array.end(), cmp))
+    {
+        dst_array.push_back(src);
+    }
+    return *(std::find_if(dst_array.begin(), dst_array.end(), cmp));
+}
 
 } // mjolnir
 #endif// JARNGREIPR_FORCEFIELD_GENERATOR
