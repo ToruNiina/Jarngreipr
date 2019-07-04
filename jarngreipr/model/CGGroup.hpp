@@ -53,6 +53,11 @@ class CGGroup
     const_iterator cbegin() const noexcept {return chains_.cbegin();}
     const_iterator cend()   const noexcept {return chains_.cend();}
 
+    chain_type&       front()       noexcept {return chains_.front();}
+    chain_type const& front() const noexcept {return chains_.front();}
+    chain_type&       back ()       noexcept {return chains_.back();}
+    chain_type const& back () const noexcept {return chains_.back();}
+
     container_type const& chains() const noexcept {return chains_;}
     container_type&       chains()       noexcept {return chains_;}
     std::string const&    name()  const noexcept {return name_;}
