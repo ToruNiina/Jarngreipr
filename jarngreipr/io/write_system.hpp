@@ -57,6 +57,10 @@ write_system(std::basic_ostream<charT, traits>& os,
         const auto n = toml::find(particle, "name");
         const auto g = toml::find(particle, "group");
 
+        if(!particle.comments().empty())
+        {
+            os << particle.comments();
+        }
         os << "{m = "   << format_number("%8.3f", m);
         os << ", pos = " << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
         os << ", vel = " << format_number("[%9.4f,%9.4f,%9.4f]", v[0], v[1], v[2]);
