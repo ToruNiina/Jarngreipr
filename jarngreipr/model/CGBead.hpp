@@ -2,6 +2,8 @@
 #define JARNGREIPR_MODEL_CGBEAD_HPP
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <vector>
+#include <string>
+#include <map>
 
 namespace jarngreipr
 {
@@ -38,6 +40,7 @@ class CGBead
     std::size_t     index_;
     std::string     name_;
     container_type  atoms_;
+    std::map<std::string, std::string> attr_;
 };
 
 }//jarngreipr
