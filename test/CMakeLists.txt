@@ -1,5 +1,6 @@
 set(TEST_NAMES
     test_ninfo_readwrite
+    test_read_range
     )
 
 foreach(TEST_NAME ${TEST_NAMES})
