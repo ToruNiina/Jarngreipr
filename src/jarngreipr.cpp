@@ -168,7 +168,8 @@ int main(int argc, char **argv)
                     {
                         is_front = false;
                         particle.comments().push_back(std::string(" chain ") +
-                                chain.name() + " of group " + group.name());
+                                chain.name() + " in group \"" + group.name() +
+                                "\"");
                     }
                     ps.push_back(std::move(particle));
                 }
