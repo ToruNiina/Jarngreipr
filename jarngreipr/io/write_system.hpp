@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_WRITE_SYSTEM_HPP
 #define JARNGREIPR_WRITE_SYSTEM_HPP
-#include <extlib/toml/toml.hpp>
+#include <jarngreipr/io/toml_serializer.hpp>
 #include <jarngreipr/io/write_number.hpp>
 #include <iomanip>
 
@@ -13,8 +13,12 @@ std::basic_ostream<charT, traits>&
 write_system(std::basic_ostream<charT, traits>& os,
              const toml::basic_value<Comment, Map, Array>& sys)
 {
+    using value_type = toml::basic_value<Comment, Map, Array>;
+
     if(!sys.comments().empty()) {os << sys.comments();}
     os << "[[systems]]\n";
+
+    inline_formatted_serializer<value_type> inline_serializer("%d", "%9.4f");
 
     if(toml::find(sys, "boundary_shape").as_table().empty())
     {
@@ -25,8 +29,8 @@ write_system(std::basic_ostream<charT, traits>& os,
         for(const auto& kv : toml::find(sys, "boundary_shape").as_table())
         {
             assert(kv.second.comments().empty());
-            // TODO later (toml11 v3.0.0), use toml::format_key(kv.first) here
-            os << "boundary_shape." << kv.first << " = " << kv.second << '\n';
+            os << "boundary_shape." << toml::format_key(kv.first)
+               << " = " << toml::visit(inline_serializer, kv.second) << '\n';
         }
     }
 
@@ -35,8 +39,8 @@ write_system(std::basic_ostream<charT, traits>& os,
         for(const auto& kv : toml::find(sys, "attributes").as_table())
         {
             assert(kv.second.comments().empty());
-            // TODO later (toml11 v3.0.0), use toml::format_key(kv.first) here
-            os << "attributes." << kv.first << " = " << kv.second << '\n';
+            os << "attributes." << toml::format_key(kv.first)
+               << " = " << toml::visit(inline_serializer, kv.second) << '\n';
         }
     }
 
@@ -53,9 +57,9 @@ write_system(std::basic_ostream<charT, traits>& os,
         {
             os << particle.comments();
         }
-        os << "{m = "   << format_number("%8.3f", m);
-        os << ", pos = " << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
-        os << ", vel = " << format_number("[%9.4f,%9.4f,%9.4f]", v[0], v[1], v[2]);
+        os << "{m = "     << format_number("%8.3f", m);
+        os << ", pos = "  << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
+        os << ", vel = "  << format_number("[%9.4f,%9.4f,%9.4f]", v[0], v[1], v[2]);
         os << ", name = " << n << ", group = " << g << "},\n";
     }
     os << "]\n";
