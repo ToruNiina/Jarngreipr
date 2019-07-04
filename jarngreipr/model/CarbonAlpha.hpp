@@ -67,7 +67,6 @@ class CarbonAlpha final : public CGBead<realT>
     CarbonAlpha& operator=(const CarbonAlpha&) = default;
     CarbonAlpha& operator=(CarbonAlpha&&)      = default;
 
-    std::string attribute(const std::string&) const override {return "";}
     std::string kind() const override {return "CarbonAlpha";}
 
     coordinate_type position() const override {return this->position_;}
