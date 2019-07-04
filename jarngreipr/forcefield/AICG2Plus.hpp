@@ -32,8 +32,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
     template<typename Comment, template<typename...> class Map,
              template<typename...> class Array>
-    AICG2Plus(const toml::basic_value<Comment, Map, Array>& para,
-              const std::vector<std::size_t>& flex)
+    AICG2Plus(const toml::basic_value<Comment, Map, Array>& para)
       : e_min_(toml::find<real_type>(para, "ecut_up_aicg2")),
         e_max_(toml::find<real_type>(para, "ecut_low_aicg2")),
         // cut-offs
@@ -72,13 +71,8 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
         angle_x_      (toml::find<decltype(angle_x_      )>(para, "flexible_local", "angle_x")),
         angle_y_1_    (toml::find<decltype(angle_y_1_    )>(para, "flexible_local", "angle_term1")),
         angle_y_2_    (toml::find<decltype(angle_y_2_    )>(para, "flexible_local", "angle_term2")),
-        dihedral_term_(toml::find<decltype(dihedral_term_)>(para, "flexible_local", "dihedral_term")),
-        // list of index of beads in flexible regions
-        flexible_beads_(flex)
+        dihedral_term_(toml::find<decltype(dihedral_term_)>(para, "flexible_local", "dihedral_term"))
     {
-        // to use binary_search, we need to sort it.
-        std::sort(this->flexible_beads_.begin(), this->flexible_beads_.end());
-
         if(go_contact_threshold_ <= atom_contact_cutoff_)
         {
             std::cerr
@@ -103,10 +97,13 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
   private:
 
-    bool is_in_flexible_region(const std::size_t bead_idx) const
+    bool is_in_flexible_region(const bead_ptr& bead) const
     {
-        return std::binary_search(this->flexible_beads_.begin(),
-                                  this->flexible_beads_.end(), bead_idx);
+        if(bead->has_attribute("is_flexible"))
+        {
+            return (bead->attribute("is_flexible") == "true");
+        }
+        return false;
     }
 
     bool is_backbone(const atom_type& atom) const
@@ -164,8 +161,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
     real_type calc_contact_coef(const bead_ptr& bead1, const bead_ptr& bead2) const;
 
-    real_type min_distance_sq(const std::shared_ptr<bead_type>& bead1,
-                              const std::shared_ptr<bead_type>& bead2) const
+    real_type min_distance_sq(const bead_ptr& bead1, const bead_ptr& bead2) const
     {
         real_type min_dist = std::numeric_limits<real_type>::max();
         for(const auto& atom1 : bead1->atoms())
@@ -324,12 +320,11 @@ AICG2Plus<realT>::generate(
                 const auto& bead2 = chain.at(i-1);
                 const auto& bead3 = chain.at(i);
                 const auto  i1    = bead1->index();
-                const auto  i2    = bead2->index();
                 const auto  i3    = bead3->index();
 
                 // if the beads contains flexible region, remove 1-3 contact.
-                if(is_in_flexible_region(i1) || is_in_flexible_region(i2) ||
-                   is_in_flexible_region(i3))
+                if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2) ||
+                   is_in_flexible_region(bead3))
                 {
                     continue;
                 }
@@ -430,8 +425,8 @@ AICG2Plus<realT>::generate(
                 const auto  i4    = bead4->index();
 
                 // if the beads contains flexible region, remove 1-4 contact.
-                if(is_in_flexible_region(i1) || is_in_flexible_region(i2) ||
-                   is_in_flexible_region(i3) || is_in_flexible_region(i4))
+                if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2) ||
+                   is_in_flexible_region(bead3) || is_in_flexible_region(bead4))
                 {
                     continue;
                 }
@@ -532,7 +527,7 @@ AICG2Plus<realT>::generate(
                         const auto  i2    = bead2->index();
 
                         // if one of the bead is flexible region, continue.
-                        if(is_in_flexible_region(i1) || is_in_flexible_region(i2))
+                        if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2))
                         {
                             continue;
                         }
@@ -628,7 +623,7 @@ AICG2Plus<realT>::generate(
                         const auto i2 = bead2->index();
 
                         // if one of the bead is flexible region, continue.
-                        if(is_in_flexible_region(i1) || is_in_flexible_region(i2))
+                        if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2))
                         {
                             continue;
                         }
