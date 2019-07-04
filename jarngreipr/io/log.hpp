@@ -1,5 +1,6 @@
 #ifndef JARNGREIPR_IO_LOG_HPP
 #define JARNGREIPR_IO_LOG_HPP
+#include <mjolnir/util/color.hpp>
 #include <memory>
 #include <utility>
 #include <memory>
