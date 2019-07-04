@@ -21,15 +21,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
                        const toml::basic_value<Comment, Map, Array>& ff)
 {
     using value_type = toml::basic_value<Comment, Map, Array>;
-    if(!ff.comments().empty())
-    {
-        // TODO later (toml11-v3.0.0), this can be refactored into
-        //      `os << local.comments();`
-        for(const auto& c : ff.comments())
-        {
-            os << '#' << c << '\n';
-        }
-    }
+    if(!ff.comments().empty()) {os << ff.comments();}
     os << "[[forcefields.local]]\n";
 
     // ========================================================================
@@ -111,12 +103,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         // write comment if exists
         if(!p.comments().empty())
         {
-            // TODO later (toml11-v3.0.0), this can be refactored into
-            //      `os << local.comments();`
-            for(const auto& c : p.comments())
-            {
-                os << '#' << c << '\n';
-            }
+            os << p.comments();
         }
 
         // write indices first

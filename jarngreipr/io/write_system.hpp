@@ -13,15 +13,7 @@ std::basic_ostream<charT, traits>&
 write_system(std::basic_ostream<charT, traits>& os,
              const toml::basic_value<Comment, Map, Array>& sys)
 {
-    if(!sys.comments().empty())
-    {
-        // TODO later (toml11-v3.0.0), this can be refactored into
-        //      `os << sys.comments();`
-        for(const auto& c : sys.comments())
-        {
-            os << '#' << c << '\n';
-        }
-    }
+    if(!sys.comments().empty()) {os << sys.comments();}
     os << "[[systems]]\n";
 
     if(toml::find(sys, "boundary_shape").as_table().empty())
