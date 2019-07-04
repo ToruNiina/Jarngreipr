@@ -490,7 +490,7 @@ AICG2Plus<realT>::generate(
                     {"k"      , this->k_dihedral_                        },
                     {"coef"   , bead2->name() + separator + bead3->name()}
                 };
-                if(i == 2)
+                if(i == 3)
                 {
                     para.comments().push_back(std::string(" AICG2+ Flexible "
                         "Local Dihedral Potential for chain ") + chain.name());
