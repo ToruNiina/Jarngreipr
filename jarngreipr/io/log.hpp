@@ -124,7 +124,6 @@ using logger = detail::basic_logger<log_level>;
 template<typename ... Ts>
 void log(log_level lv, Ts&& ... args)
 {
-    static_assert(sizeof...(Ts) > 0, "write_error requires at least one value");
     if(logger::is_activated(lv))
     {
         detail::log_output(std::cerr, lv, std::forward<Ts>(args)...);
