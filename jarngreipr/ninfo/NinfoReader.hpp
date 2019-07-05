@@ -2,6 +2,7 @@
 #define JARNGREIPR_NINFO_READER_HPP
 #include <jarngreipr/ninfo/NinfoData.hpp>
 #include <jarngreipr/io/read_number.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <fstream>
 
 namespace jarngreipr
@@ -24,8 +25,8 @@ class NinfoReader
     {
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "NinfoReader: file open error: ", filename_);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            std::terminate();
         }
         ifstrm_.close();
     }
@@ -66,8 +67,8 @@ class NinfoReader
         this->ifstrm_.open(this->filename_);
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "NinfoReader: file open error: ", filename_);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            std::terminate();
         }
 
         this->rewind();
@@ -101,12 +102,11 @@ class NinfoReader
         for(auto& coef  : ninfo.coefs)  {iss >> coef;}
         if(iss.fail())
         {
-            write_error(std::cerr, "while reading ninfo ", ninfoT::prefix,
-                        " block in ", this->filename_,
-                        " some of the column has invalid format");
-            write_underline(std::cerr, iss.str(), 0, iss.str().size(),
-                            at_line(this->line_num_));
-            std::exit(EXIT_FAILURE);
+            source_location src(this->filename_, iss.str(), 0, iss.str().size(),
+                                this->line_num_);
+            log(log_level::error, "while reading ninfo ", ninfoT::prefix,
+                                  " invalid column appeared", src, "this line");
+            std::terminate();
         }
 
         // if there are no suffix, it does not matter.

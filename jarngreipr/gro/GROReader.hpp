@@ -3,6 +3,7 @@
 #include <jarngreipr/gro/GROLine.hpp>
 #include <jarngreipr/gro/GROFrame.hpp>
 #include <jarngreipr/io/read_number.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
@@ -24,8 +25,8 @@ class GROReader
     {
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "GROReader: file open error: ", filename_);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "GROReader: file open error: ", filename_, '\n');
+            std::terminate();
         }
     }
     ~GROReader() = default;
@@ -67,9 +68,10 @@ class GROReader
         iss >> frame.box[0] >> frame.box[1] >> frame.box[2];
         if(iss.fail())
         {
-            write_error("GROReader: while reading box information:");
-            write_underline(line, 0, line.size(), '-', at_line(this->line_num_));
-            std::exit(EXIT_FAILURE);
+            source_location src(this->filename_, line, 0, line.size(), this->line_num_);
+            log(log_level::error, "GROReader: while reading box information:\n",
+                                   src, "invalid number appeared");
+            std::terminate();
         }
 
         return frame;
@@ -86,20 +88,19 @@ class GROReader
 
     line_type read_gro(const std::string& line)
     {
-        const auto ln  = at_line(this->line_num_);
-        const auto msg = std::string("while reading gro ATOM in ") + this->filename_;
+        source_location src(this->filename_, line, 0, 0, this->line_num_)
 
         line_type atom;
-        atom.residue_id   = read_number<std::int32_t>(line, 0, 5, msg, ln);
-        atom.residue_name = get_substr(line,  5, 5, msg, ln);
-        atom.atom_name    = get_substr(line, 10, 5, msg, ln);
-        atom.atom_id      = read_number<std::int32_t>(line, 15, 5, msg, ln);
-        atom.position[0]  = read_number<double>(line, 20, 8, msg, ln);
-        atom.position[1]  = read_number<double>(line, 28, 8, msg, ln);
-        atom.position[2]  = read_number<double>(line, 36, 8, msg, ln);
-        atom.velocity[0]  = read_number<double>(line, 44, 8, msg, ln);
-        atom.velocity[1]  = read_number<double>(line, 52, 8, msg, ln);
-        atom.velocity[2]  = read_number<double>(line, 60, 8, msg, ln);
+        atom.residue_id   = read_number<std::int32_t>(src, 0, 5);
+        atom.residue_name = get_substr(src,  5, 5);
+        atom.atom_name    = get_substr(src, 10, 5);
+        atom.atom_id      = read_number<std::int32_t>(src, 15, 5);
+        atom.position[0]  = read_number<double>(src, 20, 8);
+        atom.position[1]  = read_number<double>(src, 28, 8);
+        atom.position[2]  = read_number<double>(src, 36, 8);
+        atom.velocity[0]  = read_number<double>(src, 44, 8);
+        atom.velocity[1]  = read_number<double>(src, 52, 8);
+        atom.velocity[2]  = read_number<double>(src, 60, 8);
 
         return atom;
     }

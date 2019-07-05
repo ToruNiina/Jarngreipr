@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_NINFO_WRITER_HPP
 #define JARNGREIPR_NINFO_WRITER_HPP
 #include <jarngreipr/ninfo/NinfoData.hpp>
-#include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <fstream>
 #include <iomanip>
 
@@ -22,8 +22,8 @@ class NinfoWriter
     {
         if(!ofstrm_.good())
         {
-            write_error(std::cerr, "NinfoReader: file open error: ", filename_);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            std::terminate();
         }
         ofstrm_.close();
     }

@@ -25,8 +25,8 @@ class XYZReader
     {
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "XYZReader: file open error: ", fname);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "XYZReader: file open error: ", fname, '\n');
+            std::terminate();
         }
     }
     ~XYZReader() = default;
@@ -51,9 +51,9 @@ class XYZReader
             }
         }
 
-        write_error(std::cerr, "XYZReader: ", this->filename_,
-                    " does not contain frame ", idx, '.');
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "XYZReader: ", this->filename_,
+                              " does not contain frame ", idx, ".\n");
+        std::terminate();
     }
 
   private:
@@ -87,23 +87,19 @@ class XYZReader
             iss >> crd_x;
             iss >> crd_y;
             iss >> crd_z;
+            source_location src(this->filename_, line, 0, line.size(), this->line_num_);
             if(crd_z.empty() || crd_y.empty() || crd_x.empty() || ident.empty())
             {
-                write_error(std::cerr, "XYZReader: ", this->filename_,
-                            " line too short.");
-                write_underline(std::cerr, line, 0, line.size(), '^', ln);
-                std::exit(EXIT_FAILURE);
+                log(log_level::error, "XYZReader: line too short.\n", src);
+                std::terminate();
             }
 
 
             particle_type xyz;
             xyz.name        = ident;
-            xyz.position[0] = read_number<real_type>(
-                    line, line.find(crd_x), crd_x.size(), msg, ln);
-            xyz.position[1] = read_number<real_type>(
-                    line, line.find(crd_y), crd_y.size(), msg, ln);
-            xyz.position[2] = read_number<real_type>(
-                    line, line.find(crd_z), crd_z.size(), msg, ln);
+            xyz.position[0] = read_number<real_type>(src, line.find(crd_x), crd_x.size());
+            xyz.position[1] = read_number<real_type>(src, line.find(crd_y), crd_y.size());
+            xyz.position[2] = read_number<real_type>(src, line.find(crd_z), crd_z.size());
 
             // XXX: If crd_x and crd_y were the same, line.find(crd_y) returns
             //      the position of crd_x. But practically it does not matter.
