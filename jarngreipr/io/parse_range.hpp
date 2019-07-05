@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_READ_RANGE_HPP
-#define JARNGREIPR_READ_RANGE_HPP
+#ifndef JARNGREIPR_PARSE_RANGE_HPP
+#define JARNGREIPR_PARSE_RANGE_HPP
 #include <jarngreipr/io/log.hpp>
 #include <string>
 #include <vector>
@@ -18,7 +18,7 @@ namespace jarngreipr
 // (1,5] -> {2,3,4,5}
 //
 template<typename integerT = std::int64_t>
-std::vector<integerT> read_range(std::string str)
+std::vector<integerT> parse_range(std::string str)
 {
     while(str.front() == ' ') {str.erase(str.begin());}
     while(str.back()  == ' ') {str.pop_back();}
@@ -48,4 +48,4 @@ std::vector<integerT> read_range(std::string str)
 }
 
 } // jarngriepr
-#endif// JARNGREIPR_READ_RANGE_HPP
+#endif// JARNGREIPR_PARSE_RANGE_HPP

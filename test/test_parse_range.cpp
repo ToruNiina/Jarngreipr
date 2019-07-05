@@ -1,16 +1,16 @@
-#define BOOST_TEST_MODULE "test_read_range"
+#define BOOST_TEST_MODULE "test_parse_range"
 #include <boost/test/included/unit_test.hpp>
-#include <jarngreipr/io/read_range.hpp>
+#include <jarngreipr/io/parse_range.hpp>
 
 std::string operator"" _str(const char* c, std::size_t l)
 {
     return std::string(c);
 }
 
-BOOST_AUTO_TEST_CASE(test_read_range_simple)
+BOOST_AUTO_TEST_CASE(test_parse_range_simple)
 {
     {
-        const auto range = jarngreipr::read_range("[1,10]"_str);
+        const auto range = jarngreipr::parse_range("[1,10]"_str);
         BOOST_TEST(range.size(), 10);
         for(std::int64_t i=0; i<10; ++i)
         {
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_simple)
         }
     }
     {
-        const auto range = jarngreipr::read_range("[1,  10]"_str);
+        const auto range = jarngreipr::parse_range("[1,  10]"_str);
         BOOST_TEST(range.size(), 10);
         for(std::int64_t i=0; i<10; ++i)
         {
@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_simple)
         }
     }
     {
-        const auto range = jarngreipr::read_range("[1, 10)"_str);
+        const auto range = jarngreipr::parse_range("[1, 10)"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_simple)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(1, 10)"_str);
+        const auto range = jarngreipr::parse_range("(1, 10)"_str);
         BOOST_TEST(range.size(), 8);
         for(std::int64_t i=0; i<8; ++i)
         {
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_simple)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(1, 10]"_str);
+        const auto range = jarngreipr::parse_range("(1, 10]"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
@@ -51,10 +51,10 @@ BOOST_AUTO_TEST_CASE(test_read_range_simple)
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_read_range_signs)
+BOOST_AUTO_TEST_CASE(test_parse_range_signs)
 {
     {
-        const auto range = jarngreipr::read_range("[+1, +10]"_str);
+        const auto range = jarngreipr::parse_range("[+1, +10]"_str);
         BOOST_TEST(range.size(), 10);
         for(std::int64_t i=0; i<10; ++i)
         {
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("[+1, +10)"_str);
+        const auto range = jarngreipr::parse_range("[+1, +10)"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(+1, +10)"_str);
+        const auto range = jarngreipr::parse_range("(+1, +10)"_str);
         BOOST_TEST(range.size(), 8);
         for(std::int64_t i=0; i<8; ++i)
         {
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(+1, +10]"_str);
+        const auto range = jarngreipr::parse_range("(+1, +10]"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("[-10, -1]"_str);
+        const auto range = jarngreipr::parse_range("[-10, -1]"_str);
         BOOST_TEST(range.size(), 10);
         for(std::int64_t i=0; i<10; ++i)
         {
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("[-10, -1)"_str);
+        const auto range = jarngreipr::parse_range("[-10, -1)"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(-10, -1)"_str);
+        const auto range = jarngreipr::parse_range("(-10, -1)"_str);
         BOOST_TEST(range.size(), 8);
         for(std::int64_t i=0; i<8; ++i)
         {
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_read_range_signs)
         }
     }
     {
-        const auto range = jarngreipr::read_range("(-10, -1]"_str);
+        const auto range = jarngreipr::parse_range("(-10, -1]"_str);
         BOOST_TEST(range.size(), 9);
         for(std::int64_t i=0; i<9; ++i)
         {
