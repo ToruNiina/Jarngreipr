@@ -1,5 +1,5 @@
 set(TEST_NAMES
-    test_ninfo_readwrite
+#     test_ninfo_readwrite
     test_read_range
     )
 
