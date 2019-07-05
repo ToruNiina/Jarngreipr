@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_GET_SUBSTR_HPP
 #define JARNGREIPR_GET_SUBSTR_HPP
-#include <jarngreipr/io/source_location.hpp>
+#include <jarngreipr/util/source_location.hpp>
 #include <jarngreipr/io/log.hpp>
 #include <string>
 #include <cstdlib>

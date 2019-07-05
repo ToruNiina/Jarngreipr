@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE "test_parse_range"
 #include <boost/test/included/unit_test.hpp>
-#include <jarngreipr/io/parse_range.hpp>
+#include <jarngreipr/util/parse_range.hpp>
 
 std::string operator"" _str(const char* c, std::size_t l)
 {

@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_READ_NUMBER_HPP
 #define JARNGREIPR_READ_NUMBER_HPP
-#include <jarngreipr/io/get_substr.hpp>
+#include <jarngreipr/util/get_substr.hpp>
 #include <stdexcept>
 #include <string>
 #include <iostream>
