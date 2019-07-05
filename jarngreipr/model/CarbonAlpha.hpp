@@ -2,7 +2,7 @@
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/CGBead.hpp>
 #include <jarngreipr/model/CGModelGenerator.hpp>
-#include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <algorithm>
 #include <stdexcept>
 #include <memory>
@@ -30,31 +30,28 @@ class CarbonAlpha final : public CGBead<realT>
         if(!this->atoms_.empty())
         {
             const auto is_ca =
-                [](const atom_type& a){return a.atom_name==" CA ";};
+                [](const atom_type& a){return a.atom_name == " CA ";};
             const std::size_t num_ca = std::count_if(
                 this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
             if(num_ca == 0)
             {
-                write_error(std::cerr, "jarngreipr::model::CarbonAlpha: "
-                            "no c-alpha atom in this residue.");
-                for(const auto atm : this->atoms_)
-                {
-                    write_underline(std::cerr, to_string(atm), 22, 4);
-                }
-                std::exit(EXIT_FAILURE);
+                log(log_level::error,
+                    "CarbonAlpha: no c-alpha atom exists in a residue.\n");
+                log(log_level::error, this->atoms_.front(), '\n');
+                std::terminate();
             }
             if(num_ca > 1)
             {
-                write_error(std::cerr, "jarngreipr::model::CarbonAlpha: "
-                            "multiple c-alpha in this residue.");
-                for(const auto atm : this->atoms_)
+                log(log_level::error, "CarbonAlpha: ", num_ca,
+                    " c-alpha atoms exist in a residue.\n");
+                for(const auto& atm : this->atoms_)
                 {
-                    if(atm.residue_name == std::string(" CA "))
+                    if(is_ca(atm))
                     {
-                        write_underline(std::cerr, to_string(atm), 22, 4);
+                        log(log_level::error, atm, '\n');
                     }
                 }
-                std::exit(EXIT_FAILURE);
+                std::terminate();
             }
             this->position_ = std::find_if(
                 this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;

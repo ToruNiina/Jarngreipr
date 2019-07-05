@@ -1,8 +1,7 @@
 #ifndef JARNGREIPR_WRITE_FORCEFIELD_HPP
 #define JARNGREIPR_WRITE_FORCEFIELD_HPP
+#include <jarngreipr/io/log.hpp>
 #include <jarngreipr/io/toml_serializer.hpp>
-#include <jarngreipr/io/write_error.hpp>
-#include <jarngreipr/io/write_number.hpp>
 #include <algorithm>
 #include <ostream>
 
@@ -81,7 +80,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("indices") == 0)
         {
-            write_error(os, "`parameters` does not has `indices` field");
+            log(log_level::error, "`parameters` does not has `indices` field");
         }
         const auto idxs = toml::find<std::vector<std::size_t>>(p, "indices");
         max_index = std::max(max_index, *std::max_element(idxs.begin(), idxs.end()));
@@ -213,7 +212,7 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("index") == 0)
         {
-            write_error(os, "`parameters` does not has `index` field");
+            log(log_level::error, "`parameters` does not has `index` field");
         }
         max_index = std::max(max_index, toml::find<std::size_t>(p, "index"));
     }
@@ -259,6 +258,7 @@ write_forcefield(std::basic_ostream<charT, traits>& os,
     os << "[[forcefields]]\n";
     if(ff.as_table().count("local") == 1)
     {
+
         for(const auto& local : ff.as_table().at("local").as_array())
         {
             write_local_forcefield(os, local);

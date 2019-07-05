@@ -2,7 +2,7 @@
 #define JARNGREIPR_MODEL_CG_MODEL_GENERATOR_HPP
 #include <jarngreipr/model/CGChain.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
-#include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/log.hpp>
 
 namespace jarngreipr
 {
@@ -67,9 +67,9 @@ class CGModelGenerator final
                 });
             if(pdb_chain == pdbs.end())
             {
-                write_error(std::cerr, "jarngreipr::CGModelGenerator: "
-                    "chain ", chain_id, " is not provided");
-                std::exit(EXIT_FAILURE);
+                log(log_level::error, "CGModelGenerator: chain ", chain_id,
+                                      " does not exist\n");
+                std::terminate();
             }
 
             auto cg_chain = generator->generate(*pdb_chain, offset);
