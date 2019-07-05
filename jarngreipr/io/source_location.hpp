@@ -24,12 +24,18 @@ struct source_location
     source_location& operator=(source_location const&) = default;
     source_location& operator=(source_location &&)     = default;
 
-    std::uint32_t line()   const noexcept {return line_;}
-    std::uint32_t column() const noexcept {return column_;}
-    std::uint32_t range()  const noexcept {return range_;}
+    std::uint32_t  line()   const noexcept {return line_;}
+    std::uint32_t  column() const noexcept {return column_;}
+    std::uint32_t  range()  const noexcept {return range_;}
+
+    std::uint32_t& line()         noexcept {return line_;}
+    std::uint32_t& column()       noexcept {return column_;}
+    std::uint32_t& range()        noexcept {return range_;}
 
     std::string const& file_name() const noexcept {return file_name_;}
     std::string const& line_str()  const noexcept {return line_str_;}
+    std::string &      file_name()       noexcept {return file_name_;}
+    std::string &      line_str()        noexcept {return line_str_;}
 
   private:
 
@@ -64,7 +70,7 @@ operator<<(std::basic_ostream<charT, traits>& os, const source_location& src)
     for(std::size_t i=0; i<src.column();++i){os << ' ';}
     os << mjolnir::io::red;
     for(std::size_t i=0; i<src.range(); ++i){os << '^';}
-    os << mjolnir::io::nocolor;
+    os << mjolnir::io::nocolor << ' ';
     return os;
 }
 

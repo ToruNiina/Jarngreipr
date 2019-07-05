@@ -1,31 +1,13 @@
 #ifndef JARNGREIPR_READ_NUMBER_HPP
 #define JARNGREIPR_READ_NUMBER_HPP
-#include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/source_location.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <jarngreipr/io/get_substr.hpp>
 #include <stdexcept>
 #include <string>
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
-
-// use and `read_number` in the following way.
-//
-// ```cpp
-// std::string num = "the answer is 42";
-// int a1 = read_number<int>(num, 14, 2);
-// int a2 = read_number<int>(num, 14, 2, at_line(10));
-// int a3 = read_number<int>(num, 14, 2, "while reading a file: ");
-// int a4 = read_number<int>(num, 14, 2, "while reading a file: ", at_line(10));
-// ```
-//
-// and when it failed you will get an error message like...
-// (with line number and extra error message)
-//
-// ```
-// error: while reading a string, expected number, but got
-// 10 | foobar
-//    |    ^^^
-// ```
 
 namespace jarngreipr
 {
@@ -107,34 +89,31 @@ read_number_impl(const std::string& s)
 
 template<typename T>
 T read_number(const std::string& str,
-              const std::size_t begin, const std::size_t len,
-              const std::string error_prefix = "",
-              const at_line line_number = at_line{0})
+              const std::size_t begin, const std::size_t length,
+              source_location src)
 {
     static_assert(std::is_arithmetic<T>::value, "");
+    src.column() = begin;
+    src.range()  = length;
     try
     {
         return detail::read_number_impl<T>(
-                get_substr(str, begin, len, error_prefix, line_number));
+                get_substr(str, begin, length, src));
     }
     catch(const std::invalid_argument& err)
     {
-        write_error    (std::cerr, error_prefix, "expected number, but got");
-        write_underline(std::cerr, str, begin, len, line_number);
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "read_number: invalid number format", src, "here");
+        std::terminate();
     }
     catch(const std::out_of_range& err)
     {
-        write_error    (std::cerr, error_prefix, "invalid number appeared");
-        write_underline(std::cerr, str, begin, len, line_number);
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "read_number: invalid number format", src, "here");
+        std::terminate();
     }
     catch(const std::exception& err)
     {
-        write_error    (std::cerr, error_prefix, "unknown error appeared: ",
-                                   err.what());
-        write_underline(std::cerr, str, begin, len, line_number);
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "read_number: unknown error appeared", src, "here");
+        std::terminate();
     }
 }
 

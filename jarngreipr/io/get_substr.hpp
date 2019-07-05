@@ -1,6 +1,7 @@
 #ifndef JARNGREIPR_GET_SUBSTR_HPP
 #define JARNGREIPR_GET_SUBSTR_HPP
-#include <jarngreipr/io/write_error.hpp>
+#include <jarngreipr/io/source_location.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -18,9 +19,7 @@ namespace jarngreipr
 template<typename charT, typename traits, typename Alloc>
 inline charT
 get_char_at(const std::basic_string<charT, traits, Alloc>& str,
-            const std::size_t index,
-            const std::string error_message,
-            const at_line line_number = at_line{0})
+            const std::size_t index, source_location src)
 {
     try
     {
@@ -28,10 +27,10 @@ get_char_at(const std::basic_string<charT, traits, Alloc>& str,
     }
     catch(const std::out_of_range& err)
     {
-        write_error(std::cerr, error_message, " character at ", index,
-                    " cannot be extracted from the following string");
-        write_underline(std::cerr, str, index, 1, line_number);
-        std::exit(EXIT_FAILURE);
+        src.column() = index;
+        src.range()  = 1;
+        log(log_level::error, "couldn't get a character", src, "here");
+        std::terminate();
     }
 }
 
@@ -40,8 +39,7 @@ template<typename charT, typename traits, typename Alloc>
 inline std::basic_string<charT, traits, Alloc>
 get_substr(const std::basic_string<charT, traits, Alloc>& str,
            const std::size_t begin, const std::size_t len,
-           const std::string error_message,
-           const at_line line_number = at_line{0})
+           source_location src)
 {
     try
     {
@@ -49,10 +47,10 @@ get_substr(const std::basic_string<charT, traits, Alloc>& str,
     }
     catch(const std::out_of_range& err)
     {
-        write_error(std::cerr, error_message, "range [", begin, ", ", begin+len,
-                    ") cannot be extracted from the following string");
-        write_underline(std::cerr, str, begin, len, line_number);
-        std::exit(EXIT_FAILURE);
+        src.column() = begin;
+        src.range()  = len;
+        log(log_level::error, "couldn't get a sub-string", src, "here");
+        std::terminate();
     }
 }
 } // jarngreipr
