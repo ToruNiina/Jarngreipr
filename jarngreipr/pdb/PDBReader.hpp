@@ -25,8 +25,8 @@ class PDBReader
     {
         if(!ifstrm_.good())
         {
-            write_error(std::cerr, "PDBReader: file open error: ", filename_);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "PDBReader: file open error: ", filename_, '\n');
+            std::terminate();
         }
     }
 
@@ -53,9 +53,9 @@ class PDBReader
             }
         }
 
-        write_error(std::cerr, "PDBReader: ", this->filename_,
-                    " does not contain chain ", id, '.');
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "PDBReader: file \"", filename_, "\" does not "
+                              "contain chain ", id, ".\n");
+        std::terminate();
     }
 
   private:
@@ -63,29 +63,27 @@ class PDBReader
     // lazy functions.
     atom_type read_atom(const std::string& line)
     {
-        const auto ln  = at_line(this->line_num_);
-        const auto msg = std::string("while reading pdb ATOM in ") + this->filename_;
-
-        if(get_substr(line, 0, 6, msg, ln) != "ATOM  ")
+        source_location src(this->filename_, line, 0, 6, this->line_num_);
+        if(get_substr(src, 0, 6) != "ATOM  ")
         {
-            write_error(std::cerr, "[internal erorr] PDBReader: non ATOM line");
-            write_underline(std::cerr, line, 0, 6, ln);
-            std::exit(EXIT_FAILURE);
+            log(log_level::error, "internal error: not an ATOM line\n", src,
+                                  "prefix is not \"ATOM\"\n");
+            std::terminate();
         }
 
         atom_type atm;
 
         // these values are required
-        atm.atom_id      = read_number<std::int32_t>(line, 6, 5, msg, ln);
-        atm.atom_name    = get_substr (line, 12, 4, msg, ln);
-        atm.altloc       = get_char_at(line, 16,    msg, ln);
-        atm.residue_name = get_substr (line, 17, 3, msg, ln);
-        atm.chain_id     = get_char_at(line, 21,    msg, ln);
-        atm.residue_id   = read_number<std::int32_t>(line, 22, 4, msg, ln);
-        atm.icode        = get_char_at(line, 26,    msg, ln);
-        atm.position[0]  = read_number<real_type>(line, 30, 8, msg, ln);
-        atm.position[1]  = read_number<real_type>(line, 38, 8, msg, ln);
-        atm.position[2]  = read_number<real_type>(line, 46, 8, msg, ln);
+        atm.atom_id      = read_number<std::int32_t>(src, 6, 5);
+        atm.atom_name    = get_substr (src, 12, 4);
+        atm.altloc       = get_char_at(src, 16   );
+        atm.residue_name = get_substr (src, 17, 3);
+        atm.chain_id     = get_char_at(src, 21   );
+        atm.residue_id   = read_number<std::int32_t>(src, 22, 4);
+        atm.icode        = get_char_at(src, 26   );
+        atm.position[0]  = read_number<real_type>(src, 30, 8);
+        atm.position[1]  = read_number<real_type>(src, 38, 8);
+        atm.position[2]  = read_number<real_type>(src, 46, 8);
 
         // allow files that lack the following values. default values are
         atm.occupancy          = 0.0;
@@ -95,13 +93,13 @@ class PDBReader
 
         //XXX if the column exists, it should be a valid value.
         if(line.size() < 60) {return atm;}
-        atm.occupancy          = read_number<real_type>(line, 54, 6, msg, ln);
+        atm.occupancy = read_number<real_type>(src, 54, 6);
         if(line.size() < 66) {return atm;}
-        atm.temperature_factor = read_number<real_type>(line, 60, 6, msg, ln);
+        atm.temperature_factor = read_number<real_type>(src, 60, 6);
         if(line.size() < 78) {return atm;}
-        atm.element            = get_substr(line, 76, 2, msg, ln);
+        atm.element = get_substr(src, 76, 2);
         if(line.size() < 80) {return atm;}
-        atm.charge             = get_substr(line, 78, 2, msg, ln);
+        atm.charge  = get_substr(src, 78, 2);
 
         return atm;
     }
@@ -119,23 +117,27 @@ class PDBReader
             {
                 atoms.push_back(this->read_atom(line));
             }
-            else if(line.size() >= 3 && line.substr(0, 3) == "TER")
+            else if((line.size() >= 3 && line.substr(0, 3) == "TER") ||
+                    (line.size() >= 6 && line.substr(0, 6) == "ENDMDL"))
             {
-                return chain_type(std::move(atoms));
-            }
-            else if(line.size() >= 6 && line.substr(0, 6) == "ENDMDL")
-            {
+                if(!atoms.empty())
+                {
+                    log(log_level::info, "PDBReader: read chain ",
+                        atoms.front().chain_id, ".\n");
+                }
                 return chain_type(std::move(atoms));
             }
             continue;
         }
         if(!atoms.empty())
         {
+            log(log_level::info, "PDBReader: read chain ",
+                atoms.front().chain_id, ".\n");
             return chain_type(std::move(atoms));
         }
-        write_error(std::cerr, "PDBReader: ", this->filename_,
-                    " does not contain chain any more.");
-        std::exit(EXIT_FAILURE);
+        log(log_level::error, "PDBReader: ", filename_, " does not contain ",
+                              "chains any more\n");
+        std::terminate();
     }
 
   private:

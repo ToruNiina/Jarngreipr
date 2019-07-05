@@ -1,7 +1,5 @@
 #ifndef JARNGREIPR_READ_NUMBER_HPP
 #define JARNGREIPR_READ_NUMBER_HPP
-#include <jarngreipr/io/source_location.hpp>
-#include <jarngreipr/io/log.hpp>
 #include <jarngreipr/io/get_substr.hpp>
 #include <stdexcept>
 #include <string>
@@ -88,17 +86,12 @@ read_number_impl(const std::string& s)
 } // detail
 
 template<typename T>
-T read_number(const std::string& str,
-              const std::size_t begin, const std::size_t length,
-              source_location src)
+T read_number(const source_location& src)
 {
     static_assert(std::is_arithmetic<T>::value, "");
-    src.column() = begin;
-    src.range()  = length;
     try
     {
-        return detail::read_number_impl<T>(
-                get_substr(str, begin, length, src));
+        return detail::read_number_impl<T>(get_substr(src));
     }
     catch(const std::invalid_argument& err)
     {
@@ -115,6 +108,14 @@ T read_number(const std::string& str,
         log(log_level::error, "read_number: unknown error appeared", src, "here");
         std::terminate();
     }
+}
+
+template<typename T>
+T read_number(source_location& src, std::size_t first, std::size_t length)
+{
+    src.column() = first;
+    src.range()  = length;
+    return read_number<T>(src);
 }
 
 } // jarngreipr
