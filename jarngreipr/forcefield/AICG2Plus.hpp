@@ -655,6 +655,12 @@ typename AICG2Plus<realT>::real_type
 AICG2Plus<realT>::calc_contact_coef(
         const bead_ptr& bead1, const bead_ptr& bead2) const
 {
+    // AICG2+ parameters should be used for Ca-Ca pair.
+    if(bead1->kind() != "CarbonAlpha" || bead2->kind() != "CarbonAlpha")
+    {
+        return 0.3; // the default value
+    }
+
     std::size_t num_bb_hb = 0; // backbone-backbone hydrogen bond
     std::size_t num_bb_da = 0; // backbone-backbone donor-acceptor
     std::size_t num_bb_cx = 0; // backbone-backbone carbon-X contact
