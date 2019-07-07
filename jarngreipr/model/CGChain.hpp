@@ -52,6 +52,11 @@ class CGChain
     const_iterator cbegin() const noexcept {return beads_.cbegin();}
     const_iterator cend()   const noexcept {return beads_.cend();}
 
+    bead_ptr&       front()       noexcept {return beads_.front();}
+    bead_ptr const& front() const noexcept {return beads_.front();}
+    bead_ptr&       back()        noexcept {return beads_.back();}
+    bead_ptr const& back()  const noexcept {return beads_.back();}
+
     container_type const& beads() const noexcept {return beads_;}
     container_type&       beads()       noexcept {return beads_;}
     std::string const&    name()  const noexcept {return name_;}
