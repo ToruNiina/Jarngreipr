@@ -161,8 +161,8 @@ int main(int argc, char **argv)
                         {"mass", m},
                         {"position", toml::value{p[0], p[1], p[2]}},
                         {"velocity", toml::value{v[0], v[1], v[2]}},
-                        {"name",     "CA"},
-                        {"group",    "none"}
+                        {"name",     bead->name()},
+                        {"group",    group.name()}
                     };
                     if(is_front)
                     {
