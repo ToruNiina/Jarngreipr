@@ -47,8 +47,9 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::map>& ff_,
-                                const group_type& chains) const
+ExcludedVolume<realT>::generate(
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        const group_type& chains) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
@@ -65,15 +66,12 @@ ExcludedVolume<realT>::generate(toml::basic_value<toml::preserve_comments, std::
         ff["global"] = array_type{};
     }
 
-    // TODO to support inter- and intra-group interaction, the argument
-    //      std::vector<chain_type> should be changed to a group class later.
-
     table_type exv{
         {"interaction", "Pair"          },
         {"potential"  , "ExcludedVolume"},
         {"ignore", table_type{
                 {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
-                {"molecule", "Nothing"} // TODO ignore inter-group interaction
+                {"molecule", "Nothing"}
             }
         },
         {"spatial_partition", table_type{
@@ -104,13 +102,63 @@ template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(
         toml::basic_value<toml::preserve_comments, std::map>& ff_,
-        const group_type&, const group_type&) const
+        const group_type& grp1, const group_type& grp2) const
 {
-    std::cerr
-        << '[' << mjolnir::io::red << "error" << mjolnir::io::nocolor
-        << "] only inter-group excluded volume is currently not supported. "
-           "see https://github.com/Mjolnir-MD/Mjolnir/issues/128"
-        << std::endl;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
+    using array_type = value_type::array_type;
+    using table_type = value_type::table_type;
+
+    if(ff_.is_uninitialized())
+    {
+        ff_ = table_type{};
+    }
+
+    table_type& ff = ff_.as_table();
+    if(ff.count("global") == 0)
+    {
+        ff["global"] = array_type{};
+    }
+
+    table_type exv{
+        {"interaction", "Pair"          },
+        {"potential"  , "ExcludedVolume"},
+        {"ignore", table_type{
+                {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
+                {"molecule", "Nothing"},
+                {"group", table_type{{"inter", array_type{grp1.name(), grp2.name()} }} },
+            }
+        },
+        {"spatial_partition", table_type{
+                {"type", "CellList"}, {"margin", 0.5}
+            }
+        },
+        {"epsilon", this->epsilon_}
+    };
+
+    array_type params;
+    for(const auto& chain : grp1)
+    {
+        for(const auto& bead : chain)
+        {
+            table_type para;
+            para["index"]  = bead->index();
+            para["radius"] = this->radii_.at(bead->name());
+            params.push_back(std::move(para));
+        }
+    }
+    for(const auto& chain : grp2)
+    {
+        for(const auto& bead : chain)
+        {
+            table_type para;
+            para["index"]  = bead->index();
+            para["radius"] = this->radii_.at(bead->name());
+            params.push_back(std::move(para));
+        }
+    }
+    exv["parameters"] = std::move(params);
+
+    ff.at("global").as_array().push_back(std::move(exv));
     return ff_;
 }
 
