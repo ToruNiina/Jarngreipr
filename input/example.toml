@@ -1,7 +1,5 @@
 # TOML v0.5.0
 
-# "A-D" means [A, B, C, D]. "A&C&E" means [A, C, E]. "A&C-E" means [A, C, D, E].
-
 [files]
 output.prefix = "example"
 output.path   = "./"
@@ -40,14 +38,36 @@ DNA.chain     = "A-B"
 # parameter file for this forcefield
 parameters    = "./parameter/parameters.toml"
 
-[forcefields.local]
-protein = ["AICG2+"]
+[[forcefields.local]]
+# including inter-chain Go
+potential = "AICG2+"
+group     = ["protein"]
 
-[forcefields.global]
-protein     = ["GoContact", "Electrostatic", "ExcludedVolume"]
-DNA         = ["3SPN2"]
-protein-DNA = [
-    {name = "GoContact", k = 0.1},
-    "Electrostatic",
-    "ExcludedVolume"
-]
+[[forcefields.local]]
+potential = "3SPN2"
+group     = ["DNA"]
+
+[[forcefields.local]]
+# Go-contact is applied between specific pairs of particles, so classified as local
+potential = "GoContact"
+group.inter = ["DNA", "protein"]
+
+[[forcefields.global]]
+# inter- and intra-chain protein-protein GoContact and ExcludedVolume will be applied
+potential = "AICG2+"
+groups.intra = ["protein"]
+
+[[forcefields.global]]
+# DNA-DNA DebyeHuckel and WCA potential will be applied
+potential = "3SPN2"
+groups.intra = ["DNA"]
+
+[[forcefields.global]]
+# inter-chain DNA-Protein ExcludedVolume will be applied
+potential = "ExcludedVolume"
+groups.inter = ["DNA", "protein"]
+
+[[forcefields.global]]
+# DNA-Protein DebyeHuckel will be applied
+potential = "DebyeHuckel"
+groups.inter = ["DNA", "protein"]
