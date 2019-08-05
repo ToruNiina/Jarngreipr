@@ -6,6 +6,7 @@
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
+#include <jarngreipr/util/ordered_map.hpp>
 #include <iterator>
 #include <algorithm>
 #include <iostream>
@@ -84,13 +85,13 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     ~AICG2Plus() override = default;
 
     // generate local parameters, not inter-chain contacts
-    toml::basic_value<toml::preserve_comments, std::map>&
-    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
+    toml::basic_value<toml::preserve_comments, ordered_map>&
+    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
              const group_type& chains) const override;
 
     // generate inter-chain contacts.
-    toml::basic_value<toml::preserve_comments, std::map>&
-    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
+    toml::basic_value<toml::preserve_comments, ordered_map>&
+    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
              const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override;
@@ -231,12 +232,12 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, std::map>&
+toml::basic_value<toml::preserve_comments, ordered_map>&
 AICG2Plus<realT>::generate(
-        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        toml::basic_value<toml::preserve_comments, ordered_map>& ff_,
         const group_type& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
+    using value_type = toml::basic_value<toml::preserve_comments, ordered_map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
@@ -351,6 +352,7 @@ AICG2Plus<realT>::generate(
                 {"interaction", "BondAngle"},
                 {"potential",   "FlexibleLocalAngle"},
                 {"topology",    "none"},
+                {"env", {}},
                 {"parameters",  array_type{}}
             };
             const std::string y1_prefix("y1_");
@@ -370,7 +372,7 @@ AICG2Plus<realT>::generate(
                     }
                 }
                 env["default_x"] = this->angle_x_;
-                flp_angle.as_table()["env"] = std::move(env);
+                flp_angle.as_table().at("env") = std::move(env);
             }
             auto& params = find_or_push_table(ff.at("local"), flp_angle,
                 /* the keys that should be equivalent = */ {
@@ -455,6 +457,7 @@ AICG2Plus<realT>::generate(
                 {"interaction", "DihedralAngle"},
                 {"potential"  , "FlexibleLocalDihedral"},
                 {"topology"   , "none"},
+                {"env"        , {}},
                 {"parameters",  array_type{}}
             };
             {
@@ -463,7 +466,7 @@ AICG2Plus<realT>::generate(
                 {
                     env[dih.first] = dih.second;
                 }
-                flp_dihd.as_table()["env"] = std::move(env);
+                flp_dihd.as_table().at("env") = std::move(env);
             }
             auto& params = find_or_push_table(ff.at("local"), flp_dihd,
                 /* the keys that should be equivalent = */ {
@@ -558,12 +561,12 @@ AICG2Plus<realT>::generate(
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, std::map>&
+toml::basic_value<toml::preserve_comments, ordered_map>&
 AICG2Plus<realT>::generate(
-        toml::basic_value<toml::preserve_comments, std::map>& ff_,
+        toml::basic_value<toml::preserve_comments, ordered_map>& ff_,
         const group_type& lhs, const group_type& rhs) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
+    using value_type = toml::basic_value<toml::preserve_comments, ordered_map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 

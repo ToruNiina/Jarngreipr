@@ -38,13 +38,13 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     ~ClementiGo() override = default;
 
     // generate local parameters, not inter-chain contacts
-    toml::basic_value<toml::preserve_comments, std::map>&
-    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
+    toml::basic_value<toml::preserve_comments, ordered_map>&
+    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
              const group_type& chains) const override;
 
     // generate inter-chain contacts.
-    toml::basic_value<toml::preserve_comments, std::map>&
-    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
+    toml::basic_value<toml::preserve_comments, ordered_map>&
+    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
              const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type& chain) const override;
@@ -78,12 +78,12 @@ class ClementiGo final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, std::map>&
+toml::basic_value<toml::preserve_comments, ordered_map>&
 ClementiGo<realT>::generate(
-        toml::basic_value<toml::preserve_comments, std::map>& out,
+        toml::basic_value<toml::preserve_comments, ordered_map>& out,
         const group_type& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
+    using value_type = toml::basic_value<toml::preserve_comments, ordered_map>;
     using table_type = typename value_type::table_type;
     using array_type = typename value_type::array_type;
 
@@ -226,9 +226,9 @@ ClementiGo<realT>::generate(
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, std::map>&
+toml::basic_value<toml::preserve_comments, ordered_map>&
 ClementiGo<realT>::generate(
-        toml::basic_value<toml::preserve_comments, std::map>& out,
+        toml::basic_value<toml::preserve_comments, ordered_map>& out,
         const group_type& lhs, const group_type& rhs) const
 {
     const real_type th2 = contact_threshold_ * contact_threshold_;

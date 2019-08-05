@@ -29,18 +29,15 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     // ========================================================================
     // output miscellaneous stuff in the predefined order
 
-    assert(toml::find(ff, "interaction").comments().empty());
-    os << "interaction = " << toml::find(ff, "interaction") << '\n';
-    if(ff.as_table().count("potential") == 1)
+    for(const auto& kv : ff.as_table())
     {
-        assert(toml::find(ff, "potential").comments().empty());
-        os << "potential   = " << toml::find(ff, "potential") << '\n';
+        if(kv.first == "parameters" || kv.first == "env") {continue;}
+        os << toml::format_key(kv.first) << " = "
+           << toml::visit(inline_serializer, kv.second) << '\n';
     }
-    if(ff.as_table().count("topology") == 1)
-    {
-        assert(toml::find(ff, "topology").comments().empty());
-        os << "topology    = " << toml::find(ff, "topology") << '\n';
-    }
+
+    // ========================================================================
+    // output `env` field if exists.
 
     if(ff.as_table().count("env") == 1)
     {
@@ -52,21 +49,6 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
             os << "env." << toml::format_key(kv.first) << " = "
                << toml::visit(inline_serializer, kv.second) << '\n';
         }
-    }
-
-    // output other potential-specific paramters, if exists
-    for(const auto& kv : ff.as_table())
-    {
-        const auto& key = kv.first;
-        if(key == "potential" || key == "interaction" || key == "topology" ||
-           key == "env"       || key == "parameters")
-        {
-            // these keys has special meaning, so output in a different way
-            continue;
-        }
-        assert(kv.second.comments().empty());
-        os << toml::format_key(key) << " = "
-           << toml::visit(inline_serializer, kv.second) << '\n';
     }
 
     // ========================================================================
