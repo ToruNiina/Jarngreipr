@@ -1,5 +1,6 @@
 set(TEST_NAMES
     test_parse_range
+    test_ordered_map
     )
 
 foreach(TEST_NAME ${TEST_NAMES})
