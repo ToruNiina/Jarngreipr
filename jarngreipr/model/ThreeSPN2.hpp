@@ -111,4 +111,4 @@ class ThreeSPN2Phosphate final : public CGBead<realT>
 };
 
 } // jarngreipr
-#endif /*JARNGREIPR_CARBON_ALPHA*/
+#endif /*JARNGREIPR_MODEL_3SPN2*/
