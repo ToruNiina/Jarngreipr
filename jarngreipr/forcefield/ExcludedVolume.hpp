@@ -26,12 +26,12 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
     {}
     ~ExcludedVolume() override = default;
 
-    toml::basic_value<toml::preserve_comments, ordered_map>&
-    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const group_type& chains) const override;
 
-    toml::basic_value<toml::preserve_comments, ordered_map>&
-    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
+    toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const group_type& lhs, const group_type& rhs) const override;
 
     bool check_beads_kind(const chain_type&) const override
@@ -46,12 +46,12 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 };
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, ordered_map>&
+toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(
-        toml::basic_value<toml::preserve_comments, ordered_map>& ff_,
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
         const group_type& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, ordered_map>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
@@ -99,12 +99,12 @@ ExcludedVolume<realT>::generate(
 }
 
 template<typename realT>
-toml::basic_value<toml::preserve_comments, ordered_map>&
+toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(
-        toml::basic_value<toml::preserve_comments, ordered_map>& ff_,
+        toml::basic_value<toml::preserve_comments, std::map>& ff_,
         const group_type& grp1, const group_type& grp2) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, ordered_map>;
+    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 

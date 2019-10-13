@@ -187,7 +187,7 @@ int main(int argc, char **argv)
     const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
 
     const std::vector<std::size_t> flex{/* flexible region*/};
-    toml::basic_value<toml::preserve_comments, ordered_map> ff;
+    toml::basic_value<toml::preserve_comments, std::map> ff;
 
     // -----------------------------------------------------------------------
     // local

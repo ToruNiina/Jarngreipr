@@ -1,7 +1,6 @@
 #ifndef JARNGREIPR_FORCEFIELD_GENERATOR
 #define JARNGREIPR_FORCEFIELD_GENERATOR
 #include <jarngreipr/model/CGGroup.hpp>
-#include <jarngreipr/util/ordered_map.hpp>
 #include <extlib/toml/toml.hpp>
 #include <memory>
 #include <map>
@@ -23,13 +22,13 @@ class ForceFieldGenerator
     virtual ~ForceFieldGenerator() = default;
 
     //!@brief generate forcefield parameter values
-    virtual toml::basic_value<toml::preserve_comments, ordered_map>&
-    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
+    virtual toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const group_type& group) const = 0;
 
     //!@brief generate inter-chain parameters if it's defined.
-    virtual toml::basic_value<toml::preserve_comments, ordered_map>&
-    generate(toml::basic_value<toml::preserve_comments, ordered_map>& out,
+    virtual toml::basic_value<toml::preserve_comments, std::map>&
+    generate(toml::basic_value<toml::preserve_comments, std::map>& out,
              const group_type& lhs, const group_type& rhs) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
