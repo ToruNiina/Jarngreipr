@@ -62,13 +62,5 @@ std::basic_ostream<charT, traits>& operator<<(
     return os;
 }
 
-template<typename realT>
-std::string to_string(const PDBAtom<realT>& atm)
-{
-    std::ostringstream oss;
-    oss << atm;
-    return oss.str();
-}
-
 }//jarngreipr
 #endif // JARNGREIPR_PDB_ATOM_HPP
