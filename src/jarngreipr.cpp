@@ -18,7 +18,7 @@ int main(int argc, char **argv)
         return 1;
     }
     const std::string fname(argv[1]);
-    const auto input  = toml::parse(fname);
+    const auto input  = toml::parse<toml::discard_comments, std::map>(fname);
 
     // output files and units tables
     {
