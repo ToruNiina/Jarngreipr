@@ -3,4 +3,4 @@ extlib/boost_1_67_0.tar.bz2
 bin/*
 build/*
 *.pdb
-*.toml
+./*.toml
