@@ -66,7 +66,7 @@ ExcludedVolume<realT>::generate(
         ff["global"] = array_type{};
     }
 
-    table_type exv{
+    toml::basic_value<toml::preserve_comments, std::map> exv{
         {"interaction", "Pair"          },
         {"potential"  , "ExcludedVolume"},
         {"ignore", table_type{
@@ -78,10 +78,15 @@ ExcludedVolume<realT>::generate(
                 {"type", "CellList"}, {"margin", 0.5}
             }
         },
-        {"epsilon", this->epsilon_}
+        {"epsilon", this->epsilon_},
+        {"parameters",  array_type{}}
     };
 
-    array_type params;
+    auto& params = find_or_push_table(ff.at("global"), exv,
+        /* the keys that should be equivalent = */ {
+            "interaction", "potential", "ignore", "spatial_partition", "epsilon"
+        }).as_table().at("parameters").as_array();
+
     for(const auto& chain : chains)
     {
         for(const auto& bead : chain)
@@ -92,9 +97,6 @@ ExcludedVolume<realT>::generate(
             params.push_back(std::move(para));
         }
     }
-    exv["parameters"] = std::move(params);
-
-    ff.at("global").as_array().push_back(std::move(exv));
     return ff_;
 }
 
@@ -104,6 +106,7 @@ ExcludedVolume<realT>::generate(
         toml::basic_value<toml::preserve_comments, std::map>& ff_,
         const group_type& grp1, const group_type& grp2) const
 {
+    // TODO
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
