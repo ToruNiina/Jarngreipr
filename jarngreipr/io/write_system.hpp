@@ -49,7 +49,6 @@ write_system(std::basic_ostream<charT, traits>& os,
     {
         const auto m = toml::find<double>(particle, "mass");
         const auto p = toml::find<std::array<double, 3>>(particle, "position");
-        const auto v = toml::find<std::array<double, 3>>(particle, "velocity");
         const auto n = toml::find(particle, "name");
         const auto g = toml::find(particle, "group");
 
@@ -59,7 +58,6 @@ write_system(std::basic_ostream<charT, traits>& os,
         }
         os << "{m = "     << format_number("%8.3f", m);
         os << ", pos = "  << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
-        os << ", vel = "  << format_number("[%9.4f,%9.4f,%9.4f]", v[0], v[1], v[2]);
         os << ", name = " << n << ", group = " << g << "},\n";
     }
     os << "]\n";
