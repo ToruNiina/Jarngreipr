@@ -132,8 +132,6 @@ int main(int argc, char **argv)
         using table_type = typename value_type::table_type;
         using array_type = typename value_type::array_type;
 
-        // consider units
-        const double kBT = 300.0 * 1.986231313e-3;
 
         value_type sys = table_type{
             {"attributes",     toml::find(system, "attributes")    },
@@ -151,18 +149,12 @@ int main(int argc, char **argv)
                 bool is_front = true;
                 for(const auto& bead : chain)
                 {
-                    const auto m = toml::find<double>(mass, bead->name());
-                    std::normal_distribution<double>
-                        maxwell_boltzmann(0.0, std::sqrt(kBT / m));
-
+                    const auto  m = toml::find<double>(mass, bead->name());
                     const auto& p = bead->position();
-                    const std::array<double, 3> v{
-                        {maxwell_boltzmann(mt), maxwell_boltzmann(mt), maxwell_boltzmann(mt)}
-                    };
+
                     value_type particle = table_type{
-                        {"mass", m},
+                        {"mass",     m},
                         {"position", toml::value{p[0], p[1], p[2]}},
-                        {"velocity", toml::value{v[0], v[1], v[2]}},
                         {"name",     bead->name()},
                         {"group",    group.name()}
                     };
