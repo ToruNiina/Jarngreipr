@@ -1,6 +1,7 @@
 // #include <jarngreipr/forcefield/ClementiGo.hpp>
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
+#include <jarngreipr/forcefield/ElectroStatic.hpp>
 #include <jarngreipr/io/write_forcefield.hpp>
 #include <jarngreipr/io/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
@@ -179,8 +180,8 @@ int main(int argc, char **argv)
 
     const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
     const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
+    const auto ele_params    = toml::parse("parameter/ElectroStatic.toml");
 
-    const std::vector<std::size_t> flex{/* flexible region*/};
     toml::basic_value<toml::preserve_comments, std::map> ff;
 
     // -----------------------------------------------------------------------
@@ -196,10 +197,12 @@ int main(int argc, char **argv)
     // global
 
     ExcludedVolume<double> exv(exv_params);
+    ElectroStatic<double> ele(ele_params);
 
     for(const auto& group : groups)
     {
         exv. generate(ff, group);
+        ele. generate(ff, group);
         aicg.generate(ff, group, group);
     }
 
