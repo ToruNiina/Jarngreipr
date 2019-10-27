@@ -33,7 +33,7 @@ class CGBead
 
     bool has_attribute(const std::string& key) const {return attr_.count(key) == 1;}
     std::string const& attribute(const std::string& key) const {return attr_.at(key);}
-    std::string&       attribute(const std::string& key)       {return attr_.at(key);}
+    std::string&       attribute(const std::string& key)       {return attr_[key];}
 
   protected:
 
