@@ -96,6 +96,7 @@ int main(int argc, char **argv)
     std::cout << "integrator.seed       = " << rng() << '\n';
     std::cout << "integrator.parameters = [\n";
     {
+        const auto& mass = toml::find(params, "mass");
         std::size_t num_total_bead = 0;
         for(const auto& group : groups)
         {
@@ -112,9 +113,10 @@ int main(int argc, char **argv)
             {
                 for(const auto& bead : chain)
                 {
+                    const auto m = toml::find<double>(mass, bead->name());
                     // TODO assuming default CA parameter...
                     std::cout << "{index = " << std::setw(width) << bead->index()
-                              << ", gamma = " << 168.7 * 0.005 << "},\n";
+                              << ", gamma = " << 168.7 * 0.005 / m << "},\n";
                 }
             }
         }
