@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     }
 
     // TODO be aware of paths
-    const auto params = toml::parse("parameter/parameters.toml");
+    const auto mass_params = toml::parse("parameter/mass.toml");
 
     // get `path.pdb`. if not exists, return "./"
     const auto pdb_path = [&]() -> std::string {
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     std::cout << "integrator.seed       = " << rng() << '\n';
     std::cout << "integrator.parameters = [\n";
     {
-        const auto& mass = toml::find(params, "mass");
+        const auto& mass = toml::find(mass_params, "mass");
         std::size_t num_total_bead = 0;
         for(const auto& group : groups)
         {
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
             {"particles",      array_type{}}
         };
         std::mt19937 mt(123456789);
-        const auto& mass = toml::find(params, "mass");
+        const auto& mass = toml::find(mass_params, "mass");
 
         auto& ps = sys.as_table().at("particles").as_array();
         for(const auto& group : groups)
