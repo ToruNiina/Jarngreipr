@@ -93,8 +93,8 @@ int main(int argc, char **argv)
     std::cout << "delta_t               = 0.1\n";
     std::cout << "total_step            = 1000_000\n";
     std::cout << "save_step             =    1_000\n";
+    std::cout << "seed                  = " << rng() << '\n';
     std::cout << "integrator.type       = \"BAOABLangevin\"\n";
-    std::cout << "integrator.seed       = " << rng() << '\n';
     std::cout << "integrator.parameters = [\n";
     {
         const auto& mass = toml::find(mass_params, "mass");
