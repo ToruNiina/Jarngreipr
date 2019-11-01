@@ -6,16 +6,48 @@
 #include <jarngreipr/io/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
 #include <jarngreipr/pdb/PDBReader.hpp>
+#include <jarngreipr/util/parse_range.hpp>
 #include <algorithm>
 #include <random>
 #include <map>
+
+template<typename Com, template<typename ...> class Tab,
+         template<typename ...> class Arr>
+std::map<std::string, std::vector<std::int64_t>>
+read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& flexible_regions)
+{
+    using namespace jarngreipr;
+
+    std::map<std::string, std::vector<std::int64_t>> regions;
+    for(const auto& region : flexible_regions.as_array())
+    {
+        const auto chainID = toml::find<std::string>(region, "chain");
+        if(regions.count(chainID) == 0)
+        {
+            regions[chainID] = {};
+        }
+        const auto residues = jarngreipr::parse_range<std::int64_t>(
+                toml::find<std::string>(region, "residues"));
+
+        log(log_level::info, "residue from ", residues.front(), " to ",
+            residues.back(), " are the flexible region of chain ", chainID, '\n');
+
+        std::copy(residues.begin(), residues.end(),
+                  std::back_inserter(regions.at(chainID)));
+    }
+    for(auto& kv : regions)
+    {
+        std::sort(kv.second.begin(), kv.second.end());
+    }
+    return regions;
+}
 
 int main(int argc, char **argv)
 {
     using namespace jarngreipr;
     if(argc < 2)
     {
-        std::cerr << "Usage: jarngreipr [file.toml]" << std::endl;
+        log(log_level::error, "Usage: jarngreipr [file.toml]\n");
         return 1;
     }
     const std::string fname(argv[1]);
@@ -59,6 +91,8 @@ int main(int argc, char **argv)
         // special keys. skip them.
         if(kv.first == "boundary_shape" || kv.first == "attributes") {continue;}
 
+        log(log_level::info, "reading group ", kv.first, "\n");
+
         // other stuffs are the definitions of groups.
         CGGroup<double> group(kv.first);
         const auto& group_def = kv.second;
@@ -66,22 +100,47 @@ int main(int argc, char **argv)
         // read a reference file
         PDBReader<double> reader(pdb_path + toml::find<std::string>(group_def, "reference"));
 
-        // TODO assuming CarbonAlpha...
+        // TODO assuming CarbonAlpha here...
         CarbonAlphaGenerator<double> model_generator;
+
+        const auto flexible_regions =
+            read_flexible_regions(toml::find(group_def, "flexible_regions"));
 
         for(auto&& chain_id : toml::find<std::vector<std::string>>(group_def, "chain"))
         {
             if(chain_id.size() != 1)
             {
-                std::cerr << "chain should be defined by a character" << std::endl;
+                log(log_level::error, "chain ID should be 1 letter -> ", chain_id, '\n');
                 return 1;
             }
+            log(log_level::info, "reading chain ", chain_id, " of group ",
+                                 kv.first, '\n');
+
             const auto chain = reader.read_chain(chain_id.front());
-            group.push_back(model_generator.generate(chain, offset));
+            auto cg_chain = model_generator.generate(chain, offset);
+
+            if(flexible_regions.count(chain_id) != 0)
+            {
+                const auto& flex = flexible_regions.at(chain_id);
+                for(auto& cg_bead : cg_chain)
+                {
+                    const auto resID = cg_bead->atoms().front().residue_id;
+                    if(std::binary_search(flex.begin(), flex.end(), resID))
+                    {
+                        cg_bead->attribute("is_flexible") = std::string("true");
+                    }
+                    else
+                    {
+                        cg_bead->attribute("is_flexible") = std::string("false");
+                    }
+                }
+            }
+            group.push_back(cg_chain);
             offset += group.back().size();
         }
         groups.push_back(std::move(group));
     }
+    log(log_level::info, "systems are coarse-grained\n");
 
     // ========================================================================
 
@@ -115,7 +174,6 @@ int main(int argc, char **argv)
                 for(const auto& bead : chain)
                 {
                     const auto m = toml::find<double>(mass, bead->name());
-                    // TODO assuming default CA parameter...
                     std::cout << "{index = " << std::setw(width) << bead->index()
                               << ", gamma = " << 168.7 * 0.005 / m << "},\n";
                 }
@@ -132,7 +190,6 @@ int main(int argc, char **argv)
         using value_type = toml::basic_value<toml::preserve_comments, std::map>;
         using table_type = typename value_type::table_type;
         using array_type = typename value_type::array_type;
-
 
         value_type sys = table_type{
             {"attributes",     toml::find(system, "attributes")    },
@@ -171,6 +228,8 @@ int main(int argc, char **argv)
             }
         }
         write_system(std::cout, sys);
+
+        log(log_level::info, "[[systems]] written\n");
     }
 
     // ========================================================================
@@ -187,14 +246,19 @@ int main(int argc, char **argv)
     // -----------------------------------------------------------------------
     // local
 
+    log(log_level::info, "generating local forcefield ...\n");
+
     AICG2Plus<double> aicg(aicg2p_params);
     for(const auto& group : groups)
     {
         aicg.generate(ff, group);
     }
+    log(log_level::info, "local forcefield generated\n");
 
     // -----------------------------------------------------------------------
     // global
+
+    log(log_level::info, "generating global forcefield ...\n");
 
     ExcludedVolume<double> exv(exv_params);
     ElectroStatic<double> ele(ele_params);
@@ -205,6 +269,7 @@ int main(int argc, char **argv)
         ele. generate(ff, group);
         aicg.generate(ff, group, group);
     }
+    log(log_level::info, "global forcefield generated\n");
 
     write_forcefield(std::cout, ff);
 
