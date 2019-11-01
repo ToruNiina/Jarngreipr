@@ -23,7 +23,7 @@ std::vector<integerT> parse_range(std::string str)
     while(str.front() == ' ') {str.erase(str.begin());}
     while(str.back()  == ' ') {str.pop_back();}
 
-    std::regex syntax(R"((\(|\[)((\+|-)?\d+),\s*((\+|-)?\d+)(\)|\]))");
+    std::regex syntax(R"((\(|\[)\s*((\+|-)?\d+),\s*((\+|-)?\d+)\s*(\)|\]))");
     std::smatch sm;
     if(!std::regex_match(str, sm, syntax))
     {
