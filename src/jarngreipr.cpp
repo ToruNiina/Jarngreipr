@@ -14,11 +14,13 @@
 template<typename Com, template<typename ...> class Tab,
          template<typename ...> class Arr>
 std::map<std::string, std::vector<std::int64_t>>
-read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& flexible_regions)
+read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& group)
 {
     using namespace jarngreipr;
-
     std::map<std::string, std::vector<std::int64_t>> regions;
+    if(group.as_table().count("flexible_regions") != 0) {return regions;}
+
+    const auto& flexible_regions = toml::find(group, "flexible_regions");
     for(const auto& region : flexible_regions.as_array())
     {
         const auto chainID = toml::find<std::string>(region, "chain");
