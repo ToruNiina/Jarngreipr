@@ -18,7 +18,11 @@ read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& group)
 {
     using namespace jarngreipr;
     std::map<std::string, std::vector<std::int64_t>> regions;
-    if(group.as_table().count("flexible_regions") != 0) {return regions;}
+    if(group.as_table().count("flexible_regions") == 0)
+    {
+        log(log_level::info, "no flexible region defined in this group\n");
+        return regions;
+    }
 
     const auto& flexible_regions = toml::find(group, "flexible_regions");
     for(const auto& region : flexible_regions.as_array())
@@ -105,8 +109,7 @@ int main(int argc, char **argv)
         // TODO assuming CarbonAlpha here...
         CarbonAlphaGenerator<double> model_generator;
 
-        const auto flexible_regions =
-            read_flexible_regions(toml::find(group_def, "flexible_regions"));
+        const auto flexible_regions = read_flexible_regions(group_def);
 
         for(auto&& chain_id : toml::find<std::vector<std::string>>(group_def, "chain"))
         {
