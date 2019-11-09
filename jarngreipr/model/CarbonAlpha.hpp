@@ -24,8 +24,8 @@ class CarbonAlpha final : public CGBead<realT>
 
   public:
 
-    CarbonAlpha(std::size_t idx, container_type atoms, std::string name)
-        : base_type(idx, std::move(atoms), std::move(name))
+    CarbonAlpha(std::size_t idx, real_type mass, container_type atoms, std::string name)
+        : base_type(idx, mass, std::move(atoms), std::move(name))
     {
         if(!this->atoms_.empty())
         {
