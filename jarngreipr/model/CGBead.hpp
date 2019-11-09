@@ -19,8 +19,8 @@ class CGBead
 
   public:
 
-    CGBead(std::size_t index, container_type atoms, std::string name)
-        : index_(index), name_(std::move(name)), atoms_(std::move(atoms))
+    CGBead(std::size_t index, real_type mass, container_type atoms, std::string name)
+        : index_(index), mass_(mass), name_(std::move(name)), atoms_(std::move(atoms))
     {}
     virtual ~CGBead() = default;
 
@@ -30,6 +30,7 @@ class CGBead
     container_type const& atoms() const noexcept {return atoms_;}
     std::string    const& name()  const noexcept {return name_;}
     std::size_t    const& index() const noexcept {return index_;}
+    real_type      const& mass()  const noexcept {return mass_;}
 
     bool has_attribute(const std::string& key) const {return attr_.count(key) == 1;}
     std::string const& attribute(const std::string& key) const {return attr_.at(key);}
@@ -38,6 +39,7 @@ class CGBead
   protected:
 
     std::size_t     index_;
+    real_type       mass_;
     std::string     name_;
     container_type  atoms_;
     std::map<std::string, std::string> attr_;
