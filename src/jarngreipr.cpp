@@ -5,6 +5,7 @@
 #include <jarngreipr/io/write_forcefield.hpp>
 #include <jarngreipr/io/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
+#include <jarngreipr/model/ThreeSPN2.hpp>
 #include <jarngreipr/pdb/PDBReader.hpp>
 #include <jarngreipr/util/parse_range.hpp>
 #include <algorithm>
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
         PDBReader<double> reader(pdb_path + toml::find<std::string>(group_def, "reference"));
 
         // TODO assuming CarbonAlpha here...
-        CarbonAlphaGenerator<double> model_generator;
+        CarbonAlphaGenerator<double> model_generator(toml::find(mass_params, "mass"));
 
         const auto flexible_regions = read_flexible_regions(group_def);
 
@@ -161,7 +162,6 @@ int main(int argc, char **argv)
     std::cout << "integrator.type       = \"BAOABLangevin\"\n";
     std::cout << "integrator.parameters = [\n";
     {
-        const auto& mass = toml::find(mass_params, "mass");
         std::size_t num_total_bead = 0;
         for(const auto& group : groups)
         {
@@ -178,9 +178,8 @@ int main(int argc, char **argv)
             {
                 for(const auto& bead : chain)
                 {
-                    const auto m = toml::find<double>(mass, bead->name());
                     std::cout << "{index = " << std::setw(width) << bead->index()
-                              << ", gamma = " << 168.7 * 0.005 / m << "},\n";
+                              << ", gamma = " << 168.7 * 0.005 / bead->mass() << "},\n";
                 }
             }
         }
@@ -202,7 +201,6 @@ int main(int argc, char **argv)
             {"particles",      array_type{}}
         };
         std::mt19937 mt(123456789);
-        const auto& mass = toml::find(mass_params, "mass");
 
         auto& ps = sys.as_table().at("particles").as_array();
         for(const auto& group : groups)
@@ -212,11 +210,10 @@ int main(int argc, char **argv)
                 bool is_front = true;
                 for(const auto& bead : chain)
                 {
-                    const auto  m = toml::find<double>(mass, bead->name());
                     const auto& p = bead->position();
 
                     value_type particle = table_type{
-                        {"mass",     m},
+                        {"mass",     bead->mass()},
                         {"position", toml::value{p[0], p[1], p[2]}},
                         {"name",     bead->name()},
                         {"group",    group.name()}
