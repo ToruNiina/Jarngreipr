@@ -5,6 +5,8 @@ O   = 15.9994
 C   = 12.0107
 N   = 14.0067
 
+[mass."AICG2+"]
+
 ALA =  71.09
 ARG = 156.19
 ASN = 114.11
@@ -25,3 +27,12 @@ THR = 101.11
 TRP = 186.21
 TYR = 163.18
 VAL =  99.14
+
+[mass.3SPN2]
+
+P =  94.9696 # Phosphate
+S =  83.1104 # Sugar
+A = 134.1220 # Adenine
+T = 125.1078 # Thymine
+C = 110.0964 # Cytosine
+G = 150.1214 # Guanine
