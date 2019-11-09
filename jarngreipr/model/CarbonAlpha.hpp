@@ -84,12 +84,14 @@ class CarbonAlphaGenerator final : public CGModelGeneratorBase<realT>
 
   public:
 
-    CarbonAlphaGenerator() = default;
+    explicit CarbonAlphaGenerator(toml::value mass): masses_(std::move(mass)) {}
     ~CarbonAlphaGenerator() override = default;
 
     cg_chain_type
     generate(const pdb_chain_type& pdb, const std::size_t offset) const override
     {
+        const auto& mass_AICG2p = toml::find(this->masses_, "AICG2+");
+
         CGChain<realT> retval(std::string(1, pdb.chain_id()));
         for(std::size_t i=0; i<pdb.residues_size(); ++i)
         {
@@ -97,10 +99,15 @@ class CarbonAlphaGenerator final : public CGModelGeneratorBase<realT>
             std::vector<PDBAtom<realT>> atoms(res.begin(), res.end());
             const auto name = atoms.front().residue_name;
             retval.push_back(std::make_shared<CarbonAlpha<realT>>(
-                        i + offset, std::move(atoms), name));
+                    i + offset, toml::find<real_type>(mass_AICG2p, name),
+                    std::move(atoms), name));
         }
         return retval;
     }
+
+  private:
+
+    toml::value masses_;
 };
 
 } // jarngreipr
