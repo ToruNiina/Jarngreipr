@@ -291,7 +291,8 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
         for(const auto& atom : atoms)
         {
             // assuming atom.name conforms the wwPDB 3 international standard.
-            log(log_level::debug, "atom_name = ", atom.atom_name, ", atom = ", atom.atom_name.substr(1, 1), '\n');
+            log(log_level::debug, "atom_name = ", atom.atom_name, ", atom = ",
+                                  atom.atom_name.substr(1, 1), '\n');
             const auto m = toml::find(masses_, atom.atom_name.substr(1, 1)).as_floating();
             com   += m * atom.position;
             denom += m;
