@@ -101,11 +101,13 @@ find_or_push_table(toml::basic_value<Comment, Map, Array>& dst,
 {
     const auto cmp = make_table_comparator(src, std::move(keys));
     auto& dst_array = dst.as_array();
-    if(dst_array.end() == std::find_if(dst_array.begin(), dst_array.end(), cmp))
+    const auto found = std::find_if(dst_array.begin(), dst_array.end(), cmp);
+    if(dst_array.end() == found)
     {
         dst_array.push_back(src);
+        return dst_array.back();
     }
-    return *(std::find_if(dst_array.begin(), dst_array.end(), cmp));
+    return *found;
 }
 
 } // mjolnir
