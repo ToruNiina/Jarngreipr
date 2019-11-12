@@ -6,6 +6,7 @@
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
+#include <jarngreipr/io/log.hpp>
 #include <iterator>
 #include <algorithm>
 #include <iostream>
@@ -253,6 +254,7 @@ AICG2Plus<realT>::generate(
 
     for(const auto& chain : chains)
     {
+        log(log_level::info, "generating AICG2+ parameters for chain ", chain.name(), '\n');
         if(!this->check_beads_kind(chain))
         {
             std::cerr
@@ -404,70 +406,20 @@ AICG2Plus<realT>::generate(
             }
         }
         /* dihedral-angle */{
-            auto& params = find_or_push_table(ff.at("local"), value_type{
-                {"interaction", "DihedralAngle"},
-                {"potential",   "Gaussian"},
-                {"topology",    "none"},
-                {"parameters",  array_type{}}
-            }, /* the keys that should be equivalent = */ {
-                "interaction", "potential", "topology"
-            }).as_table().at("parameters").as_array();
-            params.reserve(params.size() + chain.size());
-
-            for(std::size_t i=3, sz = chain.size(); i<sz; ++i)
+            table_type env;
+            for(const auto& dih : this->dihedral_term_)
             {
-                const auto& bead1 = chain.at(i-3);
-                const auto& bead2 = chain.at(i-2);
-                const auto& bead3 = chain.at(i-1);
-                const auto& bead4 = chain.at(i);
-                const auto  i1    = bead1->index();
-                const auto  i2    = bead2->index();
-                const auto  i3    = bead3->index();
-                const auto  i4    = bead4->index();
-
-                // if the beads contains flexible region, remove 1-4 contact.
-                if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2) ||
-                   is_in_flexible_region(bead3) || is_in_flexible_region(bead4))
-                {
-                    continue;
-                }
-
-                const auto nat_dihd = dihedral_angle(
-                                        bead1->position(), bead2->position(),
-                                        bead3->position(), bead4->position());
-                const auto contact_coef = this->calc_contact_coef(bead1, bead4);
-
-                value_type para = table_type{
-                    {"indices", value_type{i1, i2, i3, i4}   },
-                    {"v0"     , nat_dihd                     },
-                    {"sigma"  , this->wid_dih_               },
-                    {"k"      , this->coef_14_ * contact_coef}
-                };
-                if(i == 3)
-                {
-                    para.comments().push_back(std::string(" AICG2+ Dihedral "
-                        "Potential for chain ") + chain.name());
-                }
-                params.push_back(std::move(para));
+                env[dih.first] = dih.second;
             }
-        }
-        /* flexible-dihedral-angle */{
-            value_type flp_dihd{
+            value_type aicg_flp_dihd{
                 {"interaction", "DihedralAngle"},
-                {"potential"  , "FlexibleLocalDihedral"},
+                {"potential"  , "Gaussian+FlexibleLocalDihedral"},
                 {"topology"   , "none"},
-                {"env"        , {}},
+                {"env"        , env},
                 {"parameters",  array_type{}}
             };
-            {
-                table_type env;
-                for(const auto& dih : this->dihedral_term_)
-                {
-                    env[dih.first] = dih.second;
-                }
-                flp_dihd.as_table().at("env") = std::move(env);
-            }
-            auto& params = find_or_push_table(ff.at("local"), flp_dihd,
+
+            auto& params = find_or_push_table(ff.at("local"), aicg_flp_dihd,
                 /* the keys that should be equivalent = */ {
                     "interaction", "potential", "topology", "env"
                 }).as_table().at("parameters").as_array();
@@ -484,22 +436,88 @@ AICG2Plus<realT>::generate(
                 const auto  i3    = bead3->index();
                 const auto  i4    = bead4->index();
 
-                // like "ALA-PHE" or something like that
-                const std::string separator("-");
+                const auto nat_dihd = dihedral_angle(
+                                        bead1->position(), bead2->position(),
+                                        bead3->position(), bead4->position());
+                const auto contact_coef = this->calc_contact_coef(bead1, bead4);
 
                 value_type para = table_type{
-                    {"indices", value_type{i1, i2, i3, i4}               },
-                    {"k"      , this->k_dihedral_                        },
-                    {"coef"   , bead2->name() + separator + bead3->name()}
+                    {"indices", value_type{i1, i2, i3, i4}   },
+                    {"Gaussian", table_type{
+                        {"v0"     , nat_dihd                     },
+                        {"sigma"  , this->wid_dih_               },
+                        {"k"      , this->coef_14_ * contact_coef}
+                    }},
+                    {"FlexibleLocalDihedral", table_type{
+                        {"k"      , this->k_dihedral_                  },
+                        {"coef"   , bead2->name() + '-' + bead3->name()}
+                    }}
                 };
+
+                // if the beads contains flexible region, remove 1-4 contact.
+                // but keep FLP dihedral
+                if(is_in_flexible_region(bead1) || is_in_flexible_region(bead2) ||
+                   is_in_flexible_region(bead3) || is_in_flexible_region(bead4))
+                {
+                    para.at("Gaussian").at("k") = 0.0;
+                }
                 if(i == 3)
                 {
-                    para.comments().push_back(std::string(" AICG2+ Flexible "
-                        "Local Dihedral Potential for chain ") + chain.name());
+                    para.comments().push_back(std::string(" AICG2+ Dihedral "
+                        "Potential for chain ") + chain.name());
                 }
                 params.push_back(std::move(para));
             }
         }
+//         /* flexible-dihedral-angle */{
+//             value_type flp_dihd{
+//                 {"interaction", "DihedralAngle"},
+//                 {"potential"  , "FlexibleLocalDihedral"},
+//                 {"topology"   , "none"},
+//                 {"env"        , {}},
+//                 {"parameters",  array_type{}}
+//             };
+//             {
+//                 table_type env;
+//                 for(const auto& dih : this->dihedral_term_)
+//                 {
+//                     env[dih.first] = dih.second;
+//                 }
+//                 flp_dihd.as_table().at("env") = std::move(env);
+//             }
+//             auto& params = find_or_push_table(ff.at("local"), flp_dihd,
+//                 /* the keys that should be equivalent = */ {
+//                     "interaction", "potential", "topology", "env"
+//                 }).as_table().at("parameters").as_array();
+//             params.reserve(params.size() + chain.size());
+//
+//             for(std::size_t i=3, sz = chain.size(); i<sz; ++i)
+//             {
+//                 const auto& bead1 = chain.at(i-3);
+//                 const auto& bead2 = chain.at(i-2);
+//                 const auto& bead3 = chain.at(i-1);
+//                 const auto& bead4 = chain.at(i);
+//                 const auto  i1    = bead1->index();
+//                 const auto  i2    = bead2->index();
+//                 const auto  i3    = bead3->index();
+//                 const auto  i4    = bead4->index();
+//
+//                 // like "ALA-PHE" or something like that
+//                 const std::string separator("-");
+//
+//                 value_type para = table_type{
+//                     {"indices", value_type{i1, i2, i3, i4}               },
+//                     {"k"      , this->k_dihedral_                        },
+//                     {"coef"   , bead2->name() + separator + bead3->name()}
+//                 };
+//                 if(i == 3)
+//                 {
+//                     para.comments().push_back(std::string(" AICG2+ Flexible "
+//                         "Local Dihedral Potential for chain ") + chain.name());
+//                 }
+//                 params.push_back(std::move(para));
+//             }
+//         }
 
         const real_type th2 = this->go_contact_threshold_ *
                               this->go_contact_threshold_;
