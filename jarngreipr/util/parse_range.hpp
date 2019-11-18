@@ -62,6 +62,10 @@ typename std::enable_if<std::is_same<T, std::string>::value, std::vector<T>
     std::smatch sm;
     if(!std::regex_match(str, sm, syntax))
     {
+        if(str.size() == 1u && std::isupper(str.at(0)) != 0)
+        {
+            return std::vector<std::string>{str};
+        }
         log(log_level::error, "syntax error in range \"", str, "\"\n");
         log(log_level::error, "expected like: \"A:D\", \"C:F\"\n");
         return {};
