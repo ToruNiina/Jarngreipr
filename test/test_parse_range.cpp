@@ -229,13 +229,13 @@ BOOST_AUTO_TEST_CASE(test_parse_range_signs)
 BOOST_AUTO_TEST_CASE(test_parse_range_chains)
 {
     {
-        const auto range = jarngreipr::parse_range<std::string>("A:B"_str);
+        const auto range = jarngreipr::parse_chain_range("A:B"_str);
         BOOST_TEST(range.size() == 2u);
         BOOST_TEST(range.at(0) == "A");
         BOOST_TEST(range.at(1) == "B");
     }
     {
-        const auto range = jarngreipr::parse_range<std::string>("C:F"_str);
+        const auto range = jarngreipr::parse_chain_range("C:F"_str);
         BOOST_TEST(range.size() == 4u);
         BOOST_TEST(range.at(0) == "C");
         BOOST_TEST(range.at(1) == "D");

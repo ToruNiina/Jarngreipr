@@ -51,9 +51,7 @@ typename std::enable_if<std::is_integral<integerT>::value, std::vector<integerT>
 //
 // "A:D" -> ["A", "B", "C", "D"]
 //
-template<typename T>
-typename std::enable_if<std::is_same<T, std::string>::value, std::vector<T>
-    >::type parse_range(std::string str)
+inline std::vector<std::string> parse_chain_range(std::string str)
 {
     while(str.front() == ' ') {str.erase(str.begin());}
     while(str.back()  == ' ') {str.pop_back();}
