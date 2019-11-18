@@ -2,7 +2,7 @@
 #define JARNGREIPR_PDB_READER_HPP
 #include <jarngreipr/pdb/PDBAtom.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
-#include <jarngreipr/io/read_number.hpp>
+#include <jarngreipr/util/read_number.hpp>
 #include <fstream>
 #include <sstream>
 

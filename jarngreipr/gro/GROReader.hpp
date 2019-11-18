@@ -2,7 +2,7 @@
 #define JARNGREIPR_GRO_READER_HPP
 #include <jarngreipr/gro/GROLine.hpp>
 #include <jarngreipr/gro/GROFrame.hpp>
-#include <jarngreipr/io/read_number.hpp>
+#include <jarngreipr/util/read_number.hpp>
 #include <jarngreipr/util/log.hpp>
 #include <stdexcept>
 #include <fstream>

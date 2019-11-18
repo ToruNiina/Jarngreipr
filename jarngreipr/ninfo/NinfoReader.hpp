@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_NINFO_READER_HPP
 #define JARNGREIPR_NINFO_READER_HPP
 #include <jarngreipr/ninfo/NinfoData.hpp>
-#include <jarngreipr/io/read_number.hpp>
+#include <jarngreipr/util/read_number.hpp>
 #include <jarngreipr/util/log.hpp>
 #include <fstream>
 
