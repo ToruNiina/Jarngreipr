@@ -49,6 +49,29 @@ read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& group)
     return regions;
 }
 
+std::unique_ptr<jarngreipr::CGModelGeneratorBase<double>>
+setup_model_generator(const std::string& model, const toml::value& params)
+{
+    using namespace jarngreipr;
+    if(model == "CarbonAlpha")
+    {
+        return std::unique_ptr<CGModelGeneratorBase<double>>(
+            new CarbonAlphaGenerator<double>(params));
+    }
+    else if(model == "3SPN2")
+    {
+        return std::unique_ptr<CGModelGeneratorBase<double>>(
+            new ThreeSPN2Generator<double>(params));
+    }
+    else
+    {
+        log(log_level::error, "unknown model specified: ", model, '\n');
+        log(log_level::error, "- \"CarbonAlpha\" is for AICG2+");
+        log(log_level::error, "- \"3SPN2\" is for 3SPN.2 and 3SPN.2C");
+        std::terminate();
+    }
+}
+
 int main(int argc, char **argv)
 {
     using namespace jarngreipr;
@@ -107,12 +130,12 @@ int main(int argc, char **argv)
         // read a reference file
         PDBReader<double> reader(pdb_path + toml::find<std::string>(group_def, "reference"));
 
-        // TODO assuming CarbonAlpha here...
-        CarbonAlphaGenerator<double> model_generator(toml::find(mass_params, "mass"));
+        const auto model_generator = setup_model_generator(
+                toml::find<std::string>(group_def, "model"),
+                toml::find(mass_params, "mass"));
 
-        const auto flexible_regions = read_flexible_regions(group_def);
-
-        // All of those are valid.
+        // --------------------------------------------------------------------
+        // Extract chains to be coarse-grained. All of the following are valid.
         //  1. proteins.chain = "A"
         //  2. proteins.chain = "A:D"
         //  3. proteins.chain = ["A", "B"]
@@ -133,6 +156,10 @@ int main(int argc, char **argv)
                 }
             }
         }
+
+        // -------------------------------------------------------------------
+        // Coarse-Graining
+        const auto flexible_regions = read_flexible_regions(group_def);
         for(const auto& chain_id : chain_ids)
         {
             if(chain_id.size() != 1)
@@ -144,7 +171,7 @@ int main(int argc, char **argv)
                                  kv.first, '\n');
 
             const auto chain = reader.read_chain(chain_id.front());
-            auto cg_chain = model_generator.generate(chain, offset);
+            auto cg_chain = model_generator->generate(chain, offset);
 
             if(flexible_regions.count(chain_id) != 0)
             {
