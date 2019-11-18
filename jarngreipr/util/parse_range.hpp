@@ -18,7 +18,8 @@ namespace jarngreipr
 // (1,5] -> {2,3,4,5}
 //
 template<typename integerT = std::int64_t>
-std::vector<integerT> parse_range(std::string str)
+typename std::enable_if<std::is_integral<integerT>::value, std::vector<integerT>
+    >::type parse_range(std::string str)
 {
     while(str.front() == ' ') {str.erase(str.begin());}
     while(str.back()  == ' ') {str.pop_back();}
@@ -45,6 +46,38 @@ std::vector<integerT> parse_range(std::string str)
     if(!contains_back)  {ints.pop_back();}
 
     return ints;
+}
+
+//
+// "A:D" -> ["A", "B", "C", "D"]
+//
+template<typename T>
+typename std::enable_if<std::is_same<T, std::string>::value, std::vector<T>
+    >::type parse_range(std::string str)
+{
+    while(str.front() == ' ') {str.erase(str.begin());}
+    while(str.back()  == ' ') {str.pop_back();}
+
+    std::regex syntax(R"((\s*)([A-Z])(\s*:\s*)([A-Z])(\s*))");
+    std::smatch sm;
+    if(!std::regex_match(str, sm, syntax))
+    {
+        log(log_level::error, "syntax error in range \"", str, "\"\n");
+        log(log_level::error, "expected like: \"A:D\", \"C:F\"\n");
+        return {};
+    }
+    const auto front = sm.str(2);
+    const auto back  = sm.str(4);
+    assert(front.size() == 1u);
+    assert(back .size() == 1u);
+
+    std::vector<std::string> chains;
+    //XXX here it assumes that the character encoding is ASCII or UTF-8
+    for(char c = front.at(0); c <= back.at(0); ++c)
+    {
+        chains.emplace_back(1, c);
+    }
+    return chains;
 }
 
 } // jarngriepr
