@@ -112,7 +112,28 @@ int main(int argc, char **argv)
 
         const auto flexible_regions = read_flexible_regions(group_def);
 
-        for(auto&& chain_id : toml::find<std::vector<std::string>>(group_def, "chain"))
+        // All of those are valid.
+        //  1. proteins.chain = "A"
+        //  2. proteins.chain = "A:D"
+        //  3. proteins.chain = ["A", "B"]
+        //  4. proteins.chain = ["A:B", "E:F", "H"]
+        std::vector<std::string> chain_ids;
+        if(group_def.at("chain").is_string())
+        {
+            chain_ids = jarngreipr::parse_chain_range(
+                    toml::find<std::string>(group_def, "chain"));
+        }
+        else if(group_def.at("chain").is_array())
+        {
+            for(const auto& chain_def : toml::find<std::vector<std::string>>(group_def, "chain"))
+            {
+                for(const auto& chain_id : jarngreipr::parse_chain_range(chain_def))
+                {
+                    chain_ids.push_back(chain_id);
+                }
+            }
+        }
+        for(const auto& chain_id : chain_ids)
         {
             if(chain_id.size() != 1)
             {
