@@ -469,55 +469,6 @@ AICG2Plus<realT>::generate(
                 params.push_back(std::move(para));
             }
         }
-//         /* flexible-dihedral-angle */{
-//             value_type flp_dihd{
-//                 {"interaction", "DihedralAngle"},
-//                 {"potential"  , "FlexibleLocalDihedral"},
-//                 {"topology"   , "none"},
-//                 {"env"        , {}},
-//                 {"parameters",  array_type{}}
-//             };
-//             {
-//                 table_type env;
-//                 for(const auto& dih : this->dihedral_term_)
-//                 {
-//                     env[dih.first] = dih.second;
-//                 }
-//                 flp_dihd.as_table().at("env") = std::move(env);
-//             }
-//             auto& params = find_or_push_table(ff.at("local"), flp_dihd,
-//                 /* the keys that should be equivalent = */ {
-//                     "interaction", "potential", "topology", "env"
-//                 }).as_table().at("parameters").as_array();
-//             params.reserve(params.size() + chain.size());
-//
-//             for(std::size_t i=3, sz = chain.size(); i<sz; ++i)
-//             {
-//                 const auto& bead1 = chain.at(i-3);
-//                 const auto& bead2 = chain.at(i-2);
-//                 const auto& bead3 = chain.at(i-1);
-//                 const auto& bead4 = chain.at(i);
-//                 const auto  i1    = bead1->index();
-//                 const auto  i2    = bead2->index();
-//                 const auto  i3    = bead3->index();
-//                 const auto  i4    = bead4->index();
-//
-//                 // like "ALA-PHE" or something like that
-//                 const std::string separator("-");
-//
-//                 value_type para = table_type{
-//                     {"indices", value_type{i1, i2, i3, i4}               },
-//                     {"k"      , this->k_dihedral_                        },
-//                     {"coef"   , bead2->name() + separator + bead3->name()}
-//                 };
-//                 if(i == 3)
-//                 {
-//                     para.comments().push_back(std::string(" AICG2+ Flexible "
-//                         "Local Dihedral Potential for chain ") + chain.name());
-//                 }
-//                 params.push_back(std::move(para));
-//             }
-//         }
 
         const real_type th2 = this->go_contact_threshold_ *
                               this->go_contact_threshold_;
