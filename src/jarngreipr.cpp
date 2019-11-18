@@ -1,7 +1,7 @@
 // #include <jarngreipr/forcefield/ClementiGo.hpp>
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
-#include <jarngreipr/forcefield/ElectroStatic.hpp>
+#include <jarngreipr/forcefield/DebyeHuckel.hpp>
 #include <jarngreipr/io/write_forcefield.hpp>
 #include <jarngreipr/io/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
@@ -311,7 +311,7 @@ int main(int argc, char **argv)
     log(log_level::info, "generating global forcefield ...\n");
 
     ExcludedVolume<double> exv(exv_params);
-    ElectroStatic<double> ele(ele_params);
+    DebyeHuckel<double> ele(ele_params);
 
     for(const auto& group : groups)
     {

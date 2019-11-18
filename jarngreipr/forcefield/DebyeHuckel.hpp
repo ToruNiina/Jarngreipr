@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_FORCEFIELD_ELECTRO_STATIC_HPP
-#define JARNGREIPR_FORCEFIELD_ELECTRO_STATIC_HPP
+#ifndef JARNGREIPR_FORCEFIELD_DEBYE_HUCKEL_HPP
+#define JARNGREIPR_FORCEFIELD_DEBYE_HUCKEL_HPP
 #include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
 #include <extlib/toml/toml.hpp>
 
@@ -7,7 +7,7 @@ namespace jarngreipr
 {
 
 template<typename realT>
-class ElectroStatic final : public ForceFieldGenerator<realT>
+class DebyeHuckel final : public ForceFieldGenerator<realT>
 {
   public:
     using base_type = ForceFieldGenerator<realT>;
@@ -20,10 +20,10 @@ class ElectroStatic final : public ForceFieldGenerator<realT>
 
     template<typename Comment, template<typename...> class Map,
              template<typename...> class Array>
-    explicit ElectroStatic(const toml::basic_value<Comment, Map, Array>& para)
+    explicit DebyeHuckel(const toml::basic_value<Comment, Map, Array>& para)
         : charges_(toml::find<decltype(charges_)>(para, "charge"))
     {}
-    ~ElectroStatic() override = default;
+    ~DebyeHuckel() override = default;
 
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
@@ -49,7 +49,7 @@ class ElectroStatic final : public ForceFieldGenerator<realT>
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
-ElectroStatic<realT>::generate(
+DebyeHuckel<realT>::generate(
         toml::basic_value<toml::preserve_comments, std::map>& ff_,
         const group_type& chains) const
 {
