@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_WRITE_FORCEFIELD_HPP
 #define JARNGREIPR_WRITE_FORCEFIELD_HPP
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 #include <jarngreipr/io/toml_serializer.hpp>
 #include <algorithm>
 #include <ostream>

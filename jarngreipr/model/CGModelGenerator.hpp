@@ -2,7 +2,7 @@
 #define JARNGREIPR_MODEL_CG_MODEL_GENERATOR_HPP
 #include <jarngreipr/model/CGChain.hpp>
 #include <jarngreipr/pdb/PDBChain.hpp>
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 
 namespace jarngreipr
 {

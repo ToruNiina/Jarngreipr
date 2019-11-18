@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_NINFO_WRITER_HPP
 #define JARNGREIPR_NINFO_WRITER_HPP
 #include <jarngreipr/ninfo/NinfoData.hpp>
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 #include <fstream>
 #include <iomanip>
 

@@ -3,7 +3,7 @@
 #include <jarngreipr/gro/GROLine.hpp>
 #include <jarngreipr/gro/GROFrame.hpp>
 #include <jarngreipr/io/read_number.hpp>
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>

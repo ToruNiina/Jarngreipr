@@ -1,5 +1,5 @@
-#ifndef JARNGREIPR_IO_LOG_HPP
-#define JARNGREIPR_IO_LOG_HPP
+#ifndef JARNGREIPR_UTIL_LOG_HPP
+#define JARNGREIPR_UTIL_LOG_HPP
 #include <mjolnir/util/color.hpp>
 #include <memory>
 #include <utility>
@@ -132,4 +132,4 @@ void log(log_level lv, Ts&& ... args)
 }
 
 } // jarngreipr
-#endif // JARNGREIPR_IO_LOG_HPP
+#endif // JARNGREIPR_UTIL_LOG_HPP

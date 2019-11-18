@@ -2,7 +2,6 @@
 #define JARNGREIPR_MODEL_CARBON_ALPHA_HPP
 #include <jarngreipr/model/CGBead.hpp>
 #include <jarngreipr/model/CGModelGenerator.hpp>
-#include <jarngreipr/io/log.hpp>
 #include <algorithm>
 #include <stdexcept>
 #include <memory>

@@ -6,7 +6,7 @@
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
 #include <jarngreipr/geometry/dihedral.hpp>
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 #include <iterator>
 #include <algorithm>
 #include <iostream>

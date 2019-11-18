@@ -1,6 +1,6 @@
 #ifndef JARNGREIPR_PARSE_RANGE_HPP
 #define JARNGREIPR_PARSE_RANGE_HPP
-#include <jarngreipr/io/log.hpp>
+#include <jarngreipr/util/log.hpp>
 #include <string>
 #include <vector>
 #include <cstdint>
