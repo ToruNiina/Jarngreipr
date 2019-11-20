@@ -54,12 +54,10 @@ class ClementiGo final : public ForceFieldGenerator<realT>
     real_type min_distance_sq(const bead_ptr& bead1, const bead_ptr& bead2) const
     {
         real_type min_dist_sq = std::numeric_limits<real_type>::max();
-        for(const auto& atom1 : bead1->atoms())
+        for(const auto& atom1 : remove_hydrogens(bead1->atoms()))
         {
-            if(atom1.element == " H"){continue;}
-            for(const auto& atom2 : bead2->atoms())
+            for(const auto& atom2 : remove_hydrogens(bead2->atoms()))
             {
-                if(atom2.element == " H") {continue;}
                 const auto dsq = distance_sq(atom1.position, atom2.position);
                 min_dist_sq = std::min(dsq, min_dist_sq);
             }

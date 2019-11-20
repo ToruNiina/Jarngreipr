@@ -165,16 +165,16 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
     real_type min_distance_sq(const bead_ptr& bead1, const bead_ptr& bead2) const
     {
-        real_type min_dist = std::numeric_limits<real_type>::max();
+        real_type min_dist_sq = std::numeric_limits<real_type>::max();
         for(const auto& atom1 : remove_hydrogens(bead1->atoms()))
         {
             for(const auto& atom2 : remove_hydrogens(bead2->atoms()))
             {
-                const real_type dist = distance_sq(atom1.position, atom2.position);
-                if(dist < min_dist) {min_dist = dist;}
+                const real_type dist_sq = distance_sq(atom1.position, atom2.position);
+                min_dist_sq = std::min(dist_sq, min_dist_sq);
             }
         }
-        return min_dist;
+        return min_dist_sq;
     }
 
     real_type limit_energy(const real_type val) const
