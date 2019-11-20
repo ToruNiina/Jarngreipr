@@ -183,7 +183,7 @@ int main(int argc, char **argv)
     const auto system = toml::find(input, "systems").as_array().front();
 
     std::size_t offset = 0;
-    std::vector<CGGroup<double>> groups;
+    std::map<std::string, CGGroup<double>> groups;
     for(const auto& kv : system.as_table())
     {
         // special keys. skip them.
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
             group.push_back(cg_chain);
             offset += group.back().size();
         }
-        groups.push_back(std::move(group));
+        groups[kv.first] = std::move(group);
     }
     log(log_level::info, "systems are coarse-grained\n");
 
@@ -288,8 +288,9 @@ int main(int argc, char **argv)
     std::cout << "integrator.parameters = [\n";
     {
         std::size_t num_total_bead = 0;
-        for(const auto& group : groups)
+        for(const auto& kv : groups)
         {
+            const auto& group = kv.second;
             for(const auto& chain : group)
             {
                 num_total_bead += chain.size();
@@ -297,8 +298,9 @@ int main(int argc, char **argv)
         }
 
         const auto width = std::to_string(num_total_bead).size();
-        for(const auto& group : groups)
+        for(const auto& kv : groups)
         {
+            const auto& group = kv.second;
             for(const auto& chain : group)
             {
                 for(const auto& bead : chain)
@@ -326,8 +328,9 @@ int main(int argc, char **argv)
         std::mt19937 mt(123456789);
 
         auto& ps = sys.as_table().at("particles").as_array();
-        for(const auto& group : groups)
+        for(const auto& kv : groups)
         {
+            const auto& group = kv.second;
             for(const auto& chain : group)
             {
                 bool is_front = true;
@@ -359,44 +362,45 @@ int main(int argc, char **argv)
 
     // ========================================================================
     // generate forcefield parameters
-    //
-    // TODO
 
     const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
     const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
     const auto ele_params    = toml::parse("parameter/ElectroStatic.toml");
 
     toml::basic_value<toml::preserve_comments, std::map> ff;
+    const auto forcefield = toml::find(input, "forcefields").as_array().front();
 
     // -----------------------------------------------------------------------
-    // local
-
     log(log_level::info, "generating local forcefield ...\n");
-
-
     AICG2Plus<double> aicg(aicg2p_params);
-    for(const auto& group : groups)
+
+    for(const auto& local : toml::find(forcefield, "local").as_array())
     {
-        aicg.generate(ff, group);
+        for(auto gname : toml::find<std::vector<std::string>>(local, "groups"))
+        {
+            const auto& group = groups.at(gname);
+            aicg.generate(ff, group);
+        }
     }
-    log(log_level::info, "local forcefield generated\n");
 
     // -----------------------------------------------------------------------
-    // global
-
     log(log_level::info, "generating global forcefield ...\n");
 
     ExcludedVolume<double> exv(exv_params);
     DebyeHuckel<double> ele(ele_params);
 
-    for(const auto& group : groups)
+    for(const auto& global : toml::find(forcefield, "global").as_array())
     {
-        exv. generate(ff, group);
-        ele. generate(ff, group);
-        aicg.generate(ff, group, group);
+        for(auto gname : toml::find<std::vector<std::string>>(global, "groups"))
+        {
+            const auto& group = groups.at(gname);
+            exv. generate(ff, group);
+            ele. generate(ff, group);
+            aicg.generate(ff, group, group);
+        }
     }
-    log(log_level::info, "global forcefield generated\n");
 
+    log(log_level::info, "writing forcefields\n");
     write_forcefield(std::cout, ff);
 
     return 0;
