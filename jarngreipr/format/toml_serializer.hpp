@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_TOML_SERIALIZER_HPP
 #define JARNGREIPR_TOML_SERIALIZER_HPP
 #include <extlib/toml/toml.hpp>
-#include <jarngreipr/io/write_number.hpp>
+#include <jarngreipr/format/write_number.hpp>
 #include <sstream>
 #include <string>
 

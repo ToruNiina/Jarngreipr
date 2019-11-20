@@ -1,7 +1,7 @@
 #ifndef JARNGREIPR_WRITE_SYSTEM_HPP
 #define JARNGREIPR_WRITE_SYSTEM_HPP
-#include <jarngreipr/io/toml_serializer.hpp>
-#include <jarngreipr/io/write_number.hpp>
+#include <jarngreipr/format/toml_serializer.hpp>
+#include <jarngreipr/format/write_number.hpp>
 #include <iomanip>
 
 namespace jarngreipr

@@ -2,8 +2,8 @@
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
 #include <jarngreipr/forcefield/DebyeHuckel.hpp>
-#include <jarngreipr/io/write_forcefield.hpp>
-#include <jarngreipr/io/write_system.hpp>
+#include <jarngreipr/format/write_forcefield.hpp>
+#include <jarngreipr/format/write_system.hpp>
 #include <jarngreipr/model/CarbonAlpha.hpp>
 #include <jarngreipr/model/ThreeSPN2.hpp>
 #include <jarngreipr/pdb/PDBReader.hpp>
