@@ -85,6 +85,15 @@ class PDBReader
         atm.position[1]  = read_number<real_type>(src, 38, 8);
         atm.position[2]  = read_number<real_type>(src, 46, 8);
 
+        if(atm.altloc != ' ')
+        {
+            src.column() = 16;
+            src.range()  =  1;
+            log(log_level::warn, "pdb ATOM has alternative location code. "
+                                 "It may cause invalid parameters.\n");
+            log(log_level::warn, src, '\n');
+        }
+
         // allow files that lack the following values. default values are
         atm.occupancy          = 0.0;
         atm.temperature_factor = 0.0;
