@@ -26,35 +26,37 @@ class CarbonAlpha final : public CGBead<realT>
     CarbonAlpha(std::size_t idx, real_type mass, container_type atoms, std::string name)
         : base_type(idx, mass, std::move(atoms), std::move(name))
     {
-        if(!this->atoms_.empty())
+        if(this->atoms_.empty())
         {
-            const auto is_ca =
-                [](const atom_type& a){return a.atom_name == " CA ";};
-            const std::size_t num_ca = std::count_if(
-                this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
-            if(num_ca == 0)
-            {
-                log(log_level::error,
-                    "CarbonAlpha: no c-alpha atom exists in a residue.\n");
-                log(log_level::error, this->atoms_.front(), '\n');
-                std::terminate();
-            }
-            if(num_ca > 1)
-            {
-                log(log_level::error, "CarbonAlpha: ", num_ca,
-                    " c-alpha atoms exist in a residue.\n");
-                for(const auto& atm : this->atoms_)
-                {
-                    if(is_ca(atm))
-                    {
-                        log(log_level::error, atm, '\n');
-                    }
-                }
-                std::terminate();
-            }
-            this->position_ = std::find_if(
-                this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;
+            log(log_level::error, "CarbonAlpha: initialized with no atoms.\n");
+            std::terminate();
         }
+        const auto is_ca =
+            [](const atom_type& a){return a.atom_name == " CA ";};
+        const std::size_t num_ca = std::count_if(
+            this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
+        if(num_ca == 0)
+        {
+            log(log_level::error,
+                "CarbonAlpha: no c-alpha atom exists in a residue.\n");
+            log(log_level::error, this->atoms_.front(), '\n');
+            std::terminate();
+        }
+        if(num_ca > 1)
+        {
+            log(log_level::error, "CarbonAlpha: ", num_ca,
+                " c-alpha atoms exist in a residue.\n");
+            for(const auto& atm : this->atoms_)
+            {
+                if(is_ca(atm))
+                {
+                    log(log_level::error, atm, '\n');
+                }
+            }
+            std::terminate();
+        }
+        this->position_ = std::find_if(
+            this->atoms_.cbegin(), this->atoms_.cend(), is_ca)->position;
     }
     ~CarbonAlpha() override = default;
 
