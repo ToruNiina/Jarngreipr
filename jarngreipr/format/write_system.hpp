@@ -44,7 +44,7 @@ write_system(std::basic_ostream<charT, traits>& os,
         }
     }
 
-    os << "particles = [\n";
+    os << "particles = [ # {{{\n";
     for(const auto& particle : toml::find(sys, "particles").as_array())
     {
         const auto m = toml::find<double>(particle, "mass");
@@ -60,7 +60,7 @@ write_system(std::basic_ostream<charT, traits>& os,
         os << ", pos = "  << format_number("[%9.4f,%9.4f,%9.4f]", p[0], p[1], p[2]);
         os << ", name = " << n << ", group = " << g << "},\n";
     }
-    os << "]\n";
+    os << "] # }}}\n";
     return os;
 }
 

@@ -79,7 +79,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     }
     std::sort(keys.begin(), keys.end());
 
-    os << "parameters = [\n";
+    os << "parameters = [ # {{{\n";
     for(const auto& p : toml::find(ff, "parameters").as_array())
     {
         // write comment if exists
@@ -109,7 +109,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         }
         os << "},\n";
     }
-    os << "]\n";
+    os << "] # }}}\n";
     return os;
 }
 
@@ -159,12 +159,14 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     if(ff.as_table().count("env") == 1)
     {
         // to sort the values, convert it into std::map.
+        os << "# {{{\n";
         for(const auto& kv : toml::find<std::map<std::string, value_type>>(ff, "env"))
         {
             assert(kv.second.comments().empty());
             os << "env." << toml::format_key(kv.first) << " = "
                << toml::visit(inline_serializer, kv.second) << '\n';
         }
+        os << "# }}}\n";
     }
 
     // ------------------------------------------------------------------------
@@ -213,7 +215,7 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     // ------------------------------------------------------------------------
     // output parameters
 
-    os << "parameters = [\n";
+    os << "parameters = [ # {{{\n";
     for(const auto& p : toml::find(ff, "parameters").as_array())
     {
         os << "{index = "
@@ -227,7 +229,7 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
         }
         os << "},\n";
     }
-    os << "]\n";
+    os << "] # }}}\n";
     return os;
 }
 
