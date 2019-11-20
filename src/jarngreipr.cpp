@@ -104,15 +104,51 @@ setup_model_generator(const std::string& model, const toml::value& params)
     }
 }
 
+std::string read_input_filename(int argc, char **argv)
+{
+    using namespace jarngreipr;
+    std::vector<std::string> opts;
+    for(int i=1; i<argc; ++i)
+    {
+        opts.push_back(std::string(argv[i]));
+    }
+
+    // default settings
+    logger::inactivate(log_level::debug);
+    logger::activate(log_level::info);
+    logger::activate(log_level::warn);
+    logger::activate(log_level::error);
+
+    std::string fname;
+    for(const auto& opt : opts)
+    {
+        if(opt == "--debug")
+        {
+            logger::activate(log_level::debug);
+        }
+        else if(5 < opt.size() && opt.substr(opt.size()-5, 5) == ".toml")
+        {
+            fname = opt;
+        }
+        else
+        {
+            log(log_level::warn, "unknown option appeared. ignore\"", opt, "\"\n");
+        }
+    }
+    return fname;
+}
+
 int main(int argc, char **argv)
 {
     using namespace jarngreipr;
+
     if(argc < 2)
     {
-        log(log_level::error, "Usage: jarngreipr [file.toml]\n");
+        log(log_level::error, "Usage: jarngreipr input.toml\n");
         return 1;
     }
-    const std::string fname(argv[1]);
+
+    const std::string fname = read_input_filename(argc, argv);
     const auto input  = toml::parse<toml::discard_comments, std::map>(fname);
 
     // output files and units tables
@@ -277,8 +313,6 @@ int main(int argc, char **argv)
 
     // ========================================================================
     // generate system
-    //
-    // TODO consider multiple systems...
     {
         using value_type = toml::basic_value<toml::preserve_comments, std::map>;
         using table_type = typename value_type::table_type;
@@ -338,6 +372,7 @@ int main(int argc, char **argv)
     // local
 
     log(log_level::info, "generating local forcefield ...\n");
+
 
     AICG2Plus<double> aicg(aicg2p_params);
     for(const auto& group : groups)
