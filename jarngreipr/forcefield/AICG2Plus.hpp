@@ -101,11 +101,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
 
     bool is_in_flexible_region(const bead_ptr& bead) const
     {
-        if(bead->has_attribute("is_flexible"))
-        {
-            return (bead->attribute("is_flexible") == "true");
-        }
-        return false;
+        return bead->has_attribute("flexible_regions");
     }
 
     bool is_backbone(const atom_type& atom) const
@@ -329,7 +325,6 @@ AICG2Plus<realT>::generate(
                 {
                     continue;
                 }
-
                 const auto nat_dist = distance(bead1->position(), bead3->position());
                 const auto contact_coef = this->calc_contact_coef(bead1, bead3);
 

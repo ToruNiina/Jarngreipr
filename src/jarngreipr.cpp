@@ -12,41 +12,73 @@
 #include <random>
 #include <map>
 
+// map of attribute name -> {map of chain ID -> pair of {indices, parameters}}
 template<typename Com, template<typename ...> class Tab,
          template<typename ...> class Arr>
-std::map<std::string, std::vector<std::int64_t>>
-read_flexible_regions(const toml::basic_value<Com, Tab, Arr>& group)
+std::map<std::string,     // attribute name ->
+    std::map<std::string, // chain ID ->
+        std::vector<std::pair<std::int64_t, std::string>> // {indices, parameter}
+        >
+    >
+read_attributes(const toml::basic_value<Com, Tab, Arr>& group)
 {
     using namespace jarngreipr;
-    std::map<std::string, std::vector<std::int64_t>> regions;
-    if(group.as_table().count("flexible_regions") == 0)
-    {
-        log(log_level::info, "no flexible region defined in this group\n");
-        return regions;
-    }
 
-    const auto& flexible_regions = toml::find(group, "flexible_regions");
-    for(const auto& region : flexible_regions.as_array())
+    std::map<std::string, std::map<std::string,
+             std::vector<std::pair<std::int64_t, std::string>>>> attributes;
+    for(const auto& kv : group.as_table())
     {
-        const auto chainID = toml::find<std::string>(region, "chain");
-        if(regions.count(chainID) == 0)
+        const auto& key = kv.first;
+        if(key == "reference" || key == "initial" || key == "model" || key == "chain")
         {
-            regions[chainID] = {};
+            continue; // these are special keys, not an additional attribute.
         }
-        const auto residues = jarngreipr::parse_range<std::int64_t>(
-                toml::find<std::string>(region, "residues"));
+        std::map<std::string, std::vector<std::pair<std::int64_t, std::string>>>
+            regions;
+        for(const auto& v : kv.second.as_array())
+        {
+            const auto chainID  = toml::find<std::string>(v, "chain");
+            if(regions.count(chainID) == 0)
+            {
+                regions[chainID] = {};
+            }
+            const auto residues = parse_range<std::int64_t>(
+                    toml::find<std::string>(v, "residues"));
+            const auto attr_value = toml::find_or<std::string>(
+                    v, "value", std::string(""));
 
-        log(log_level::info, "residue from ", residues.front(), " to ",
-            residues.back(), " are the flexible region of chain ", chainID, '\n');
+            log(log_level::info, "residue from ", residues.front(), " to ",
+                residues.back(), " has an attribute ", key, '\n');
 
-        std::copy(residues.begin(), residues.end(),
-                  std::back_inserter(regions.at(chainID)));
+            for(const auto& res : residues)
+            {
+                regions.at(chainID).emplace_back(res, attr_value);
+            }
+        }
+
+        // overlap check
+        for(auto& region : regions)
+        {
+            std::sort(region.second.begin(), region.second.end(),
+                [](const std::pair<std::int64_t, std::string>& lhs,
+                   const std::pair<std::int64_t, std::string>& rhs) -> bool {
+                    return lhs.first < rhs.first;
+                });
+            const auto overlapped = std::adjacent_find(
+                region.second.begin(), region.second.end(),
+                [](const std::pair<std::int64_t, std::string>& lhs,
+                   const std::pair<std::int64_t, std::string>& rhs) -> bool {
+                    return lhs.first == rhs.first;
+                });
+            if(overlapped != region.second.end())
+            {
+                log(log_level::warn, "attribute regions overlap each other: ",
+                        overlapped->first, " specified twice\n");
+            }
+        }
+        attributes[key] = regions;
     }
-    for(auto& kv : regions)
-    {
-        std::sort(kv.second.begin(), kv.second.end());
-    }
-    return regions;
+    return attributes;
 }
 
 std::unique_ptr<jarngreipr::CGModelGeneratorBase<double>>
@@ -159,7 +191,8 @@ int main(int argc, char **argv)
 
         // -------------------------------------------------------------------
         // Coarse-Graining
-        const auto flexible_regions = read_flexible_regions(group_def);
+
+        const auto attributes = read_attributes(group_def);
         for(const auto& chain_id : chain_ids)
         {
             if(chain_id.size() != 1)
@@ -173,19 +206,27 @@ int main(int argc, char **argv)
             const auto chain = reader.read_chain(chain_id.front());
             auto cg_chain = model_generator->generate(chain, offset);
 
-            if(flexible_regions.count(chain_id) != 0)
+            for(const auto& attribute : attributes)
             {
-                const auto& flex = flexible_regions.at(chain_id);
-                for(auto& cg_bead : cg_chain)
+                const auto& attr_name = attribute.first;
+                if(attribute.second.count(chain_id) != 0)
                 {
-                    const auto resID = cg_bead->atoms().front().residue_id;
-                    if(std::binary_search(flex.begin(), flex.end(), resID))
+                    const auto& regions  = attribute.second.at(chain_id);
+                    for(auto& cg_bead : cg_chain)
                     {
-                        cg_bead->attribute("is_flexible") = std::string("true");
-                    }
-                    else
-                    {
-                        cg_bead->attribute("is_flexible") = std::string("false");
+                        const auto resID = cg_bead->atoms().front().residue_id;
+                        const auto found = std::find_if(
+                            regions.begin(), regions.end(),
+                            [=](const std::pair<std::int64_t, std::string>& x){
+                                return x.first == resID;
+                            });
+                        if(found != regions.end())
+                        {
+                            log(log_level::debug, "bead residue idx = ", resID,
+                                " attribute name = ", attr_name,
+                                " attribute value = ", found->second, '\n');
+                            cg_bead->attribute(attr_name) = found->second;
+                        }
                     }
                 }
             }
