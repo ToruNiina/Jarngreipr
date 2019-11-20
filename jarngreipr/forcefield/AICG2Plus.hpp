@@ -2,6 +2,7 @@
 #define JARNGREIPR_FORCEFIELD_AICG2_PLUS_H
 #include <extlib/toml/toml.hpp>
 #include <mjolnir/util/color.hpp>
+#include <jarngreipr/forcefield/remove_hydrogens.hpp>
 #include <jarngreipr/forcefield/ForceFieldGenerator.hpp>
 #include <jarngreipr/geometry/distance.hpp>
 #include <jarngreipr/geometry/angle.hpp>
@@ -165,12 +166,10 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     real_type min_distance_sq(const bead_ptr& bead1, const bead_ptr& bead2) const
     {
         real_type min_dist = std::numeric_limits<real_type>::max();
-        for(const auto& atom1 : bead1->atoms())
+        for(const auto& atom1 : remove_hydrogens(bead1->atoms()))
         {
-            if(atom1.element == " H") {continue;}
-            for(const auto& atom2 : bead2->atoms())
+            for(const auto& atom2 : remove_hydrogens(bead2->atoms()))
             {
-                if(atom2.element == " H") {continue;}
                 const real_type dist = distance_sq(atom1.position, atom2.position);
                 if(dist < min_dist) {min_dist = dist;}
             }
@@ -653,9 +652,9 @@ AICG2Plus<realT>::calc_contact_coef(
     std::int32_t num_short = 0; // short range contact
     std::int32_t num_long  = 0; // long range contact
 
-    for(const auto& atom1 : bead1->atoms())
+    for(const auto& atom1 : remove_hydrogens(bead1->atoms()))
     {
-        for(const auto& atom2 : bead2->atoms())
+        for(const auto& atom2 : remove_hydrogens(bead2->atoms()))
         {
             const auto dist = distance(atom1.position, atom2.position);
 
