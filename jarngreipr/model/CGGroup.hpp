@@ -27,13 +27,14 @@ class CGGroup
 
   public:
 
-    CGGroup(const std::string& name): name_(name){}
+    explicit CGGroup(const std::string& name): name_(name){}
 
+    CGGroup() = default;
+    ~CGGroup() = default;
     CGGroup(const CGGroup&) = default;
     CGGroup(CGGroup&&)      = default;
     CGGroup& operator=(const CGGroup&) = default;
     CGGroup& operator=(CGGroup&&)      = default;
-    ~CGGroup() = default;
 
     bool       empty() const noexcept {return chains_.empty();}
     std::size_t size() const noexcept {return chains_.size();}
