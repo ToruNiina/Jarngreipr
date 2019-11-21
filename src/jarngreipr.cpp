@@ -407,11 +407,11 @@ int main(int argc, char **argv)
 
     const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
     const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
-    const auto ele_params    = toml::parse("parameter/ElectroStatic.toml");
+    const auto ele_params    = toml::parse("parameter/DebyeHuckel.toml");
 
-    AICG2Plus<double> aicg(aicg2p_params);
+    AICG2Plus<double>     aicg(aicg2p_params);
     ExcludedVolume<double> exv(exv_params);
-    DebyeHuckel<double> ele(ele_params);
+    DebyeHuckel<double>    ele(ele_params);
 
     for(const auto& global : toml::find(forcefield, "global").as_array())
     {
