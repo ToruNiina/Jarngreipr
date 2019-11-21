@@ -81,6 +81,24 @@ read_attributes(const toml::basic_value<Com, Tab, Arr>& group)
     return attributes;
 }
 
+std::unique_ptr<jarngreipr::ForceFieldGenerator<double>>
+setup_forcefield_generator(const std::string& forcefield,
+                           const std::string& parameter_file)
+{
+    using namespace jarngreipr;
+    if(forcefield == "AICG2+")
+    {
+        return std::unique_ptr<ForceFieldGenerator<double>>(
+            new AICG2Plus<double>(toml::parse(parameter_file)));
+    }
+    else
+    {
+        log(log_level::error, "unknown forcefield specified: ", forcefield, '\n');
+        log(log_level::error, "- \"AICG2+\" is for AICG2+");
+        std::terminate();
+    }
+}
+
 std::unique_ptr<jarngreipr::CGModelGeneratorBase<double>>
 setup_model_generator(const std::string& model, const toml::value& params)
 {
@@ -363,29 +381,35 @@ int main(int argc, char **argv)
     // ========================================================================
     // generate forcefield parameters
 
-    const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
-    const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
-    const auto ele_params    = toml::parse("parameter/ElectroStatic.toml");
-
     toml::basic_value<toml::preserve_comments, std::map> ff;
     const auto forcefield = toml::find(input, "forcefields").as_array().front();
 
     // -----------------------------------------------------------------------
     log(log_level::info, "generating local forcefield ...\n");
-    AICG2Plus<double> aicg(aicg2p_params);
 
     for(const auto& local : toml::find(forcefield, "local").as_array())
     {
+        const auto ff_name   = toml::find<std::string>(local, "forcefield");
+        const auto para_file = toml::find_or<std::string>(
+                local, "parameter_file", "parameter/" + ff_name + ".toml");
+
+        const auto ffgen = setup_forcefield_generator(ff_name, para_file);
+
         for(auto gname : toml::find<std::vector<std::string>>(local, "groups"))
         {
             const auto& group = groups.at(gname);
-            aicg.generate(ff, group);
+            ffgen->generate(ff, group);
         }
     }
 
     // -----------------------------------------------------------------------
     log(log_level::info, "generating global forcefield ...\n");
 
+    const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
+    const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
+    const auto ele_params    = toml::parse("parameter/ElectroStatic.toml");
+
+    AICG2Plus<double> aicg(aicg2p_params);
     ExcludedVolume<double> exv(exv_params);
     DebyeHuckel<double> ele(ele_params);
 
