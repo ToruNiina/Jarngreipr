@@ -93,7 +93,8 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     // generate inter-chain contacts.
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const group_type& lhs, const group_type& rhs) const override;
+             const std::vector<std::reference_wrapper<const group_type>>& gs
+             ) const override;
 
     bool check_beads_kind(const chain_type& chain) const override;
 
@@ -526,7 +527,7 @@ template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
 AICG2Plus<realT>::generate(
         toml::basic_value<toml::preserve_comments, std::map>& ff_,
-        const group_type& lhs, const group_type& rhs) const
+        const std::vector<std::reference_wrapper<const group_type>>& gs) const
 {
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
@@ -555,7 +556,14 @@ AICG2Plus<realT>::generate(
     }).as_table().at("parameters").as_array();
 
     std::vector<std::pair<std::string, std::string>> combinations;
-    combinations.reserve(1 + lhs.size() * rhs.size() / 2);
+
+    for(std::size_t i=0; i<gs.size(); ++i)
+    {
+        const auto& lhs = gs.at(i).get();
+
+    for(std::size_t j=i+1; j<gs.size(); ++j)
+    {
+        const auto& rhs = gs.at(j).get();
 
     for(const auto& chain1 : lhs)
     {
@@ -611,6 +619,8 @@ AICG2Plus<realT>::generate(
             }
         }
     }
+    } // rhs
+    } // lhs
 
     return ff_;
 }

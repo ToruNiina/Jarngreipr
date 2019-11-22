@@ -32,7 +32,8 @@ class ExcludedVolume final : public ForceFieldGenerator<realT>
 
     toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const group_type& lhs, const group_type& rhs) const override;
+             const std::vector<std::reference_wrapper<const group_type>>& gs
+             ) const override;
 
     bool check_beads_kind(const chain_type&) const override
     {
@@ -51,62 +52,62 @@ ExcludedVolume<realT>::generate(
         toml::basic_value<toml::preserve_comments, std::map>& ff_,
         const group_type& chains) const
 {
-    using value_type = toml::basic_value<toml::preserve_comments, std::map>;
-    using array_type = value_type::array_type;
-    using table_type = value_type::table_type;
-
-    if(ff_.is_uninitialized())
-    {
-        ff_ = table_type{};
-    }
-
-    table_type& ff = ff_.as_table();
-    if(ff.count("global") == 0)
-    {
-        ff["global"] = array_type{};
-    }
-
-    toml::basic_value<toml::preserve_comments, std::map> exv{
-        {"interaction", "Pair"          },
-        {"potential"  , "ExcludedVolume"},
-        {"ignore", table_type{
-                {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
-                {"molecule", "Nothing"}
-            }
-        },
-        {"spatial_partition", table_type{
-                {"type", "CellList"}, {"margin", 0.5}
-            }
-        },
-        {"epsilon", this->epsilon_},
-        {"parameters",  array_type{}}
-    };
-
-    auto& params = find_or_push_table(ff.at("global"), exv,
-        /* the keys that should be equivalent = */ {
-            "interaction", "potential", "ignore", "spatial_partition", "epsilon"
-        }).as_table().at("parameters").as_array();
-
-    for(const auto& chain : chains)
-    {
-        for(const auto& bead : chain)
-        {
-            table_type para;
-            para["index"]  = bead->index();
-            para["radius"] = this->radii_.at(bead->name());
-            params.push_back(std::move(para));
-        }
-    }
-    return ff_;
+    throw std::runtime_error("ExcludedVolume is global-only potential");
+//     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
+//     using array_type = value_type::array_type;
+//     using table_type = value_type::table_type;
+//
+//     if(ff_.is_uninitialized())
+//     {
+//         ff_ = table_type{};
+//     }
+//
+//     table_type& ff = ff_.as_table();
+//     if(ff.count("global") == 0)
+//     {
+//         ff["global"] = array_type{};
+//     }
+//
+//     toml::basic_value<toml::preserve_comments, std::map> exv{
+//         {"interaction", "Pair"          },
+//         {"potential"  , "ExcludedVolume"},
+//         {"ignore", table_type{
+//                 {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
+//                 {"molecule", "Nothing"}
+//             }
+//         },
+//         {"spatial_partition", table_type{
+//                 {"type", "CellList"}, {"margin", 0.5}
+//             }
+//         },
+//         {"epsilon", this->epsilon_},
+//         {"parameters",  array_type{}}
+//     };
+//
+//     auto& params = find_or_push_table(ff.at("global"), exv,
+//         /* the keys that should be equivalent = */ {
+//             "interaction", "potential", "ignore", "spatial_partition", "epsilon"
+//         }).as_table().at("parameters").as_array();
+//
+//     for(const auto& chain : chains)
+//     {
+//         for(const auto& bead : chain)
+//         {
+//             table_type para;
+//             para["index"]  = bead->index();
+//             para["radius"] = this->radii_.at(bead->name());
+//             params.push_back(std::move(para));
+//         }
+//     }
+//     return ff_;
 }
 
 template<typename realT>
 toml::basic_value<toml::preserve_comments, std::map>&
 ExcludedVolume<realT>::generate(
-        toml::basic_value<toml::preserve_comments, std::map>& ff_,
-        const group_type& grp1, const group_type& grp2) const
+    toml::basic_value<toml::preserve_comments, std::map>& ff_,
+    const std::vector<std::reference_wrapper<const group_type>>& groups) const
 {
-    // TODO
     using value_type = toml::basic_value<toml::preserve_comments, std::map>;
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
@@ -125,10 +126,9 @@ ExcludedVolume<realT>::generate(
     table_type exv{
         {"interaction", "Pair"          },
         {"potential"  , "ExcludedVolume"},
+        // TODO: input ignore particles
         {"ignore", table_type{
                 {"particles_within", table_type{{"bond", 3}, {"contact", 1}}},
-                {"molecule", "Nothing"},
-                {"group", table_type{{"inter", array_type{grp1.name(), grp2.name()} }} },
             }
         },
         {"spatial_partition", table_type{
@@ -139,24 +139,17 @@ ExcludedVolume<realT>::generate(
     };
 
     array_type params;
-    for(const auto& chain : grp1)
+    for(const auto& group : groups)
     {
-        for(const auto& bead : chain)
+        for(const auto& chain : group.get())
         {
-            table_type para;
-            para["index"]  = bead->index();
-            para["radius"] = this->radii_.at(bead->name());
-            params.push_back(std::move(para));
-        }
-    }
-    for(const auto& chain : grp2)
-    {
-        for(const auto& bead : chain)
-        {
-            table_type para;
-            para["index"]  = bead->index();
-            para["radius"] = this->radii_.at(bead->name());
-            params.push_back(std::move(para));
+            for(const auto& bead : chain)
+            {
+                table_type para;
+                para["index"]  = bead->index();
+                para["radius"] = this->radii_.at(bead->name());
+                params.push_back(std::move(para));
+            }
         }
     }
     exv["parameters"] = std::move(params);
