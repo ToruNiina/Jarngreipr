@@ -91,10 +91,22 @@ setup_forcefield_generator(const std::string& forcefield,
         return std::unique_ptr<ForceFieldGenerator<double>>(
             new AICG2Plus<double>(toml::parse(parameter_file)));
     }
+    else if(forcefield == "ExcludedVolume")
+    {
+        return std::unique_ptr<ForceFieldGenerator<double>>(
+            new ExcludedVolume<double>(toml::parse(parameter_file)));
+    }
+    else if(forcefield == "DebyeHuckel")
+    {
+        return std::unique_ptr<ForceFieldGenerator<double>>(
+            new DebyeHuckel<double>(toml::parse(parameter_file)));
+    }
     else
     {
         log(log_level::error, "unknown forcefield specified: ", forcefield, '\n');
-        log(log_level::error, "- \"AICG2+\" is for AICG2+");
+        log(log_level::error, "- \"AICG2+\": local and global");
+        log(log_level::error, "- \"ExcludedVolume\": global only");
+        log(log_level::error, "- \"DebyeHuckel\": global only");
         std::terminate();
     }
 }
@@ -405,23 +417,20 @@ int main(int argc, char **argv)
     // -----------------------------------------------------------------------
     log(log_level::info, "generating global forcefield ...\n");
 
-    const auto aicg2p_params = toml::parse("parameter/AICG2+.toml");
-    const auto exv_params    = toml::parse("parameter/ExcludedVolume.toml");
-    const auto ele_params    = toml::parse("parameter/DebyeHuckel.toml");
-
-    AICG2Plus<double>     aicg(aicg2p_params);
-    ExcludedVolume<double> exv(exv_params);
-    DebyeHuckel<double>    ele(ele_params);
-
     for(const auto& global : toml::find(forcefield, "global").as_array())
     {
-        for(auto gname : toml::find<std::vector<std::string>>(global, "groups"))
+        const auto ff_name   = toml::find<std::string>(local, "forcefield");
+        const auto para_file = toml::find_or<std::string>(
+                local, "parameter_file", "parameter/" + ff_name + ".toml");
+
+        const auto ffgen = setup_forcefield_generator(ff_name, para_file);
+
+        std::vector<std::reference_wrapper<const CGGroup<double>>> cg_groups;
+        for(auto gname : toml::find<std::vector<std::string>>(local, "groups"))
         {
-            const auto& group = groups.at(gname);
-            exv. generate(ff, group);
-            ele. generate(ff, group);
-            aicg.generate(ff, group, group);
+            cg_groups.push_back(std::cref(groups.at(gname));
         }
+        ffgen->generate(ff, cg_groups); // !
     }
 
     log(log_level::info, "writing forcefields\n");
