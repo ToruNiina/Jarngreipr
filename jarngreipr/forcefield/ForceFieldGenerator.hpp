@@ -29,7 +29,8 @@ class ForceFieldGenerator
     //!@brief generate inter-chain parameters if it's defined.
     virtual toml::basic_value<toml::preserve_comments, std::map>&
     generate(toml::basic_value<toml::preserve_comments, std::map>& out,
-             const group_type& lhs, const group_type& rhs) const = 0;
+             const std::vector<std::reference_wrapper<const group_type>>& gs
+             ) const = 0;
 
     //!@brief if chain contains invalid bead, return false.
     virtual bool check_beads_kind(const chain_type& chain) const = 0;
