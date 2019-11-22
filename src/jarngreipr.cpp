@@ -419,16 +419,16 @@ int main(int argc, char **argv)
 
     for(const auto& global : toml::find(forcefield, "global").as_array())
     {
-        const auto ff_name   = toml::find<std::string>(local, "forcefield");
+        const auto ff_name   = toml::find<std::string>(global, "forcefield");
         const auto para_file = toml::find_or<std::string>(
-                local, "parameter_file", "parameter/" + ff_name + ".toml");
+                global, "parameter_file", "parameter/" + ff_name + ".toml");
 
         const auto ffgen = setup_forcefield_generator(ff_name, para_file);
 
         std::vector<std::reference_wrapper<const CGGroup<double>>> cg_groups;
-        for(auto gname : toml::find<std::vector<std::string>>(local, "groups"))
+        for(auto gname : toml::find<std::vector<std::string>>(global, "groups"))
         {
-            cg_groups.push_back(std::cref(groups.at(gname));
+            cg_groups.push_back(std::cref(groups.at(gname)));
         }
         ffgen->generate(ff, cg_groups); // !
     }
