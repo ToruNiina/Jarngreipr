@@ -1,3 +1,5 @@
+# ExcludedVolume for AICG2+
+
 epsilon = 0.6
 
 [radii]
@@ -22,3 +24,11 @@ TRP = 2.238
 TYR = 2.0675
 VAL = 2.22
 OTH = 2.00
+
+# AICG2+ with 3SPN.2
+P = 3.112
+S = 3.689
+A = 4.341
+G = 4.631
+C = 4.95
+T = 5.142
