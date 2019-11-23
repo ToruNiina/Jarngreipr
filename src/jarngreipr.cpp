@@ -458,15 +458,19 @@ int main(int argc, char **argv)
         const auto ff_name   = toml::find<std::string>(global, "forcefield");
         const auto para_file = toml::find_or<std::string>(
                 global, "parameter_file", "parameter/" + ff_name + ".toml");
+        log(log_level::debug, "generating ", ff_name, "\n");
 
         const auto ffgen = setup_forcefield_generator(ff_name, para_file);
 
         std::vector<std::reference_wrapper<const CGGroup<double>>> cg_groups;
         for(auto gname : toml::find<std::vector<std::string>>(global, "groups"))
         {
+            log(log_level::debug, "adding ", gname, "to a list\n");
             cg_groups.push_back(std::cref(groups.at(gname)));
         }
+
         ffgen->generate(ff, cg_groups); // !
+        log(log_level::debug, "generated.\n");
     }
 
     log(log_level::info, "writing forcefields\n");
