@@ -81,6 +81,63 @@ read_attributes(const toml::basic_value<Com, Tab, Arr>& group)
     return attributes;
 }
 
+std::pair<jarngreipr::CGGroup<double>, std::size_t>
+read_cg_group(const std::string& group_name, const std::string& pdb_file,
+    const std::vector<std::string>& chain_ids,
+    const std::unique_ptr<jarngreipr::CGModelGeneratorBase<double>>& model,
+    const std::map<std::string, std::map<std::string,
+            std::vector<std::pair<std::int64_t, std::string>>>>& attributes,
+    std::size_t offset)
+{
+    using namespace jarngreipr;
+    PDBReader<double> reader(pdb_file);
+
+    // -------------------------------------------------------------------
+    // Coarse-Graining
+
+    CGGroup<double> group(group_name);
+    for(const auto& chain_id : chain_ids)
+    {
+        if(chain_id.size() != 1)
+        {
+            log(log_level::error, "chain ID should be 1 letter -> ", chain_id, '\n');
+            std::terminate();
+        }
+        log(log_level::info, "reading chain ", chain_id, " of group ", group_name, '\n');
+
+        const auto chain = reader.read_chain(chain_id.front());
+        auto cg_chain = model->generate(chain, offset);
+
+        for(const auto& attribute : attributes)
+        {
+            const auto& attr_name = attribute.first;
+            if(attribute.second.count(chain_id) != 0)
+            {
+                const auto& regions = attribute.second.at(chain_id);
+                for(auto& cg_bead : cg_chain)
+                {
+                    const auto resID = cg_bead->atoms().front().residue_id;
+                    const auto found = std::find_if(
+                        regions.begin(), regions.end(),
+                        [=](const std::pair<std::int64_t, std::string>& x){
+                            return x.first == resID;
+                        });
+                    if(found != regions.end())
+                    {
+                        log(log_level::debug, "bead residue idx = ", resID,
+                            " attribute name = ", attr_name,
+                            " attribute value = ", found->second, '\n');
+                        cg_bead->attribute(attr_name) = found->second;
+                    }
+                }
+            }
+        }
+        group.push_back(cg_chain);
+        offset += group.back().size();
+    }
+    return std::make_pair(group, offset);
+}
+
 std::unique_ptr<jarngreipr::ForceFieldGenerator<double>>
 setup_forcefield_generator(const std::string& forcefield,
                            const std::string& parameter_file)
@@ -212,21 +269,16 @@ int main(int argc, char **argv)
     // TODO: consider multiple systems ...
     const auto system = toml::find(input, "systems").as_array().front();
 
-    std::size_t offset = 0;
+    std::size_t offset = 0; // for bead index
     std::map<std::string, CGGroup<double>> groups;
+    std::map<std::string, CGGroup<double>> initials;
     for(const auto& kv : system.as_table())
     {
         // special keys. skip them.
         if(kv.first == "boundary_shape" || kv.first == "attributes") {continue;}
-
         log(log_level::info, "reading group ", kv.first, "\n");
 
-        // other stuffs are the definitions of groups.
-        CGGroup<double> group(kv.first);
         const auto& group_def = kv.second;
-
-        // read a reference file
-        PDBReader<double> reader(pdb_path + toml::find<std::string>(group_def, "reference"));
 
         const auto model_generator = setup_model_generator(
                 toml::find<std::string>(group_def, "model"),
@@ -255,51 +307,35 @@ int main(int argc, char **argv)
             }
         }
 
-        // -------------------------------------------------------------------
-        // Coarse-Graining
-
+        // attributes of beads; like flexible regions
         const auto attributes = read_attributes(group_def);
-        for(const auto& chain_id : chain_ids)
+
+        // group and the next offset
+        auto group_ofs = read_cg_group(kv.first,
+            pdb_path + toml::find<std::string>(group_def, "reference"), chain_ids,
+            model_generator, attributes, offset);
+
+        groups[kv.first] = std::move(group_ofs.first);
+
+        if(group_def.as_table().count("initial") != 0)
         {
-            if(chain_id.size() != 1)
-            {
-                log(log_level::error, "chain ID should be 1 letter -> ", chain_id, '\n');
-                return 1;
-            }
-            log(log_level::info, "reading chain ", chain_id, " of group ",
-                                 kv.first, '\n');
+            auto init_ofs = read_cg_group(kv.first,
+                pdb_path + toml::find<std::string>(group_def, "initial"), chain_ids,
+                model_generator, attributes, offset);
+            initials[kv.first] = std::move(init_ofs.first);
 
-            const auto chain = reader.read_chain(chain_id.front());
-            auto cg_chain = model_generator->generate(chain, offset);
-
-            for(const auto& attribute : attributes)
+            if(init_ofs.second != group_ofs.second)
             {
-                const auto& attr_name = attribute.first;
-                if(attribute.second.count(chain_id) != 0)
-                {
-                    const auto& regions  = attribute.second.at(chain_id);
-                    for(auto& cg_bead : cg_chain)
-                    {
-                        const auto resID = cg_bead->atoms().front().residue_id;
-                        const auto found = std::find_if(
-                            regions.begin(), regions.end(),
-                            [=](const std::pair<std::int64_t, std::string>& x){
-                                return x.first == resID;
-                            });
-                        if(found != regions.end())
-                        {
-                            log(log_level::debug, "bead residue idx = ", resID,
-                                " attribute name = ", attr_name,
-                                " attribute value = ", found->second, '\n');
-                            cg_bead->attribute(attr_name) = found->second;
-                        }
-                    }
-                }
+                log(log_level::error, "the initial and the reference structure "
+                    "in a group ", kv.first, " differs each other\n");
+                std::terminate();
             }
-            group.push_back(cg_chain);
-            offset += group.back().size();
         }
-        groups[kv.first] = std::move(group);
+        else
+        {
+            initials[kv.first] = groups[kv.first];
+        }
+        offset = group_ofs.second;
     }
     log(log_level::info, "systems are coarse-grained\n");
 
@@ -358,7 +394,7 @@ int main(int argc, char **argv)
         std::mt19937 mt(123456789);
 
         auto& ps = sys.as_table().at("particles").as_array();
-        for(const auto& kv : groups)
+        for(const auto& kv : initials)
         {
             const auto& group = kv.second;
             for(const auto& chain : group)
