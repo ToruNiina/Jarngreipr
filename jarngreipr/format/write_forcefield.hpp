@@ -140,21 +140,24 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     assert(toml::find(ff, "potential").comments().empty());
     os << "potential   = " << toml::find(ff, "potential") << '\n';
 
-    // TODO
     if(ff.as_table().count("ignore") != 0)
     {
         const auto& ignore = ff.at("ignore");
         if(ignore.as_table().count("group") != 0)
         {
-            os << "ignore.group = " << toml::find(ignore, "group") << '\n';
+            for(const auto& kv : toml::find(ignore, "group").as_table())
+            {
+                os << "ignore.group." << toml::format_key(kv.first) << " = "
+                   << toml::visit(inline_serializer, kv.second) << '\n';
+            }
         }
         if(ignore.as_table().count("molecule") != 0)
         {
-            os << "ignore.molecule = " << toml::find(ignore, "molecule") << '\n';
+            os << "ignore.molecule = " << toml::visit(inline_serializer,
+                    toml::find(ignore, "molecule")) << '\n';
         }
         for(const auto& kv : toml::find(ignore, "particles_within").as_table())
         {
-            assert(kv.second.comments().empty());
             os << "ignore.particles_within." << toml::format_key(kv.first)
                << " = " << toml::visit(inline_serializer, kv.second) << '\n';
         }
