@@ -520,6 +520,69 @@ AICG2Plus<realT>::generate(
             }
         }
     }
+
+    // (inter-chain & intra-group) go contact
+    {
+        const real_type th2 = this->go_contact_threshold_ *
+                              this->go_contact_threshold_;
+
+        auto& params = find_or_push_table(ff.at("local"), value_type{
+            {"interaction", "BondLength"},
+            {"potential",   "GoContact"},
+            {"topology",    "contact"},
+            {"parameters",  array_type{}}
+        }, /* the keys that should be equivalent = */ {
+            "interaction", "potential", "topology"
+        }).as_table().at("parameters").as_array();
+
+        for(std::size_t chain_i = 0; chain_i < chains.size(); ++chain_i)
+        {
+            const auto& chain1 = chains.at(chain_i);
+            for(std::size_t chain_j=chain_i+1; chain_j<chains.size(); ++chain_j)
+            {
+                const auto& chain2 = chains.at(chain_j);
+
+                bool first = true;
+                for(const auto& bead1 : chain1)
+                {
+                    for(const auto& bead2 : chain2)
+                    {
+                        if(this->min_distance_sq(bead1, bead2) < th2)
+                        {
+                            const auto i1 = bead1->index();
+                            const auto i2 = bead2->index();
+
+                            // if one of the beads is flexible region, skip it.
+                            if(is_in_flexible_region(bead1) ||
+                               is_in_flexible_region(bead2))
+                            {
+                                continue;
+                            }
+
+                            const auto nat_dist =
+                                distance(bead1->position(), bead2->position());
+                            const auto contact_coef =
+                                calc_contact_coef(bead1, bead2);
+
+                            value_type para = table_type{
+                                {"indices", value_type{i1, i2}            },
+                                {"v0"     , nat_dist                      },
+                                {"k"      , -this->coef_go_ * contact_coef}
+                            };
+                            if(first)
+                            {
+                                para.comments().push_back(std::string(" AICG2+ "
+                                    "Contact Potential between chain ") +
+                                    chain1.name() + " and " + chain2.name());
+                                first = false;
+                            }
+                            params.push_back(std::move(para));
+                        }
+                    }
+                }
+            }
+        }
+    }
     return ff_;
 }
 
