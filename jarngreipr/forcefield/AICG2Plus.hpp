@@ -42,6 +42,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
         atom_contact_cutoff_ (toml::find<real_type>(para, "atom_contact_cutoff")),
         hydrogen_bond_cutoff_(toml::find<real_type>(para, "hydrogen_bond_cutoff")),
         salt_bridge_cutoff_  (toml::find<real_type>(para, "salt_bridge_cutoff")),
+        native_bond_warning_ (toml::find_or<real_type>(para, "native_bond_warning", 5.0)),
         // base coefficients
         coef_13_   (toml::find<real_type>(para, "caicg2plus_13")),
         coef_14_   (toml::find<real_type>(para, "caicg2plus_14")),
@@ -191,6 +192,8 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     real_type hydrogen_bond_cutoff_;
     real_type salt_bridge_cutoff_;
 
+    real_type native_bond_warning_;
+
     real_type coef_13_;
     real_type coef_14_;
     real_type coef_go_;
@@ -285,6 +288,12 @@ AICG2Plus<realT>::generate(
                 const auto  i1    = bead1->index();
                 const auto  i2    = bead2->index();
                 const auto  dist  = distance(bead1->position(), bead2->position());
+
+                if(dist > this->native_bond_warning_)
+                {
+                    log(log_level::warn, "Native Ca-Ca distance ", dist,
+                        "[angst.] seems to be too large.\n");
+                }
 
                 value_type para = table_type{
                     {"indices", array_type{i1, i2}},
