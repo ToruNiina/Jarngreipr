@@ -29,20 +29,20 @@ else()
         message(STATUS "downloading completed. Unpacking...")
 
         execute_process(COMMAND tar xf boost_1_67_0.tar.bz2
-            WORKING_DIRECTORY "${JARNGREIPR_EXTLIB_DIR}"
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/extlib"
             OUTPUT_QUIET ERROR_QUIET)
 
-        include_directories(${JARNGREIPR_EXTLIB_DIR}/boost_1_67_0)
+        include_directories(${PROJECT_SOURCE_DIR}/extlib/boost_1_67_0)
         message(STATUS "done.")
     endif()
 endif()
 
-if(NOT EXISTS "${JARNGREIPR_EXTLIB_DIR}/toml/toml.hpp")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/toml/toml.hpp")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
-if(NOT EXISTS "${JARNGREIPR_EXTLIB_DIR}/Mjolnir/README.md")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extlib/Mjolnir/README.md")
     execute_process(COMMAND git submodule update --init --recursive
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
