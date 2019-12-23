@@ -28,7 +28,7 @@ class CarbonAlpha final : public CGBead<realT>
     {
         if(this->atoms_.empty())
         {
-            log(log_level::error, "CarbonAlpha: initialized with no atoms.\n");
+            log::error("CarbonAlpha: initialized with no atoms.\n");
             std::terminate();
         }
         const auto is_ca =
@@ -37,20 +37,19 @@ class CarbonAlpha final : public CGBead<realT>
             this->atoms_.cbegin(), this->atoms_.cend(), is_ca);
         if(num_ca == 0)
         {
-            log(log_level::error,
-                "CarbonAlpha: no c-alpha atom exists in a residue.\n");
-            log(log_level::error, this->atoms_.front(), '\n');
+            log::error("CarbonAlpha: no c-alpha atom exists in a residue.\n");
+            log::error(this->atoms_.front(), '\n');
             std::terminate();
         }
         if(num_ca > 1)
         {
-            log(log_level::error, "CarbonAlpha: ", num_ca,
+            log::error("CarbonAlpha: ", num_ca,
                 " c-alpha atoms exist in a residue.\n");
             for(const auto& atm : this->atoms_)
             {
                 if(is_ca(atm))
                 {
-                    log(log_level::error, atm, '\n');
+                    log::error(atm, '\n');
                 }
             }
             std::terminate();

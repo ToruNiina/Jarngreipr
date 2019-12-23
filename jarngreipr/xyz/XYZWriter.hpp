@@ -23,7 +23,7 @@ class XYZWriter
     {
         if(!ofstrm_.good())
         {
-            log(log_level::error, "XYZWriter: file open error: ", fname, '\n');
+            log::error("XYZWriter: file open error: ", fname, '\n');
             std::exit(EXIT_FAILURE);
         }
     }

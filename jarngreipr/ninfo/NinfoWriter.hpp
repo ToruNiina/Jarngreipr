@@ -22,7 +22,7 @@ class NinfoWriter
     {
         if(!ofstrm_.good())
         {
-            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            log::error("NinfoReader: file open error: ", filename_);
             std::terminate();
         }
         ofstrm_.close();

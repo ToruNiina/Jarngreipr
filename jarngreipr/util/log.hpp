@@ -12,7 +12,9 @@
 namespace jarngreipr
 {
 
-enum class log_level : std::uint8_t
+namespace log
+{
+enum class level : std::uint8_t
 {
     debug = 0,
     info  = 1,
@@ -22,7 +24,7 @@ enum class log_level : std::uint8_t
 
 template<typename charT, typename traits>
 std::basic_ostream<charT, traits>&
-operator<<(std::basic_ostream<charT, traits>& os, const log_level lv)
+operator<<(std::basic_ostream<charT, traits>& os, const level lv)
 {
     using mjolnir::io::red;
     using mjolnir::io::yellow;
@@ -32,22 +34,22 @@ operator<<(std::basic_ostream<charT, traits>& os, const log_level lv)
 
     switch(lv)
     {
-        case log_level::error:
+        case level::error:
         {
             os << '[' << red    << "error" << nocolor << "] ";
             break;
         }
-        case log_level::warn:
+        case level::warn:
         {
             os << '[' << yellow << "warn"  << nocolor << "] ";
             break;
         }
-        case log_level::info:
+        case level::info:
         {
             os << '[' << green  << "info"  << nocolor << "] ";
             break;
         }
-        case log_level::debug:
+        case level::debug:
         {
             os << '[' << cyan   << "debug" << nocolor << "] ";
             break;
@@ -64,10 +66,7 @@ operator<<(std::basic_ostream<charT, traits>& os, const log_level lv)
     return os;
 }
 
-namespace detail
-{
-
-template<typename Level = log_level>
+template<typename Level = level>
 struct basic_logger
 {
     static std::unique_ptr<std::ofstream> file;
@@ -108,25 +107,23 @@ void log_output(std::basic_ostream<charT, traits>&)
 template<typename charT, typename traits, typename T, typename ... Ts>
 void log_output(std::basic_ostream<charT, traits>& os, T&& v, Ts&& ... args)
 {
-    if(basic_logger<log_level>::file)
+    if(basic_logger<level>::file)
     {
-        (*basic_logger<log_level>::file) << v;
+        (*basic_logger<level>::file) << v;
     }
     os << std::forward<T>(v);
     log_output(os, std::forward<Ts>(args)...);
     return;
 }
 
-} // detail
-
-using logger = detail::basic_logger<log_level>;
+using logger = basic_logger<level>;
 
 template<typename ... Ts>
 void error(Ts&& ... args)
 {
-    if(logger::is_activated(log_level::error))
+    if(logger::is_activated(level::error))
     {
-        detail::log_output(std::cerr, log_level::error, std::forward<Ts>(args)...);
+        log_output(std::cerr, level::error, std::forward<Ts>(args)...);
     }
     return ;
 }
@@ -134,43 +131,31 @@ void error(Ts&& ... args)
 template<typename ... Ts>
 void warn(Ts&& ... args)
 {
-    if(logger::is_activated(log_level::warn))
+    if(logger::is_activated(level::warn))
     {
-        detail::log_output(std::cerr, log_level::warn, std::forward<Ts>(args)...);
+        log_output(std::cerr, level::warn, std::forward<Ts>(args)...);
     }
     return ;
 }
 template<typename ... Ts>
 void info(Ts&& ... args)
 {
-    if(logger::is_activated(log_level::info))
+    if(logger::is_activated(level::info))
     {
-        detail::log_output(std::cerr, log_level::info, std::forward<Ts>(args)...);
+        log_output(std::cerr, level::info, std::forward<Ts>(args)...);
     }
     return ;
 }
 template<typename ... Ts>
 void debug(Ts&& ... args)
 {
-    if(logger::is_activated(log_level::debug))
+    if(logger::is_activated(level::debug))
     {
-        detail::log_output(std::cerr, log_level::debug, std::forward<Ts>(args)...);
+        log_output(std::cerr, level::debug, std::forward<Ts>(args)...);
     }
     return ;
 }
-
-
-template<typename ... Ts>
-void log(log_level lv, Ts&& ... args)
-{
-    if(logger::is_activated(lv))
-    {
-        detail::log_output(std::cerr, lv, std::forward<Ts>(args)...);
-    }
-    return ;
-}
-
-
+} // log
 
 } // jarngreipr
 #endif // JARNGREIPR_UTIL_LOG_HPP

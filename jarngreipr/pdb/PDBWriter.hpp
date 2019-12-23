@@ -23,7 +23,7 @@ class PDBWriter
     {
         if(!ofstrm_.good())
         {
-            log(log_level::error, "PDBWriter: file open error: ", filename_, '\n');
+            log::error("PDBWriter: file open error: ", filename_, '\n');
             std::terminate();
         }
     }
