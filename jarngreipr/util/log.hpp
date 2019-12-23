@@ -122,6 +122,45 @@ void log_output(std::basic_ostream<charT, traits>& os, T&& v, Ts&& ... args)
 using logger = detail::basic_logger<log_level>;
 
 template<typename ... Ts>
+void error(Ts&& ... args)
+{
+    if(logger::is_activated(log_level::error))
+    {
+        detail::log_output(std::cerr, log_level::error, std::forward<Ts>(args)...);
+    }
+    return ;
+}
+
+template<typename ... Ts>
+void warn(Ts&& ... args)
+{
+    if(logger::is_activated(log_level::warn))
+    {
+        detail::log_output(std::cerr, log_level::warn, std::forward<Ts>(args)...);
+    }
+    return ;
+}
+template<typename ... Ts>
+void info(Ts&& ... args)
+{
+    if(logger::is_activated(log_level::info))
+    {
+        detail::log_output(std::cerr, log_level::info, std::forward<Ts>(args)...);
+    }
+    return ;
+}
+template<typename ... Ts>
+void debug(Ts&& ... args)
+{
+    if(logger::is_activated(log_level::debug))
+    {
+        detail::log_output(std::cerr, log_level::debug, std::forward<Ts>(args)...);
+    }
+    return ;
+}
+
+
+template<typename ... Ts>
 void log(log_level lv, Ts&& ... args)
 {
     if(logger::is_activated(lv))
@@ -130,6 +169,8 @@ void log(log_level lv, Ts&& ... args)
     }
     return ;
 }
+
+
 
 } // jarngreipr
 #endif // JARNGREIPR_UTIL_LOG_HPP
