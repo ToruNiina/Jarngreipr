@@ -62,7 +62,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("indices") == 0)
         {
-            log(log_level::error, "`parameters` does not has `indices` field");
+            log::error("`parameters` does not has `indices` field");
         }
         const auto idxs = toml::find<std::vector<std::size_t>>(p, "indices");
         max_index = std::max(max_index, *std::max_element(idxs.begin(), idxs.end()));
@@ -210,7 +210,7 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("index") == 0)
         {
-            log(log_level::error, "`parameters` does not has `index` field");
+            log::error("`parameters` does not has `index` field");
         }
         max_index = std::max(max_index, toml::find<std::size_t>(p, "index"));
     }

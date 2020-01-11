@@ -16,7 +16,7 @@ inline char get_char_at(const source_location& src)
     }
     catch(const std::out_of_range& err)
     {
-        log(log_level::error, "couldn't get a character", src, "here");
+        log::error("couldn't get a character", src, "here");
         std::terminate();
     }
 }
@@ -34,7 +34,7 @@ inline std::string get_substr(const source_location& src)
     }
     catch(const std::out_of_range& err)
     {
-        log(log_level::error, "couldn't get a sub-string", src, "here");
+        log::error("couldn't get a sub-string", src, "here");
         std::terminate();
     }
 }

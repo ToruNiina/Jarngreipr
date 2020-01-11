@@ -25,7 +25,7 @@ class XYZReader
     {
         if(!ifstrm_.good())
         {
-            log(log_level::error, "XYZReader: file open error: ", fname, '\n');
+            log::error("XYZReader: file open error: ", fname, '\n');
             std::terminate();
         }
     }
@@ -51,8 +51,8 @@ class XYZReader
             }
         }
 
-        log(log_level::error, "XYZReader: ", this->filename_,
-                              " does not contain frame ", idx, ".\n");
+        log::error("XYZReader: ", this->filename_,
+                   " does not contain frame ", idx, ".\n");
         std::terminate();
     }
 
@@ -90,7 +90,7 @@ class XYZReader
             source_location src(this->filename_, line, 0, line.size(), this->line_num_);
             if(crd_z.empty() || crd_y.empty() || crd_x.empty() || ident.empty())
             {
-                log(log_level::error, "XYZReader: line too short.\n", src);
+                log::error("XYZReader: line too short.\n", src);
                 std::terminate();
             }
 

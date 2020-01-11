@@ -28,8 +28,8 @@ typename std::enable_if<std::is_integral<integerT>::value, std::vector<integerT>
     std::smatch sm;
     if(!std::regex_match(str, sm, syntax))
     {
-        log(log_level::error, "syntax error in range \"", str, "\"\n");
-        log(log_level::error, "expected like: \"[1,10]\", \"[10, 20)\"\n");
+        log::error("syntax error in range \"", str, "\"\n");
+        log::error("expected like: \"[1,10]\", \"[10, 20)\"\n");
         return {};
     }
     const auto front = static_cast<integerT>(std::stoll(sm.str(2)));
@@ -64,8 +64,8 @@ inline std::vector<std::string> parse_chain_range(std::string str)
         {
             return std::vector<std::string>{str};
         }
-        log(log_level::error, "syntax error in range \"", str, "\"\n");
-        log(log_level::error, "expected like: \"A:D\", \"C:F\"\n");
+        log::error("syntax error in range \"", str, "\"\n");
+        log::error("expected like: \"A:D\", \"C:F\"\n");
         return {};
     }
     const auto front = sm.str(2);

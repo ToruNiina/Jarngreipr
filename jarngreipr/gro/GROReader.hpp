@@ -25,7 +25,7 @@ class GROReader
     {
         if(!ifstrm_.good())
         {
-            log(log_level::error, "GROReader: file open error: ", filename_, '\n');
+            log::error("GROReader: file open error: ", filename_, '\n');
             std::terminate();
         }
     }
@@ -69,7 +69,7 @@ class GROReader
         if(iss.fail())
         {
             source_location src(this->filename_, line, 0, line.size(), this->line_num_);
-            log(log_level::error, "GROReader: while reading box information:\n",
+            log::error("GROReader: while reading box information:\n",
                                    src, "invalid number appeared");
             std::terminate();
         }

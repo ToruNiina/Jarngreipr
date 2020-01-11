@@ -95,17 +95,17 @@ T read_number(const source_location& src)
     }
     catch(const std::invalid_argument& err)
     {
-        log(log_level::error, "read_number: invalid number format", src, "here");
+        log::error("read_number: invalid number format", src, "here");
         std::terminate();
     }
     catch(const std::out_of_range& err)
     {
-        log(log_level::error, "read_number: invalid number format", src, "here");
+        log::error("read_number: invalid number format", src, "here");
         std::terminate();
     }
     catch(const std::exception& err)
     {
-        log(log_level::error, "read_number: unknown error appeared", src, "here");
+        log::error("read_number: unknown error appeared", src, "here");
         std::terminate();
     }
 }

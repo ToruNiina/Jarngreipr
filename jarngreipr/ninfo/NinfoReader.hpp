@@ -25,7 +25,7 @@ class NinfoReader
     {
         if(!ifstrm_.good())
         {
-            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            log::error("NinfoReader: file open error: ", filename_);
             std::terminate();
         }
         ifstrm_.close();
@@ -67,7 +67,7 @@ class NinfoReader
         this->ifstrm_.open(this->filename_);
         if(!ifstrm_.good())
         {
-            log(log_level::error, "NinfoReader: file open error: ", filename_);
+            log::error("NinfoReader: file open error: ", filename_);
             std::terminate();
         }
 
@@ -104,7 +104,7 @@ class NinfoReader
         {
             source_location src(this->filename_, iss.str(), 0, iss.str().size(),
                                 this->line_num_);
-            log(log_level::error, "while reading ninfo ", ninfoT::prefix,
+            log::error("while reading ninfo ", ninfoT::prefix,
                                   " invalid column appeared", src, "this line");
             std::terminate();
         }

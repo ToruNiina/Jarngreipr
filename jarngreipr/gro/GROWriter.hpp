@@ -23,7 +23,7 @@ class GROWriter
     {
         if(!ofstrm_.good())
         {
-            log(log_level::error, "GROReader: file open error: ", filename_, '\n');
+            log::error("GROReader: file open error: ", filename_, '\n');
             std::terminate();
         }
     }

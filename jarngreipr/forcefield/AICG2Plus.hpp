@@ -253,7 +253,7 @@ AICG2Plus<realT>::generate(
 
     for(const auto& chain : chains)
     {
-        log(log_level::info, "generating AICG2+ parameters for chain ", chain.name(), '\n');
+        log::info("generating AICG2+ parameters for chain ", chain.name(), '\n');
         if(!this->check_beads_kind(chain))
         {
             std::cerr
@@ -291,7 +291,7 @@ AICG2Plus<realT>::generate(
 
                 if(dist > this->native_bond_warning_)
                 {
-                    log(log_level::warn, "Native Ca-Ca distance ", dist,
+                    log::warn("Native Ca-Ca distance ", dist,
                         "[angst.] seems to be too large.\n");
                 }
 

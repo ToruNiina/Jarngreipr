@@ -67,7 +67,7 @@ class CGModelGenerator final
                 });
             if(pdb_chain == pdbs.end())
             {
-                log(log_level::error, "CGModelGenerator: chain ", chain_id,
+                log::error("CGModelGenerator: chain ", chain_id,
                                       " does not exist\n");
                 std::terminate();
             }
