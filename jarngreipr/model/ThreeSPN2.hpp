@@ -174,18 +174,22 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
             const auto S = this->calc_center_of_mass(sugar);
             const auto B = this->calc_center_of_mass(base);
 
+            const auto P_name = "P" + base_kind;
+            const auto S_name = "S" + base_kind;
+            const auto B_name = "B" + base_kind;
+
             if(i != 0)
             {
                 retval.push_back(std::make_shared<ThreeSPN2Phosphate<real_type>
-                    >(3*i-1 + offset, toml::find<real_type>(mass_3SPN2, "P"),
-                      phosphate, "P", P));
+                    >(3*i-1 + offset, toml::find<real_type>(mass_3SPN2, P_name),
+                      phosphate, P_name, P));
             }
             retval.push_back(std::make_shared<ThreeSPN2Sugar<real_type>
-                    >(3*i   + offset, toml::find<real_type>(mass_3SPN2, "S"),
-                      sugar, "S", S));
+                    >(3*i   + offset, toml::find<real_type>(mass_3SPN2, S_name),
+                      sugar, S_name, S));
             retval.push_back(std::make_shared<ThreeSPN2Base <real_type>
-                    >(3*i+1 + offset, toml::find<real_type>(mass_3SPN2, base_kind),
-                      base, base_kind, B));
+                    >(3*i+1 + offset, toml::find<real_type>(mass_3SPN2, B_name),
+                      base, B_name, B));
         }
         return retval;
     }

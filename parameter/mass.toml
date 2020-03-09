@@ -29,10 +29,18 @@ TYR = 163.18
 VAL =  99.14
 
 [mass.3SPN2]
-
-P =  94.9696 # Phosphate
-S =  83.1104 # Sugar
-A = 134.1220 # Adenine
-T = 125.1078 # Thymine
-C = 110.0964 # Cytosine
-G = 150.1214 # Guanine
+# phosphate mass is independent from base kind
+PA =  94.9696 # Phosphate of Adenine
+PT =  94.9696 # Phosphate of Thymine
+PC =  94.9696 # Phosphate of Cytosine
+PG =  94.9696 # Phosphate of Guanine
+# sugar mass is independent from base kind
+SA =  83.1104 # Sugar of Adenine
+ST =  83.1104 # Sugar of Thymine
+SC =  83.1104 # Sugar of Cytosine
+SG =  83.1104 # Sugar of Guanine
+# base mass depends on base kind (of course).
+BA = 134.1220 # Base of Adenine
+BT = 125.1078 # Base of Thymine
+BC = 110.0964 # Base of Cytosine
+BG = 150.1214 # Base of Guanine
