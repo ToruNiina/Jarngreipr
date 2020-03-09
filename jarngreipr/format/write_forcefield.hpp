@@ -42,6 +42,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     if(ff.as_table().count("env") == 1)
     {
         // to sort the values, convert it into std::map.
+        os << "# env {{{\n";
         for(auto&& kv : toml::find<std::map<std::string, value_type>>(ff, "env"))
         {
             assert(kv.second.comments().empty());
@@ -49,6 +50,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
             os << "env." << toml::format_key(kv.first) << " = "
                << toml::visit(inline_serializer, kv.second) << '\n';
         }
+        os << "# }}}\n";
     }
 
     // ========================================================================
