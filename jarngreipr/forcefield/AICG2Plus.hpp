@@ -605,10 +605,10 @@ AICG2Plus<realT>::generate(
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
-    log(log_level::debug, "generating inter-chain AICG2+ parameters\n");
+    log::debug("generating inter-chain AICG2+ parameters\n");
     for(const auto& g : gs)
     {
-        log(log_level::debug, "- ", g.get().name(), "\n");
+        log::debug("- ", g.get().name(), "\n");
     }
 
     if(ff_.is_uninitialized())
@@ -663,8 +663,8 @@ AICG2Plus<realT>::generate(
             }
             combinations.push_back(std::make_pair(chain1.name(), chain2.name()));
 
-            log(log_level::info, "generating AICG2+ parameters between chain ",
-                chain1.name(), " and ", chain2.name());
+            log::info("generating AICG2+ parameters between chain ",
+                      chain1.name(), " and ", chain2.name(), '\n');
 
             bool is_first = true;
             for(const auto& bead1 : chain1)
