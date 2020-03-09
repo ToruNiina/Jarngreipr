@@ -161,9 +161,9 @@ setup_forcefield_generator(const std::string& forcefield,
     else
     {
         log::error("unknown forcefield specified: ", forcefield, '\n');
-        log::error("- \"AICG2+\": local and global");
-        log::error("- \"ExcludedVolume\": global only");
-        log::error("- \"DebyeHuckel\": global only");
+        log::error("- \"AICG2+\": local and global\n");
+        log::error("- \"ExcludedVolume\": global only\n");
+        log::error("- \"DebyeHuckel\": global only\n");
         std::terminate();
     }
 }
@@ -185,8 +185,8 @@ setup_model_generator(const std::string& model, const toml::value& params)
     else
     {
         log::error("unknown model specified: ", model, '\n');
-        log::error("- \"CarbonAlpha\" is for AICG2+");
-        log::error("- \"3SPN2\" is for 3SPN.2 and 3SPN.2C");
+        log::error("- \"CarbonAlpha\" is for AICG2+\n");
+        log::error("- \"3SPN2\" is for 3SPN.2 and 3SPN.2C\n");
         std::terminate();
     }
 }
