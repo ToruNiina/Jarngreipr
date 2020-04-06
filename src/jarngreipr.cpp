@@ -430,13 +430,14 @@ int main(int argc, char **argv)
     // generate forcefield parameters
 
     toml::basic_value<toml::preserve_comments, std::map> ff;
-    const auto forcefield = toml::find(input, "forcefields").as_array().front();
+    const auto forcefield = toml::find_or(
+            input, "forcefields", toml::value{toml::table{}}).as_array().front();
 
     // -----------------------------------------------------------------------
-    log::info("generating local forcefield ...\n");
 
-    if(forcefield.as_table().count("local") != 0)
+    if(forcefield.contains("local"))
     {
+        log::info("generating local forcefield ...\n");
         for(const auto& local : toml::find(forcefield, "local").as_array())
         {
             const auto ff_name   = toml::find<std::string>(local, "forcefield");
@@ -454,10 +455,10 @@ int main(int argc, char **argv)
     }
 
     // -----------------------------------------------------------------------
-    log::info("generating global forcefield ...\n");
 
-    if(forcefield.as_table().count("global") != 0)
+    if(forcefield.contains("global"))
     {
+        log::info("generating global forcefield ...\n");
         for(const auto& global : toml::find(forcefield, "global").as_array())
         {
             const auto ff_name   = toml::find<std::string>(global, "forcefield");
