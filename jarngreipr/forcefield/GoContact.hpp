@@ -175,7 +175,7 @@ class GoContact final : public ForceFieldGenerator<realT>
 
                         log::info("generating Go Contact parameters between chain ",
                                   chain1.name(), " and ", chain2.name(), " using coefficient ",
-                                  this->coef_contact_);
+                                  this->coef_contact_, ".\n");
 
                         bool is_first = true;
                         for(const auto& bead1 : chain1)
