@@ -1,4 +1,4 @@
-// #include <jarngreipr/forcefield/ClementiGo.hpp>
+#include <jarngreipr/forcefield/GoContact.hpp>
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
 #include <jarngreipr/forcefield/DebyeHuckel.hpp>
@@ -147,6 +147,11 @@ setup_forcefield_generator(const std::string& forcefield,
     {
         return std::unique_ptr<ForceFieldGenerator<double>>(
             new AICG2Plus<double>(toml::parse(parameter_file)));
+    }
+    if(forcefield == "GoContact")
+    {
+        return std::unique_ptr<ForceFieldGenerator<double>>(
+            new GoContact<double>(toml::parse(parameter_file)));
     }
     else if(forcefield == "ExcludedVolume")
     {
