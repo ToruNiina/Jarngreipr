@@ -148,7 +148,7 @@ setup_forcefield_generator(const std::string& forcefield,
         return std::unique_ptr<ForceFieldGenerator<double>>(
             new AICG2Plus<double>(toml::parse(parameter_file)));
     }
-    if(forcefield == "GoContact")
+    else if(forcefield == "GoContact")
     {
         return std::unique_ptr<ForceFieldGenerator<double>>(
             new GoContact<double>(toml::parse(parameter_file)));
