@@ -5,6 +5,10 @@ output.prefix = "example"
 output.path   = "./"
 output.format = "xyz"
 
+[units]
+length = "angstrom"
+energy = "kcal/mol"
+
 [simulator]
 # The same as Mjolnir.
 precision       = "double"
@@ -32,7 +36,7 @@ protein       = {reference = "example.pdb", model = "AICG2+", chain="A-D"}
 DNA.reference = "DNA.pdb"
 DNA.initial   = "bend_DNA.pdb"
 DNA.model     = "3SPN2"
-DNA.chain     = "A-B"
+DNA.chain     = "A:B"
 
 [[forcefields]]
 # parameter file for this forcefield
