@@ -42,6 +42,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     if(ff.as_table().count("env") == 1)
     {
         // to sort the values, convert it into std::map.
+        os << "# env {{{\n";
         for(auto&& kv : toml::find<std::map<std::string, value_type>>(ff, "env"))
         {
             assert(kv.second.comments().empty());
@@ -49,6 +50,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
             os << "env." << toml::format_key(kv.first) << " = "
                << toml::visit(inline_serializer, kv.second) << '\n';
         }
+        os << "# }}}\n";
     }
 
     // ========================================================================
@@ -62,7 +64,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("indices") == 0)
         {
-            log(log_level::error, "`parameters` does not has `indices` field");
+            log::error("`parameters` does not has `indices` field\n");
         }
         const auto idxs = toml::find<std::vector<std::size_t>>(p, "indices");
         max_index = std::max(max_index, *std::max_element(idxs.begin(), idxs.end()));
@@ -70,14 +72,7 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
     const auto idx_width = std::to_string(max_index).size();
 
     // ------------------------------------------------------------------------
-    // collect and sort keys in a table it to output them in a fixed order
-
-    std::vector<std::string> keys;
-    for(const auto& kv : toml::find(ff, "parameters").as_array().front().as_table())
-    {
-        if(kv.first != "indices") {keys.push_back(kv.first);}
-    }
-    std::sort(keys.begin(), keys.end());
+    // output parameters
 
     os << "parameters = [ # {{{\n";
     for(const auto& p : toml::find(ff, "parameters").as_array())
@@ -101,11 +96,13 @@ write_local_forcefield(std::basic_ostream<charT, traits>& os,
         os << ']';
 
         // write other keys in the fixed order
-        for(const auto& key : keys)
+        for(const auto& kv : p.as_table())
         {
-            assert(toml::find(p, key).comments().empty());
-            os << ", " << toml::format_key(key) << " = "
-               << toml::visit(inline_serializer, toml::find(p, key));
+            if(kv.first == "indices") {continue;}
+            assert(kv.second.comments().empty());
+
+            os << ", " << toml::format_key(kv.first) << " = "
+               << toml::visit(inline_serializer, kv.second);
         }
         os << "},\n";
     }
@@ -210,21 +207,11 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
     {
         if(p.as_table().count("index") == 0)
         {
-            log(log_level::error, "`parameters` does not has `index` field");
+            log::error("`parameters` does not has `index` field");
         }
         max_index = std::max(max_index, toml::find<std::size_t>(p, "index"));
     }
     const auto idx_width = std::to_string(max_index).size();
-
-    // ------------------------------------------------------------------------
-    // collect and sort keys in a table it to output them in a fixed order
-
-    std::vector<std::string> keys;
-    for(const auto& kv : toml::find(ff, "parameters").as_array().front().as_table())
-    {
-        if(kv.first != "index") {keys.push_back(kv.first);}
-    }
-    std::sort(keys.begin(), keys.end());
 
     // ------------------------------------------------------------------------
     // output parameters
@@ -235,11 +222,13 @@ write_global_forcefield(std::basic_ostream<charT, traits>& os,
         os << "{index = "
            << std::setw(idx_width) << toml::find<std::size_t>(p, "index");
 
-        for(const auto& key : keys)
+        for(const auto& kv : p.as_table())
         {
-            assert(toml::find(p, key).comments().empty());
-            os << ", " << toml::format_key(key) << " = "
-               << toml::visit(inline_serializer, toml::find(p, key));
+            if(kv.first == "index") {continue;}
+            assert(kv.second.comments().empty());
+
+            os << ", " << toml::format_key(kv.first) << " = "
+               << toml::visit(inline_serializer, kv.second);
         }
         os << "},\n";
     }

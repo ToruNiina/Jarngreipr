@@ -25,7 +25,7 @@ class PDBReader
     {
         if(!ifstrm_.good())
         {
-            log(log_level::error, "PDBReader: file open error: ", filename_, '\n');
+            log::error("PDBReader: file open error: ", filename_, '\n');
             std::terminate();
         }
     }
@@ -53,7 +53,7 @@ class PDBReader
             }
         }
 
-        log(log_level::error, "PDBReader: file \"", filename_, "\" does not "
+        log::error("PDBReader: file \"", filename_, "\" does not "
                               "contain chain ", id, ".\n");
         std::terminate();
     }
@@ -66,7 +66,7 @@ class PDBReader
         source_location src(this->filename_, line, 0, 6, this->line_num_);
         if(get_substr(src, 0, 6) != "ATOM  ")
         {
-            log(log_level::error, "internal error: not an ATOM line\n", src,
+            log::error("internal error: not an ATOM line\n", src,
                                   "prefix is not \"ATOM\"\n");
             std::terminate();
         }
@@ -89,9 +89,9 @@ class PDBReader
         {
             src.column() = 16;
             src.range()  =  1;
-            log(log_level::warn, "pdb ATOM has alternative location code. "
+            log::warn("pdb ATOM has alternative location code. "
                                  "It may cause invalid parameters.\n");
-            log(log_level::warn, src, '\n');
+            log::warn(src, '\n');
         }
 
         // allow files that lack the following values. default values are
@@ -131,7 +131,7 @@ class PDBReader
             {
                 if(!atoms.empty())
                 {
-                    log(log_level::info, "PDBReader: read chain ",
+                    log::info("PDBReader: read chain ",
                         atoms.front().chain_id, ".\n");
                 }
                 return chain_type(std::move(atoms));
@@ -140,11 +140,11 @@ class PDBReader
         }
         if(!atoms.empty())
         {
-            log(log_level::info, "PDBReader: read chain ",
+            log::info("PDBReader: read chain ",
                 atoms.front().chain_id, ".\n");
             return chain_type(std::move(atoms));
         }
-        log(log_level::error, "PDBReader: ", filename_, " does not contain ",
+        log::error("PDBReader: ", filename_, " does not contain ",
                               "chains any more\n");
         std::terminate();
     }

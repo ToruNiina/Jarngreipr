@@ -153,19 +153,19 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
             std::tie(base_kind, phosphate, sugar, base) = split_PSB(pdb, i);
             if(i != 0 && phosphate.size() != 5)
             {
-                log(log_level::error, "3SPN2: invalid number of atoms in "
+                log::error("3SPN2: invalid number of atoms in "
                     "phosphate residue ", residue_id, " in chain ", pdb.chain_id(), "\n");
                 std::terminate();
             }
             if(sugar.size() != 6u)
             {
-                log(log_level::error, "3SPN2: invalid number of atoms in "
+                log::error("3SPN2: invalid number of atoms in "
                     "sugar residue ", residue_id, " in chain ", pdb.chain_id(), "\n");
                 std::terminate();
             }
             if(base.empty())
             {
-                log(log_level::error, "3SPN2: no base atoms given in "
+                log::error("3SPN2: no base atoms given in "
                     "residue ", residue_id, " of chain ", pdb.chain_id(), "\n");
                 std::terminate();
             }
@@ -174,18 +174,22 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
             const auto S = this->calc_center_of_mass(sugar);
             const auto B = this->calc_center_of_mass(base);
 
+            const auto P_name = "P" + base_kind;
+            const auto S_name = "S" + base_kind;
+            const auto B_name = "B" + base_kind;
+
             if(i != 0)
             {
                 retval.push_back(std::make_shared<ThreeSPN2Phosphate<real_type>
-                    >(3*i-1 + offset, toml::find<real_type>(mass_3SPN2, "P"),
-                      phosphate, "P", P));
+                    >(3*i-1 + offset, toml::find<real_type>(mass_3SPN2, P_name),
+                      phosphate, P_name, P));
             }
             retval.push_back(std::make_shared<ThreeSPN2Sugar<real_type>
-                    >(3*i   + offset, toml::find<real_type>(mass_3SPN2, "S"),
-                      sugar, "S", S));
+                    >(3*i   + offset, toml::find<real_type>(mass_3SPN2, S_name),
+                      sugar, S_name, S));
             retval.push_back(std::make_shared<ThreeSPN2Base <real_type>
-                    >(3*i+1 + offset, toml::find<real_type>(mass_3SPN2, base_kind),
-                      base, base_kind, B));
+                    >(3*i+1 + offset, toml::find<real_type>(mass_3SPN2, B_name),
+                      base, B_name, B));
         }
         return retval;
     }
@@ -233,7 +237,7 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
             }
             if(phosphate.empty())
             {
-                log(log_level::error, "3SPN2: residue ", resid_prev, " in chain ",
+                log::error("3SPN2: residue ", resid_prev, " in chain ",
                     pdb.chain_id(), " does not have O3' atom\n");
                 std::terminate();
             }
@@ -244,8 +248,8 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
             const auto name = remove_whitespaces(atom.atom_name);
             if(atom_kind_.count(name) == 0)
             {
-                log(log_level::error, "3SPN2: unrecognized DNA atom appeares\n");
-                log(log_level::error, atom, '\n');
+                log::error("3SPN2: unrecognized DNA atom appeares\n");
+                log::error(atom, '\n');
                 std::terminate();
             }
             switch(atom_kind_.at(name))
@@ -290,7 +294,7 @@ class ThreeSPN2Generator final : public CGModelGeneratorBase<realT>
         for(const auto& atom : atoms)
         {
             // assuming atom.name conforms the wwPDB 3 international standard.
-            log(log_level::debug, "atom_name = ", atom.atom_name, ", atom = ",
+            log::debug("atom_name = ", atom.atom_name, ", atom = ",
                                   atom.atom_name.substr(1, 1), '\n');
             const auto m = toml::find(masses_, atom.atom_name.substr(1, 1)).as_floating();
             com   += m * atom.position;

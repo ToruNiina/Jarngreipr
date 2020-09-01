@@ -39,11 +39,11 @@ std::vector<PDBAtom<realT>> remove_hydrogens(std::vector<PDBAtom<realT>> atoms)
                 {
                     return false;
                 }
-                log(log_level::warn, "Atom name starting with H found. "
+                log::warn("Atom name starting with H found. "
                                      "Considering it as a hydrogen.\n");
-                log(log_level::warn, "If it is not a hydrogen, "
+                log::warn("If it is not a hydrogen, "
                                      "add element symbol section.\n");
-                log(log_level::warn, atom, '\n');
+                log::warn(atom, '\n');
                 return true;
             }
             return false;

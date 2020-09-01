@@ -1,4 +1,4 @@
-// #include <jarngreipr/forcefield/ClementiGo.hpp>
+#include <jarngreipr/forcefield/GoContact.hpp>
 #include <jarngreipr/forcefield/AICG2Plus.hpp>
 #include <jarngreipr/forcefield/ExcludedVolume.hpp>
 #include <jarngreipr/forcefield/DebyeHuckel.hpp>
@@ -47,7 +47,7 @@ read_attributes(const toml::basic_value<Com, Tab, Arr>& group)
             const auto attr_value = toml::find_or<std::string>(
                     v, "value", std::string(""));
 
-            log(log_level::info, "residue from ", residues.front(), " to ",
+            log::info("residue from ", residues.front(), " to ",
                 residues.back(), " has an attribute ", key, '\n');
 
             for(const auto& res : residues)
@@ -72,7 +72,7 @@ read_attributes(const toml::basic_value<Com, Tab, Arr>& group)
                 });
             if(overlapped != region.second.end())
             {
-                log(log_level::warn, "attribute regions overlap each other: ",
+                log::warn("attribute regions overlap each other: ",
                         overlapped->first, " specified twice\n");
             }
         }
@@ -100,10 +100,10 @@ read_cg_group(const std::string& group_name, const std::string& pdb_file,
     {
         if(chain_id.size() != 1)
         {
-            log(log_level::error, "chain ID should be 1 letter -> ", chain_id, '\n');
+            log::error("chain ID should be 1 letter -> ", chain_id, '\n');
             std::terminate();
         }
-        log(log_level::info, "reading chain ", chain_id, " of group ", group_name, '\n');
+        log::info("reading chain ", chain_id, " of group ", group_name, '\n');
 
         const auto chain = reader.read_chain(chain_id.front());
         auto cg_chain = model->generate(chain, offset);
@@ -124,7 +124,7 @@ read_cg_group(const std::string& group_name, const std::string& pdb_file,
                         });
                     if(found != regions.end())
                     {
-                        log(log_level::debug, "bead residue idx = ", resID,
+                        log::debug("bead residue idx = ", resID,
                             " attribute name = ", attr_name,
                             " attribute value = ", found->second, '\n');
                         cg_bead->attribute(attr_name) = found->second;
@@ -148,6 +148,11 @@ setup_forcefield_generator(const std::string& forcefield,
         return std::unique_ptr<ForceFieldGenerator<double>>(
             new AICG2Plus<double>(toml::parse(parameter_file)));
     }
+    else if(forcefield == "GoContact")
+    {
+        return std::unique_ptr<ForceFieldGenerator<double>>(
+            new GoContact<double>(toml::parse(parameter_file)));
+    }
     else if(forcefield == "ExcludedVolume")
     {
         return std::unique_ptr<ForceFieldGenerator<double>>(
@@ -160,10 +165,10 @@ setup_forcefield_generator(const std::string& forcefield,
     }
     else
     {
-        log(log_level::error, "unknown forcefield specified: ", forcefield, '\n');
-        log(log_level::error, "- \"AICG2+\": local and global");
-        log(log_level::error, "- \"ExcludedVolume\": global only");
-        log(log_level::error, "- \"DebyeHuckel\": global only");
+        log::error("unknown forcefield specified: ", forcefield, '\n');
+        log::error("- \"AICG2+\": local and global\n");
+        log::error("- \"ExcludedVolume\": global only\n");
+        log::error("- \"DebyeHuckel\": global only\n");
         std::terminate();
     }
 }
@@ -184,9 +189,9 @@ setup_model_generator(const std::string& model, const toml::value& params)
     }
     else
     {
-        log(log_level::error, "unknown model specified: ", model, '\n');
-        log(log_level::error, "- \"CarbonAlpha\" is for AICG2+");
-        log(log_level::error, "- \"3SPN2\" is for 3SPN.2 and 3SPN.2C");
+        log::error("unknown model specified: ", model, '\n');
+        log::error("- \"CarbonAlpha\" is for AICG2+\n");
+        log::error("- \"3SPN2\" is for 3SPN.2 and 3SPN.2C\n");
         std::terminate();
     }
 }
@@ -201,17 +206,17 @@ std::string read_input_filename(int argc, char **argv)
     }
 
     // default settings
-    logger::inactivate(log_level::debug);
-    logger::activate(log_level::info);
-    logger::activate(log_level::warn);
-    logger::activate(log_level::error);
+    log::logger::inactivate(log::level::debug);
+    log::logger::activate(log::level::info);
+    log::logger::activate(log::level::warn);
+    log::logger::activate(log::level::error);
 
     std::string fname;
     for(const auto& opt : opts)
     {
         if(opt == "--debug")
         {
-            logger::activate(log_level::debug);
+            log::logger::activate(log::level::debug);
         }
         else if(5 < opt.size() && opt.substr(opt.size()-5, 5) == ".toml")
         {
@@ -219,7 +224,7 @@ std::string read_input_filename(int argc, char **argv)
         }
         else
         {
-            log(log_level::warn, "unknown option appeared. ignore\"", opt, "\"\n");
+            log::warn("unknown option appeared. ignore\"", opt, "\"\n");
         }
     }
     return fname;
@@ -231,7 +236,7 @@ int main(int argc, char **argv)
 
     if(argc < 2)
     {
-        log(log_level::error, "Usage: jarngreipr input.toml\n");
+        log::error("Usage: jarngreipr input.toml\n");
         return 1;
     }
 
@@ -276,7 +281,7 @@ int main(int argc, char **argv)
     {
         // special keys. skip them.
         if(kv.first == "boundary_shape" || kv.first == "attributes") {continue;}
-        log(log_level::info, "reading group ", kv.first, "\n");
+        log::info("reading group ", kv.first, "\n");
 
         const auto& group_def = kv.second;
 
@@ -326,7 +331,7 @@ int main(int argc, char **argv)
 
             if(init_ofs.second != group_ofs.second)
             {
-                log(log_level::error, "the initial and the reference structure "
+                log::error("the initial and the reference structure "
                     "in a group ", kv.first, " differs each other\n");
                 std::terminate();
             }
@@ -337,7 +342,7 @@ int main(int argc, char **argv)
         }
         offset = group_ofs.second;
     }
-    log(log_level::info, "systems are coarse-grained\n");
+    log::info("systems are coarse-grained\n");
 
     // ========================================================================
 
@@ -423,20 +428,21 @@ int main(int argc, char **argv)
         }
         write_system(std::cout, sys);
 
-        log(log_level::info, "[[systems]] written\n");
+        log::info("[[systems]] written\n");
     }
 
     // ========================================================================
     // generate forcefield parameters
 
     toml::basic_value<toml::preserve_comments, std::map> ff;
-    const auto forcefield = toml::find(input, "forcefields").as_array().front();
+    const auto forcefield = toml::find_or(
+            input, "forcefields", toml::value{toml::table{}}).as_array().front();
 
     // -----------------------------------------------------------------------
-    log(log_level::info, "generating local forcefield ...\n");
 
-    if(forcefield.as_table().count("local") != 0)
+    if(forcefield.contains("local"))
     {
+        log::info("generating local forcefield ...\n");
         for(const auto& local : toml::find(forcefield, "local").as_array())
         {
             const auto ff_name   = toml::find<std::string>(local, "forcefield");
@@ -454,32 +460,32 @@ int main(int argc, char **argv)
     }
 
     // -----------------------------------------------------------------------
-    log(log_level::info, "generating global forcefield ...\n");
 
-    if(forcefield.as_table().count("global") != 0)
+    if(forcefield.contains("global"))
     {
+        log::info("generating global forcefield ...\n");
         for(const auto& global : toml::find(forcefield, "global").as_array())
         {
             const auto ff_name   = toml::find<std::string>(global, "forcefield");
             const auto para_file = toml::find_or<std::string>(
                     global, "parameter_file", "parameter/" + ff_name + ".toml");
-            log(log_level::debug, "generating ", ff_name, "\n");
+            log::debug("generating ", ff_name, "\n");
 
             const auto ffgen = setup_forcefield_generator(ff_name, para_file);
 
             std::vector<std::reference_wrapper<const CGGroup<double>>> cg_groups;
             for(auto gname : toml::find<std::vector<std::string>>(global, "groups"))
             {
-                log(log_level::debug, "adding ", gname, "to a list\n");
+                log::debug("adding ", gname, "to a list\n");
                 cg_groups.push_back(std::cref(groups.at(gname)));
             }
 
             ffgen->generate(ff, cg_groups); // !
-            log(log_level::debug, "generated.\n");
+            log::debug("generated.\n");
         }
     }
 
-    log(log_level::info, "writing forcefields\n");
+    log::info("writing forcefields\n");
     write_forcefield(std::cout, ff);
 
     return 0;

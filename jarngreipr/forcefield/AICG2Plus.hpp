@@ -42,6 +42,7 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
         atom_contact_cutoff_ (toml::find<real_type>(para, "atom_contact_cutoff")),
         hydrogen_bond_cutoff_(toml::find<real_type>(para, "hydrogen_bond_cutoff")),
         salt_bridge_cutoff_  (toml::find<real_type>(para, "salt_bridge_cutoff")),
+        native_bond_warning_ (toml::find_or<real_type>(para, "native_bond_warning", 5.0)),
         // base coefficients
         coef_13_   (toml::find<real_type>(para, "caicg2plus_13")),
         coef_14_   (toml::find<real_type>(para, "caicg2plus_14")),
@@ -191,6 +192,8 @@ class AICG2Plus final : public ForceFieldGenerator<realT>
     real_type hydrogen_bond_cutoff_;
     real_type salt_bridge_cutoff_;
 
+    real_type native_bond_warning_;
+
     real_type coef_13_;
     real_type coef_14_;
     real_type coef_go_;
@@ -250,7 +253,7 @@ AICG2Plus<realT>::generate(
 
     for(const auto& chain : chains)
     {
-        log(log_level::info, "generating AICG2+ parameters for chain ", chain.name(), '\n');
+        log::info("generating AICG2+ parameters for chain ", chain.name(), '\n');
         if(!this->check_beads_kind(chain))
         {
             std::cerr
@@ -285,6 +288,12 @@ AICG2Plus<realT>::generate(
                 const auto  i1    = bead1->index();
                 const auto  i2    = bead2->index();
                 const auto  dist  = distance(bead1->position(), bead2->position());
+
+                if(dist > this->native_bond_warning_)
+                {
+                    log::warn("Native Ca-Ca distance ", dist,
+                        "[angst.] seems to be too large.\n");
+                }
 
                 value_type para = table_type{
                     {"indices", array_type{i1, i2}},
@@ -596,6 +605,12 @@ AICG2Plus<realT>::generate(
     using array_type = value_type::array_type;
     using table_type = value_type::table_type;
 
+    log::debug("generating inter-chain AICG2+ parameters\n");
+    for(const auto& g : gs)
+    {
+        log::debug("- ", g.get().name(), "\n");
+    }
+
     if(ff_.is_uninitialized())
     {
         ff_ = table_type{};
@@ -647,6 +662,9 @@ AICG2Plus<realT>::generate(
                 continue;
             }
             combinations.push_back(std::make_pair(chain1.name(), chain2.name()));
+
+            log::info("generating AICG2+ parameters between chain ",
+                      chain1.name(), " and ", chain2.name(), '\n');
 
             bool is_first = true;
             for(const auto& bead1 : chain1)
